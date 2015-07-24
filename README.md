@@ -1,2 +1,5 @@
-# ghost-gql
-Filter query language for working with Ghost's API
+# GQL
+
+Filter query language for working with Ghost's JSON API
+
+
