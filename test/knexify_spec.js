@@ -24,7 +24,17 @@ describe('Knexify', function () {
     it('should correctly build an empty query', function () {
         knexify(postKnex, {
             statements: []
-        }).toQuery().should.eql('select * from "posts"');
+        });
+
+        // Check the output from both toSQL and toQuery - this emulates calling the query twice for pagination
+        postKnex.toSQL().should.eql({
+            bindings: [],
+            method: 'select',
+            options: {},
+            sql: 'select * from "posts"'
+        });
+
+        postKnex.toQuery().should.eql('select * from "posts"');
 
         postKnex.where.calledOnce.should.eql(false);
         postKnex.orWhere.calledOnce.should.eql(false);
@@ -40,7 +50,17 @@ describe('Knexify', function () {
             statements: [
                 {prop: 'id', op: '=', value: 5}
             ]
-        }).toQuery().should.eql('select * from "posts" where "posts"."id" = 5');
+        });
+
+        // Check the output from both toSQL and toQuery - this emulates calling the query twice for pagination
+        postKnex.toSQL().should.eql({
+            bindings: [5],
+            method: 'select',
+            options: {},
+            sql: 'select * from "posts" where "posts"."id" = ?'
+        });
+
+        postKnex.toQuery().should.eql('select * from "posts" where "posts"."id" = 5');
 
         postKnex.where.calledOnce.should.eql(true);
 
@@ -58,7 +78,17 @@ describe('Knexify', function () {
                 {prop: 'id', op: '=', value: 5},
                 {prop: 'slug', op: '=', value: 'welcome-to-ghost', func: 'and'}
             ]
-        }).toQuery().should.eql(
+        });
+
+        // Check the output from both toSQL and toQuery - this emulates calling the query twice for pagination
+        postKnex.toSQL().should.eql({
+            bindings: [5, 'welcome-to-ghost'],
+            method: 'select',
+            options: {},
+            sql: 'select * from "posts" where "posts"."id" = ? and "posts"."slug" = ?'
+        });
+
+        postKnex.toQuery().should.eql(
             'select * from "posts" where "posts"."id" = 5 and "posts"."slug" = \'welcome-to-ghost\''
         );
 
@@ -78,7 +108,17 @@ describe('Knexify', function () {
                 {prop: 'id', op: '=', value: 5},
                 {prop: 'slug', op: '=', value: 'welcome-to-ghost', func: 'or'}
             ]
-        }).toQuery().should.eql(
+        });
+
+        // Check the output from both toSQL and toQuery - this emulates calling the query twice for pagination
+        postKnex.toSQL().should.eql({
+            bindings: [5, 'welcome-to-ghost'],
+            method: 'select',
+            options: {},
+            sql: 'select * from "posts" where "posts"."id" = ? or "posts"."slug" = ?'
+        });
+
+        postKnex.toQuery().should.eql(
             'select * from "posts" where "posts"."id" = 5 or "posts"."slug" = \'welcome-to-ghost\''
         );
 
@@ -99,7 +139,17 @@ describe('Knexify', function () {
                 statements: [
                     {prop: 'image', op: 'IS', value: null}
                 ]
-            }).toQuery().should.eql(
+            });
+
+            // Check the output from both toSQL and toQuery - this emulates calling the query twice for pagination
+            postKnex.toSQL().should.eql({
+                bindings: [],
+                method: 'select',
+                options: {},
+                sql: 'select * from "posts" where "posts"."image" is null'
+            });
+
+            postKnex.toQuery().should.eql(
                 'select * from "posts" where "posts"."image" is null'
             );
 
@@ -118,7 +168,17 @@ describe('Knexify', function () {
                 statements: [
                     {prop: 'image', op: 'IS NOT', value: null}
                 ]
-            }).toQuery().should.eql(
+            });
+
+            // Check the output from both toSQL and toQuery - this emulates calling the query twice for pagination
+            postKnex.toSQL().should.eql({
+                bindings: [],
+                method: 'select',
+                options: {},
+                sql: 'select * from "posts" where "posts"."image" is not null'
+            });
+
+            postKnex.toQuery().should.eql(
                 'select * from "posts" where "posts"."image" is not null'
             );
 
@@ -139,7 +199,17 @@ describe('Knexify', function () {
                     {prop: 'id', op: '=', value: 5},
                     {prop: 'image', op: 'IS', value: null, func: 'or'}
                 ]
-            }).toQuery().should.eql(
+            });
+
+            // Check the output from both toSQL and toQuery - this emulates calling the query twice for pagination
+            postKnex.toSQL().should.eql({
+                bindings: [5],
+                method: 'select',
+                options: {},
+                sql: 'select * from "posts" where "posts"."id" = ? or "posts"."image" is null'
+            });
+
+            postKnex.toQuery().should.eql(
                 'select * from "posts" where "posts"."id" = 5 or "posts"."image" is null'
             );
 
@@ -160,7 +230,17 @@ describe('Knexify', function () {
                     {prop: 'id', op: '=', value: 5},
                     {prop: 'image', op: 'IS NOT', value: null, func: 'or'}
                 ]
-            }).toQuery().should.eql(
+            });
+
+            // Check the output from both toSQL and toQuery - this emulates calling the query twice for pagination
+            postKnex.toSQL().should.eql({
+                bindings: [5],
+                method: 'select',
+                options: {},
+                sql: 'select * from "posts" where "posts"."id" = ? or "posts"."image" is not null'
+            });
+
+            postKnex.toQuery().should.eql(
                 'select * from "posts" where "posts"."id" = 5 or "posts"."image" is not null'
             );
 
@@ -177,30 +257,76 @@ describe('Knexify', function () {
     });
 
     describe('group special cases', function () {
-       it('should correctly build a group query', function () {
-           knexify(postKnex, {
-               statements: [
-                   {op: "!=", value: "joe", prop: "author"},
-                   {
-                       group: [
-                           {op: "=", value: "photo", prop: "tag"},
-                           {op: "=", value: "video", prop: "tag", func: "or"}
-                       ], func: "and"
-                   }
-               ]
-           }).toQuery().should.eql(
-               'select * from "posts" where "author"."slug" != \'joe\' and ("tags"."slug" = \'photo\' or "tags"."slug" = \'video\')'
-           );
+        it('should correctly build a group query', function () {
+            knexify(postKnex, {
+                statements: [
+                    {op: "!=", value: "joe", prop: "author"},
+                    {
+                        group: [
+                            {op: "=", value: "photo", prop: "tag"},
+                            {op: "=", value: "video", prop: "tag", func: "or"}
+                        ], func: "and"
+                    }
+                ]
+            });
 
-           postKnex.where.calledOnce.should.eql(true);
-           postKnex.andWhere.calledOnce.should.eql(true);
+            // Check the output from both toSQL and toQuery - this emulates calling the query twice for pagination
+            postKnex.toSQL().should.eql({
+                bindings: ['joe', 'photo', 'video'],
+                method: 'select',
+                options: {},
+                sql: 'select * from "posts" where "author"."slug" != ? and ("tags"."slug" = ? or "tags"."slug" = ?)'
+            });
 
-           // can't stub out the sub-query-builder functions
-           postKnex.orWhere.calledOnce.should.eql(false);
-           postKnex.whereNull.calledOnce.should.eql(false);
-           postKnex.whereNotNull.calledOnce.should.eql(false);
-           postKnex.orWhereNull.calledOnce.should.eql(false);
-           postKnex.orWhereNotNull.calledOnce.should.eql(false);
-       });
+            postKnex.toQuery().should.eql(
+                'select * from "posts" where "author"."slug" != \'joe\' and ("tags"."slug" = \'photo\' or "tags"."slug" = \'video\')'
+            );
+
+            postKnex.where.calledOnce.should.eql(true);
+            postKnex.andWhere.calledOnce.should.eql(true);
+
+            // can't stub out the sub-query-builder functions
+            postKnex.orWhere.calledOnce.should.eql(false);
+            postKnex.whereNull.calledOnce.should.eql(false);
+            postKnex.whereNotNull.calledOnce.should.eql(false);
+            postKnex.orWhereNull.calledOnce.should.eql(false);
+            postKnex.orWhereNotNull.calledOnce.should.eql(false);
+        });
+
+        it('should correctly build a group query with a not null caluse', function () {
+            knexify(postKnex, {
+                statements: [
+                    {op: "!=", value: "joe", prop: "author"},
+                    {
+                        group: [
+                            {op: "=", value: "true", prop: "featured"},
+                            {prop: 'image', op: 'IS NOT', value: null, func: 'or'}
+                        ], func: "and"
+                    }
+                ]
+            });
+
+            // Check the output from both toSQL and toQuery - this emulates calling the query twice for pagination
+            postKnex.toSQL().should.eql({
+                bindings: ['joe', 'true'],
+                method: 'select',
+                options: {},
+                sql: 'select * from "posts" where "author"."slug" != ? and ("posts"."featured" = ? or "posts"."image" is not null)'
+            });
+
+            postKnex.toQuery().should.eql(
+                'select * from "posts" where "author"."slug" != \'joe\' and ("posts"."featured" = \'true\' or "posts"."image" is not null)'
+            );
+
+            postKnex.where.calledOnce.should.eql(true);
+            postKnex.andWhere.calledOnce.should.eql(true);
+
+            // can't stub out the sub-query-builder functions
+            postKnex.orWhere.calledOnce.should.eql(false);
+            postKnex.whereNull.calledOnce.should.eql(false);
+            postKnex.whereNotNull.calledOnce.should.eql(false);
+            postKnex.orWhereNull.calledOnce.should.eql(false);
+            postKnex.orWhereNotNull.calledOnce.should.eql(false);
+        });
     });
 });
