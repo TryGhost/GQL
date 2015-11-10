@@ -20,8 +20,37 @@ describe('Lodash Stmt Functions', function () {
             _.noConflict();
         });
 
+        it('should provide matchStatement', function () {
+            should.exist(_.matchStatement);
+        });
+
         it('should provide eachStatement', function () {
             should.exist(_.eachStatement);
+        });
+
+        it('should provide findStatement', function () {
+            should.exist(_.findStatement);
+        });
+    });
+
+    describe('matchStatement', function () {
+        var matchStatement = lodashStmt.matchStatement;
+
+        it('should match on single item', function () {
+            matchStatement({prop: 'page', op: '=', value: false}, {prop: 'page'}).should.eql(true);
+            matchStatement({prop: 'page', op: '=', value: false}, {prop: 'status'}).should.eql(false);
+            matchStatement({prop: 'page', op: '=', value: false}, {op: '='}).should.eql(true);
+            matchStatement({prop: 'page', op: '=', value: false}, {op: 'IN'}).should.eql(false);
+            matchStatement({prop: 'page', op: '=', value: false}, {value: false}).should.eql(true);
+            matchStatement({prop: 'page', op: '=', value: false}, {value: true}).should.eql(false);
+            matchStatement({prop: 'page', op: '=', value: false}, {test: false}).should.eql(false);
+        });
+
+        it('should match on multiple items', function () {
+            matchStatement({prop: 'page', op: '=', value: false}, {prop: 'page', op: '='}).should.eql(true);
+            matchStatement({prop: 'page', op: '=', value: false}, {prop: 'page', op: 'IN'}).should.eql(false);
+            matchStatement({prop: 'page', op: '=', value: false}, {op: '=', value: false}).should.eql(true);
+            matchStatement({prop: 'page', op: '=', value: false}, {value: false, test: false}).should.eql(false);
         });
     });
 
@@ -163,6 +192,83 @@ describe('Lodash Stmt Functions', function () {
                 {op: "=", value: "photo", prop: "tag"},
                 {op: "=", value: "video", prop: "tag", func: "or"}
             ], func: "and"}).should.eql(true);
+        });
+    });
+
+    describe('findStatement', function () {
+        var findStatement = lodashStmt.findStatement;
+
+        it('should match an object with a single property', function () {
+            var statements = [
+                {prop: 'page', op: '=', value: false},
+                {prop: 'status', op: '=', value: 'published', func: 'and'}
+            ];
+
+            findStatement(statements, {prop: 'page'}).should.eql(true);
+            findStatement(statements, {prop: 'status'}).should.eql(true);
+            findStatement(statements, {prop: 'tags'}).should.eql(false);
+        });
+
+        it('should match an object with multiple properties', function () {
+            var statements = [
+                {prop: 'page', op: '=', value: false},
+                {prop: 'status', op: '=', value: 'published', func: 'and'}
+            ];
+
+            findStatement(statements, {prop: 'page', op: '='}).should.eql(true);
+            findStatement(statements, {prop: 'page', op: '!='}).should.eql(false);
+        });
+
+        it('should match an object with multiple properties including a regex', function () {
+            var statements = [
+                {prop: 'tags.slug', op: 'IN', value: false},
+                {prop: 'status', op: '=', value: 'published', func: 'and'}
+            ];
+
+            findStatement(statements, {prop: /^tags/, op: 'IN'}).should.eql(true);
+            findStatement(statements, {prop: 'tags', op: 'IN'}).should.eql(false);
+        });
+
+        describe('Specific Keys', function () {
+            it('should match with a single string passed as keys', function () {
+                var statements = [
+                    {prop: 'page', op: '=', value: false},
+                    {prop: 'status', op: '=', value: 'published', func: 'and'}
+                ];
+
+                findStatement(statements, {prop: 'page', op: '=', value: false}, 'prop').should.eql(true);
+                findStatement(statements, {prop: 'status', op: '=', value: false}, 'prop').should.eql(true);
+                findStatement(statements, {prop: 'tags', op: '=', value: false}, 'prop').should.eql(false);
+            });
+
+            it('should match with an array of strings passed as keys', function () {
+                var statements = [
+                    {prop: 'page', op: '=', value: false},
+                    {prop: 'status', op: '=', value: 'published', func: 'and'}
+                ];
+
+                findStatement(statements, {prop: 'page', op: '=', value: false}, ['prop', 'op']).should.eql(true);
+                findStatement(statements, {prop: 'page', op: '!=', value: false}, ['prop', 'op']).should.eql(false);
+            });
+        });
+
+        describe('groups', function () {
+            it('should match inside a group', function () {
+                var statements = [
+                    {op: "!=", value: "joe", prop: "author"},
+                    {group: [
+                        {op: "=", value: "photo", prop: "tag"},
+                        {op: "=", value: "video", prop: "tag", func: "or"}
+                    ], func: "and"}
+                ];
+
+
+                findStatement(statements, {value: 'photo'}).should.eql(true);
+                findStatement(statements, {op: "=", value: "photo", prop: "tag"}, 'value').should.eql(true);
+                findStatement(statements, {op: "=", value: "photo", prop: "tag"}, ['value', 'prop']).should.eql(true);
+                findStatement(statements, {prop: /^tag/}).should.eql(true);
+                findStatement(statements, {prop: 'page'}).should.eql(false);
+            });
         });
     });
 });
