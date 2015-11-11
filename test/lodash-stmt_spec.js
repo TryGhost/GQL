@@ -35,6 +35,10 @@ describe('Lodash Stmt Functions', function () {
         it('should provide mergeStatements', function () {
             should.exist(_.mergeStatements);
         });
+
+        it('should provide printStatements', function () {
+            should.exist(_.printStatements);
+        });
     });
 
     describe('matchStatement', function () {
@@ -389,6 +393,83 @@ describe('Lodash Stmt Functions', function () {
                 {prop: "page", op: "=", value: false},
                 {prop: "status", op: "=", value: "published", func: "and"}
             ]})
+        });
+    });
+
+    describe('printStatements', function () {
+        var printStatements = lodashStmt.printStatements,
+            consoleSpy;
+
+        it('should do nothing for empty statements', function () {
+            consoleSpy = sandbox.spy(console, 'log');
+
+            printStatements([]);
+
+            consoleSpy.called.should.eql(false);
+        });
+
+        it('should iterate through flat statements', function () {
+            consoleSpy = sandbox.spy(console, 'log');
+
+            printStatements([
+                {op: "!=", value: "joe", prop: "author"},
+                {op: "=", value: "photo", prop: "tag", func: "and"},
+                {op: "=", value: "video", prop: "tag", func: "or"}
+            ]);
+
+            consoleSpy.callCount.should.eql(3);
+            consoleSpy.getCall(0).args.should.eql(['', {op: "!=", value: "joe", prop: "author"}]);
+            consoleSpy.getCall(1).args.should.eql(['', {op: "=", value: "photo", prop: "tag", func: "and"}]);
+            consoleSpy.getCall(2).args.should.eql(['', {op: "=", value: "video", prop: "tag", func: "or"}]);
+        });
+
+        it('should iterate through group statements without a group function', function () {
+            consoleSpy = sandbox.spy(console, 'log');
+
+            printStatements([
+                {op: "!=", value: "joe", prop: "author"},
+                {
+                    group: [
+                        {op: "=", value: "photo", prop: "tag"},
+                        {op: "=", value: "video", prop: "tag", func: "or"}
+                    ], func: "and"
+                }
+            ]);
+
+            consoleSpy.callCount.should.eql(4);
+            consoleSpy.getCall(0).args.should.eql(['', {op: "!=", value: "joe", prop: "author"}]);
+            consoleSpy.getCall(1).args.should.eql(['', 'group', 'and']);
+            consoleSpy.getCall(2).args.should.eql([' ', {op: "=", value: "photo", prop: "tag"}]);
+            consoleSpy.getCall(3).args.should.eql([' ', {op: "=", value: "video", prop: "tag", func: "or"}]);
+        });
+
+        it('should iterate through nested group statements without a group function', function () {
+            consoleSpy = sandbox.spy(console, 'log');
+
+            printStatements([
+                {op: "=", value: false, prop: "page"},
+                {op: "=", value: "published", prop: "status", func: "and"},
+                {
+                    group: [
+                        {op: "!=", value: "joe", prop: "author"},
+                        {
+                            group: [
+                                {op: "=", value: "photo", prop: "tag"},
+                                {op: "=", value: "video", prop: "tag", func: "or"}
+                            ], func: "and"
+                        }
+                    ], func: "and"
+                }
+            ]);
+
+            consoleSpy.callCount.should.eql(7);
+            consoleSpy.getCall(0).args.should.eql(['', {op: "=", value: false, prop: "page"}]);
+            consoleSpy.getCall(1).args.should.eql(['', {op: "=", value: "published", prop: "status", func: "and"}]);
+            consoleSpy.getCall(2).args.should.eql(['', 'group', 'and']);
+            consoleSpy.getCall(3).args.should.eql([' ', {op: "!=", value: "joe", prop: "author"}]);
+            consoleSpy.getCall(4).args.should.eql([' ', 'group', 'and']);
+            consoleSpy.getCall(5).args.should.eql(['  ', {op: "=", value: "photo", prop: "tag"}]);
+            consoleSpy.getCall(6).args.should.eql(['  ', {op: "=", value: "video", prop: "tag", func: "or"}]);
         });
     });
 });
