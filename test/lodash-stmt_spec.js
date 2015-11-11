@@ -31,6 +31,10 @@ describe('Lodash Stmt Functions', function () {
         it('should provide findStatement', function () {
             should.exist(_.findStatement);
         });
+
+        it('should provide mergeStatements', function () {
+            should.exist(_.mergeStatements);
+        });
     });
 
     describe('matchStatement', function () {
@@ -269,6 +273,122 @@ describe('Lodash Stmt Functions', function () {
                 findStatement(statements, {prop: /^tag/}).should.eql(true);
                 findStatement(statements, {prop: 'page'}).should.eql(false);
             });
+        });
+    });
+
+    describe('mergeStatements', function () {
+        var mergeStatements = lodashStmt.mergeStatements;
+
+        describe('empty object', function () {
+            it('should return a valid statement object when passed no args', function () {
+                var result = mergeStatements();
+                result.should.eql({statements: []})
+            });
+
+            it('should return a valid statement object when passed undefined args', function () {
+                var result = mergeStatements(undefined, undefined);
+                result.should.eql({statements: []})
+            });
+
+            it('should return a valid statement object when passed null args', function () {
+                var result = mergeStatements(null, null);
+                result.should.eql({statements: []})
+            });
+        });
+
+        it('should merge two simple statements', function () {
+            var result = mergeStatements(
+                {prop: "page", op: "=", value: false},
+                {prop: "status", op: "=", value: "published"}
+            );
+
+            result.should.eql({statements: [
+                {prop: "page", op: "=", value: false},
+                {prop: "status", op: "=", value: "published", func: "and"}
+            ]})
+        });
+
+        it('should correctly merge null and a valid statement', function () {
+            var result = mergeStatements(
+                null,
+                {prop: "status", op: "=", value: "published"}
+            );
+
+            result.should.eql({statements: [
+                {prop: "status", op: "=", value: "published"}
+            ]})
+        });
+
+        it('should correctly merge undefined and a valid statement', function () {
+            var result = mergeStatements(
+                undefined,
+                {prop: "status", op: "=", value: "published"}
+            );
+
+            result.should.eql({statements: [
+                {prop: "status", op: "=", value: "published"}
+            ]})
+        });
+
+        it('should merge two statement objects', function () {
+            var obj1 = {statements: [
+                {prop: "page", op: "=", value: false},
+                {prop: "status", op: "=", value: "published", func: "and"}
+            ]},
+                obj2 = {statements: [
+                    {op: "=", value: "photo", prop: "tag"},
+                    {op: "=", value: "video", prop: "tag", func: "or"}
+                ]},
+                result = mergeStatements(obj1, obj2);
+
+            result.should.eql({statements: [
+                {prop: "page", op: "=", value: false},
+                {prop: "status", op: "=", value: "published", func: "and"},
+                {op: "=", value: "photo", prop: "tag", func: "and"},
+                {op: "=", value: "video", prop: "tag", func: "or"}
+            ]})
+        });
+
+        it('should merge two statement objects when one is empty', function () {
+            var obj1 = {statements: [
+                    {prop: "page", op: "=", value: false},
+                    {prop: "status", op: "=", value: "published", func: "and"}
+                ]},
+                obj2 = {statements: []},
+                result = mergeStatements(obj1, obj2);
+
+            result.should.eql({statements: [
+                {prop: "page", op: "=", value: false},
+                {prop: "status", op: "=", value: "published", func: "and"}
+            ]})
+        });
+
+        it('should merge two statement objects when one is null', function () {
+            var obj1 = {statements: [
+                    {prop: "page", op: "=", value: false},
+                    {prop: "status", op: "=", value: "published", func: "and"}
+                ]},
+                obj2 = null,
+                result = mergeStatements(obj1, obj2);
+
+            result.should.eql({statements: [
+                {prop: "page", op: "=", value: false},
+                {prop: "status", op: "=", value: "published", func: "and"}
+            ]})
+        });
+
+        it('should merge two statement objects when one is undefined', function () {
+            var obj1 = {statements: [
+                    {prop: "page", op: "=", value: false},
+                    {prop: "status", op: "=", value: "published", func: "and"}
+                ]},
+                obj2 = undefined,
+                result = mergeStatements(obj1, obj2);
+
+            result.should.eql({statements: [
+                {prop: "page", op: "=", value: false},
+                {prop: "status", op: "=", value: "published", func: "and"}
+            ]})
         });
     });
 });
