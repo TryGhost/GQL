@@ -36,6 +36,10 @@ describe('Lodash Stmt Functions', function () {
             should.exist(_.mergeStatements);
         });
 
+        it('should provide rejectStatements', function () {
+            should.exist(_.rejectStatements);
+        });
+
         it('should provide printStatements', function () {
             should.exist(_.printStatements);
         });
@@ -277,6 +281,132 @@ describe('Lodash Stmt Functions', function () {
                 findStatement(statements, {prop: /^tag/}).should.eql(true);
                 findStatement(statements, {prop: 'page'}).should.eql(false);
             });
+        });
+    });
+
+    describe('rejectStatements', function () {
+        var rejectStatements = lodashStmt.rejectStatements,
+            testFunction = function (match, fields) {
+                return function (statement) {
+                    return lodashStmt.matchStatement(statement, fields ? _.pick(match, fields) : match);
+                }
+            };
+
+        it('should reject from a simple flat array', function () {
+            var statements = [
+                {prop: 'page', op: '=', value: false},
+                {prop: 'status', op: '=', value: 'published', func: 'and'}
+            ];
+
+            rejectStatements(statements, testFunction({prop: 'page'}))
+                .should.eql([{prop: 'status', op: '=', value: 'published'}]);
+        });
+
+        it('should reject with regex', function () {
+            var statements = [
+                {prop: 'tags.slug', op: 'IN', value: false},
+                {prop: 'status', op: '=', value: 'published', func: 'and'}
+            ];
+
+            rejectStatements(statements, testFunction({prop: /^tags/, op: 'IN'}))
+                .should.eql([{prop: 'status', op: '=', value: 'published'}]);
+        });
+
+        it('should filter out a statement from a group', function () {
+            var statements = [
+                {op: "!=", value: "joe", prop: "author"},
+                {group: [
+                    {op: "=", value: "photo", prop: "tag"},
+                    {op: "=", value: "video", prop: "tag", func: "or"}
+                ], func: "and"}
+            ];
+
+            rejectStatements(statements, testFunction({value: 'video'})).should.eql([
+                {op: "!=", value: "joe", prop: "author"},
+                {group: [
+                    {op: "=", value: "photo", prop: "tag"}
+                ], func: "and"}
+            ]);
+        });
+
+        it('should remove group if all statements are removed', function () {
+            var statements = [
+                {op: "!=", value: "joe", prop: "author"},
+                {group: [
+                    {op: "=", value: "photo", prop: "tag"},
+                    {op: "=", value: "video", prop: "tag", func: "or"}
+                ], func: "and"}
+            ];
+
+            rejectStatements(statements, testFunction({prop: 'tag'})).should.eql([
+                {op: "!=", value: "joe", prop: "author"}
+            ]);
+        });
+
+        it('should ensure first statement has no func', function () {
+            var statements = [
+                {op: "=", value: false, prop: "page"},
+                {op: "=", value: "cameron", prop: "author", func: "or"}
+            ];
+
+            rejectStatements(statements, testFunction({prop: "page"})).should.eql([
+                {op: "=", value: "cameron", prop: "author"}
+            ]);
+        });
+
+        it('should ensure first statement in group has no func', function () {
+            var statements = [
+                {op: "=", value: "photo", prop: "tag"},
+                {op: "=", value: "video", prop: "tag", func: "or"},
+                {group: [
+                    {op: "=", value: false, prop: "page"},
+                    {op: "=", value: "cameron", prop: "author", func: "or"}
+                ], func: "and"}
+            ];
+
+            rejectStatements(statements, testFunction({prop: "page"})).should.eql( [
+                {op: "=", value: "photo", prop: "tag"},
+                {op: "=", value: "video", prop: "tag", func: "or"},
+                {group: [
+                    {op: "=", value: "cameron", prop: "author"}
+                ], func: "and"}
+            ]);
+        });
+
+        it('should ensure first group has no func when removing a group from the front', function () {
+            var statements = [
+                {group: [
+                    {op: "=", value: "photo", prop: "tag"},
+                    {op: "=", value: "video", prop: "tag", func: "or"}
+                ]},
+                {group: [
+                    {op: "=", value: false, prop: "page"},
+                    {op: "=", value: "cameron", prop: "author", func: "or"}
+                ], func: "and"}
+            ];
+
+            rejectStatements(statements, testFunction({prop: "tag"})).should.eql([
+                {group: [
+                    {op: "=", value: false, prop: "page"},
+                    {op: "=", value: "cameron", prop: "author", func: "or"}
+                ]}
+            ]);
+        });
+
+        it('should ensure first statement has no func when removing a group from the front', function () {
+            var statements = [
+                {group: [
+                    {op: "=", value: "photo", prop: "tag"},
+                    {op: "=", value: "video", prop: "tag", func: "or"}
+                ]},
+                {op: "=", value: false, prop: "page", func: "and"},
+                {op: "=", value: "cameron", prop: "author", func: "or"}
+            ];
+
+            rejectStatements(statements, testFunction({prop: "tag"})).should.eql([
+                {op: "=", value: false, prop: "page"},
+                {op: "=", value: "cameron", prop: "author", func: "or"}
+            ]);
         });
     });
 
