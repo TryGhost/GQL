@@ -4,10 +4,11 @@ var should = require('should'),
     knexify = require('../lib/knexify');
 
 describe('Knexify', function () {
-    var postKnex, sandbox = sinon.sandbox.create();
+    var postKnex, tagKnex, sandbox = sinon.sandbox.create();
 
     beforeEach(function () {
         postKnex = knex('posts');
+        tagKnex = knex('tags');
         sandbox.spy(postKnex, 'where');
         sandbox.spy(postKnex, 'orWhere');
         sandbox.spy(postKnex, 'andWhere');
@@ -293,7 +294,7 @@ describe('Knexify', function () {
             postKnex.orWhereNotNull.calledOnce.should.eql(false);
         });
 
-        it('should correctly build a group query with a not null caluse', function () {
+        it('should correctly build a group query with a not null clause', function () {
             knexify(postKnex, {
                 statements: [
                     {op: "!=", value: "joe", prop: "author"},
@@ -327,6 +328,32 @@ describe('Knexify', function () {
             postKnex.whereNotNull.calledOnce.should.eql(false);
             postKnex.orWhereNull.calledOnce.should.eql(false);
             postKnex.orWhereNotNull.calledOnce.should.eql(false);
+        });
+    });
+
+    describe('Joins', function () {
+        it('post should have joins', function () {
+            var filter = {
+                statements: [
+                    {op: "!=", value: "joe", prop: "author"},
+                    {op: "=", value: "photo", prop: "tag"}
+                ]
+            };
+            knexify(postKnex, filter);
+
+            filter.joins.should.eql(['author', 'tags']);
+        });
+
+        it('tag should not have any joins', function () {
+            var filter = {
+                statements: [
+                    {op: "!=", value: "joe", prop: "name"},
+                    {op: "!=", value: "joe", prop: "posts.name"}
+                ]
+            };
+            knexify(tagKnex, filter);
+
+            filter.joins.should.eql([]);
         });
     });
 });
