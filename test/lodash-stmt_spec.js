@@ -1,8 +1,9 @@
+/* globals describe, beforeEach, afterEach, it */
 var should = require('should'),
     sinon  = require('sinon'),
     _      = require('lodash'),
 
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox.create(),
 
     lodashStmt = require('../lib/lodash-stmt');
 
@@ -83,9 +84,9 @@ describe('Lodash Stmt Functions', function () {
                 group = sandbox.spy();
 
             eachStatement([
-                {op: "!=", value: "joe", prop: "author"},
-                {op: "=", value: "photo", prop: "tag", func: "and"},
-                {op: "=", value: "video", prop: "tag", func: "or"}
+                {op: '!=', value: 'joe', prop: 'author'},
+                {op: '=', value: 'photo', prop: 'tag', func: 'and'},
+                {op: '=', value: 'video', prop: 'tag', func: 'or'}
             ], single, group);
 
             single.callCount.should.eql(3);
@@ -96,40 +97,40 @@ describe('Lodash Stmt Functions', function () {
             var single = sandbox.spy();
 
             eachStatement([
-                {op: "!=", value: "joe", prop: "author"},
+                {op: '!=', value: 'joe', prop: 'author'},
                 {group: [
-                        {op: "=", value: "photo", prop: "tag"},
-                        {op: "=", value: "video", prop: "tag", func: "or"}
-                ], func: "and"}
+                        {op: '=', value: 'photo', prop: 'tag'},
+                        {op: '=', value: 'video', prop: 'tag', func: 'or'}
+                ], func: 'and'}
             ], single);
 
             single.callCount.should.eql(3);
-            single.getCall(0).calledWith({op: "!=", value: "joe", prop: "author"}).should.eql(true);
-            single.getCall(1).calledWith({op: "=", value: "photo", prop: "tag"}).should.eql(true);
-            single.getCall(2).calledWith({op: "=", value: "video", prop: "tag", func: "or"}).should.eql(true);
+            single.getCall(0).calledWith({op: '!=', value: 'joe', prop: 'author'}).should.eql(true);
+            single.getCall(1).calledWith({op: '=', value: 'photo', prop: 'tag'}).should.eql(true);
+            single.getCall(2).calledWith({op: '=', value: 'video', prop: 'tag', func: 'or'}).should.eql(true);
         });
 
         it('should iterate through nested group statements without a group function', function () {
             var single = sandbox.spy();
 
             eachStatement([
-                {op: "=", value: false, prop: "page"},
-                {op: "=", value: "published", prop: "status", func: "and"},
+                {op: '=', value: false, prop: 'page'},
+                {op: '=', value: 'published', prop: 'status', func: 'and'},
                 {group: [
-                    {op: "!=", value: "joe", prop: "author"},
+                    {op: '!=', value: 'joe', prop: 'author'},
                     {group: [
-                        {op: "=", value: "photo", prop: "tag"},
-                        {op: "=", value: "video", prop: "tag", func: "or"}
-                    ], func: "and"}
-                ], func: "and"}
+                        {op: '=', value: 'photo', prop: 'tag'},
+                        {op: '=', value: 'video', prop: 'tag', func: 'or'}
+                    ], func: 'and'}
+                ], func: 'and'}
             ], single);
 
             single.callCount.should.eql(5);
-            single.getCall(0).calledWith({op: "=", value: false, prop: "page"}).should.eql(true);
-            single.getCall(1).calledWith({op: "=", value: "published", prop: "status", func: "and"}).should.eql(true);
-            single.getCall(2).calledWith({op: "!=", value: "joe", prop: "author"}).should.eql(true);
-            single.getCall(3).calledWith({op: "=", value: "photo", prop: "tag"}).should.eql(true);
-            single.getCall(4).calledWith({op: "=", value: "video", prop: "tag", func: "or"}).should.eql(true);
+            single.getCall(0).calledWith({op: '=', value: false, prop: 'page'}).should.eql(true);
+            single.getCall(1).calledWith({op: '=', value: 'published', prop: 'status', func: 'and'}).should.eql(true);
+            single.getCall(2).calledWith({op: '!=', value: 'joe', prop: 'author'}).should.eql(true);
+            single.getCall(3).calledWith({op: '=', value: 'photo', prop: 'tag'}).should.eql(true);
+            single.getCall(4).calledWith({op: '=', value: 'video', prop: 'tag', func: 'or'}).should.eql(true);
         });
 
         it('should iterate through group statements with a group function', function () {
@@ -142,23 +143,22 @@ describe('Lodash Stmt Functions', function () {
                 };
 
             testFunc([
-                {op: "!=", value: "joe", prop: "author"},
+                {op: '!=', value: 'joe', prop: 'author'},
                 {group: [
-                        {op: "=", value: "photo", prop: "tag"},
-                        {op: "=", value: "video", prop: "tag", func: "or"}
-                ], func: "and"}
+                        {op: '=', value: 'photo', prop: 'tag'},
+                        {op: '=', value: 'video', prop: 'tag', func: 'or'}
+                ], func: 'and'}
             ]);
 
-
             single.callCount.should.eql(3);
-            single.getCall(0).calledWith({op: "!=", value: "joe", prop: "author"}).should.eql(true);
-            single.getCall(1).calledWith({op: "=", value: "photo", prop: "tag"}).should.eql(true);
-            single.getCall(2).calledWith({op: "=", value: "video", prop: "tag", func: "or"}).should.eql(true);
+            single.getCall(0).calledWith({op: '!=', value: 'joe', prop: 'author'}).should.eql(true);
+            single.getCall(1).calledWith({op: '=', value: 'photo', prop: 'tag'}).should.eql(true);
+            single.getCall(2).calledWith({op: '=', value: 'video', prop: 'tag', func: 'or'}).should.eql(true);
             group.callCount.should.eql(1);
             group.getCall(0).calledWith({group: [
-                {op: "=", value: "photo", prop: "tag"},
-                {op: "=", value: "video", prop: "tag", func: "or"}
-            ], func: "and"}).should.eql(true);
+                {op: '=', value: 'photo', prop: 'tag'},
+                {op: '=', value: 'video', prop: 'tag', func: 'or'}
+            ], func: 'and'}).should.eql(true);
         });
 
         it('should iterate through nested group statements with a group function', function () {
@@ -171,39 +171,39 @@ describe('Lodash Stmt Functions', function () {
                 };
 
             testFunc([
-                {op: "=", value: false, prop: "page"},
-                {op: "=", value: "published", prop: "status", func: "and"},
+                {op: '=', value: false, prop: 'page'},
+                {op: '=', value: 'published', prop: 'status', func: 'and'},
                 {group: [
-                    {op: "!=", value: "joe", prop: "author"},
+                    {op: '!=', value: 'joe', prop: 'author'},
                     {group: [
-                        {op: "=", value: "photo", prop: "tag"},
-                        {op: "=", value: "video", prop: "tag", func: "or"}
-                    ], func: "and"}
-                ], func: "and"}
+                        {op: '=', value: 'photo', prop: 'tag'},
+                        {op: '=', value: 'video', prop: 'tag', func: 'or'}
+                    ], func: 'and'}
+                ], func: 'and'}
             ]);
 
             single.callCount.should.eql(5);
-            single.getCall(0).calledWith({op: "=", value: false, prop: "page"}).should.eql(true);
-            single.getCall(1).calledWith({op: "=", value: "published", prop: "status", func: "and"}).should.eql(true);
-            single.getCall(2).calledWith({op: "!=", value: "joe", prop: "author"}).should.eql(true);
-            single.getCall(3).calledWith({op: "=", value: "photo", prop: "tag"}).should.eql(true);
-            single.getCall(4).calledWith({op: "=", value: "video", prop: "tag", func: "or"}).should.eql(true);
+            single.getCall(0).calledWith({op: '=', value: false, prop: 'page'}).should.eql(true);
+            single.getCall(1).calledWith({op: '=', value: 'published', prop: 'status', func: 'and'}).should.eql(true);
+            single.getCall(2).calledWith({op: '!=', value: 'joe', prop: 'author'}).should.eql(true);
+            single.getCall(3).calledWith({op: '=', value: 'photo', prop: 'tag'}).should.eql(true);
+            single.getCall(4).calledWith({op: '=', value: 'video', prop: 'tag', func: 'or'}).should.eql(true);
 
             group.callCount.should.eql(2);
             group.getCall(0).calledWith({group: [
-                {op: "!=", value: "joe", prop: "author"},
+                {op: '!=', value: 'joe', prop: 'author'},
                 {
                     group: [
-                        {op: "=", value: "photo", prop: "tag"},
-                        {op: "=", value: "video", prop: "tag", func: "or"}
-                    ], func: "and"
+                        {op: '=', value: 'photo', prop: 'tag'},
+                        {op: '=', value: 'video', prop: 'tag', func: 'or'}
+                    ], func: 'and'
                 }
-            ], func: "and"}).should.eql(true);
+            ], func: 'and'}).should.eql(true);
 
             group.getCall(1).calledWith({group: [
-                {op: "=", value: "photo", prop: "tag"},
-                {op: "=", value: "video", prop: "tag", func: "or"}
-            ], func: "and"}).should.eql(true);
+                {op: '=', value: 'photo', prop: 'tag'},
+                {op: '=', value: 'video', prop: 'tag', func: 'or'}
+            ], func: 'and'}).should.eql(true);
         });
     });
 
@@ -267,17 +267,16 @@ describe('Lodash Stmt Functions', function () {
         describe('groups', function () {
             it('should match inside a group', function () {
                 var statements = [
-                    {op: "!=", value: "joe", prop: "author"},
+                    {op: '!=', value: 'joe', prop: 'author'},
                     {group: [
-                        {op: "=", value: "photo", prop: "tag"},
-                        {op: "=", value: "video", prop: "tag", func: "or"}
-                    ], func: "and"}
+                        {op: '=', value: 'photo', prop: 'tag'},
+                        {op: '=', value: 'video', prop: 'tag', func: 'or'}
+                    ], func: 'and'}
                 ];
 
-
                 findStatement(statements, {value: 'photo'}).should.eql(true);
-                findStatement(statements, {op: "=", value: "photo", prop: "tag"}, 'value').should.eql(true);
-                findStatement(statements, {op: "=", value: "photo", prop: "tag"}, ['value', 'prop']).should.eql(true);
+                findStatement(statements, {op: '=', value: 'photo', prop: 'tag'}, 'value').should.eql(true);
+                findStatement(statements, {op: '=', value: 'photo', prop: 'tag'}, ['value', 'prop']).should.eql(true);
                 findStatement(statements, {prop: /^tag/}).should.eql(true);
                 findStatement(statements, {prop: 'page'}).should.eql(false);
             });
@@ -289,7 +288,7 @@ describe('Lodash Stmt Functions', function () {
             testFunction = function (match, fields) {
                 return function (statement) {
                     return lodashStmt.matchStatement(statement, fields ? _.pick(match, fields) : match);
-                }
+                };
             };
 
         it('should reject from a simple flat array', function () {
@@ -314,81 +313,81 @@ describe('Lodash Stmt Functions', function () {
 
         it('should filter out a statement from a group', function () {
             var statements = [
-                {op: "!=", value: "joe", prop: "author"},
+                {op: '!=', value: 'joe', prop: 'author'},
                 {group: [
-                    {op: "=", value: "photo", prop: "tag"},
-                    {op: "=", value: "video", prop: "tag", func: "or"}
-                ], func: "and"}
+                    {op: '=', value: 'photo', prop: 'tag'},
+                    {op: '=', value: 'video', prop: 'tag', func: 'or'}
+                ], func: 'and'}
             ];
 
             rejectStatements(statements, testFunction({value: 'video'})).should.eql([
-                {op: "!=", value: "joe", prop: "author"},
+                {op: '!=', value: 'joe', prop: 'author'},
                 {group: [
-                    {op: "=", value: "photo", prop: "tag"}
-                ], func: "and"}
+                    {op: '=', value: 'photo', prop: 'tag'}
+                ], func: 'and'}
             ]);
         });
 
         it('should remove group if all statements are removed', function () {
             var statements = [
-                {op: "!=", value: "joe", prop: "author"},
+                {op: '!=', value: 'joe', prop: 'author'},
                 {group: [
-                    {op: "=", value: "photo", prop: "tag"},
-                    {op: "=", value: "video", prop: "tag", func: "or"}
-                ], func: "and"}
+                    {op: '=', value: 'photo', prop: 'tag'},
+                    {op: '=', value: 'video', prop: 'tag', func: 'or'}
+                ], func: 'and'}
             ];
 
             rejectStatements(statements, testFunction({prop: 'tag'})).should.eql([
-                {op: "!=", value: "joe", prop: "author"}
+                {op: '!=', value: 'joe', prop: 'author'}
             ]);
         });
 
         it('should ensure first statement has no func', function () {
             var statements = [
-                {op: "=", value: false, prop: "page"},
-                {op: "=", value: "cameron", prop: "author", func: "or"}
+                {op: '=', value: false, prop: 'page'},
+                {op: '=', value: 'cameron', prop: 'author', func: 'or'}
             ];
 
-            rejectStatements(statements, testFunction({prop: "page"})).should.eql([
-                {op: "=", value: "cameron", prop: "author"}
+            rejectStatements(statements, testFunction({prop: 'page'})).should.eql([
+                {op: '=', value: 'cameron', prop: 'author'}
             ]);
         });
 
         it('should ensure first statement in group has no func', function () {
             var statements = [
-                {op: "=", value: "photo", prop: "tag"},
-                {op: "=", value: "video", prop: "tag", func: "or"},
+                {op: '=', value: 'photo', prop: 'tag'},
+                {op: '=', value: 'video', prop: 'tag', func: 'or'},
                 {group: [
-                    {op: "=", value: false, prop: "page"},
-                    {op: "=", value: "cameron", prop: "author", func: "or"}
-                ], func: "and"}
+                    {op: '=', value: false, prop: 'page'},
+                    {op: '=', value: 'cameron', prop: 'author', func: 'or'}
+                ], func: 'and'}
             ];
 
-            rejectStatements(statements, testFunction({prop: "page"})).should.eql( [
-                {op: "=", value: "photo", prop: "tag"},
-                {op: "=", value: "video", prop: "tag", func: "or"},
+            rejectStatements(statements, testFunction({prop: 'page'})).should.eql([
+                {op: '=', value: 'photo', prop: 'tag'},
+                {op: '=', value: 'video', prop: 'tag', func: 'or'},
                 {group: [
-                    {op: "=", value: "cameron", prop: "author"}
-                ], func: "and"}
+                    {op: '=', value: 'cameron', prop: 'author'}
+                ], func: 'and'}
             ]);
         });
 
         it('should ensure first group has no func when removing a group from the front', function () {
             var statements = [
                 {group: [
-                    {op: "=", value: "photo", prop: "tag"},
-                    {op: "=", value: "video", prop: "tag", func: "or"}
+                    {op: '=', value: 'photo', prop: 'tag'},
+                    {op: '=', value: 'video', prop: 'tag', func: 'or'}
                 ]},
                 {group: [
-                    {op: "=", value: false, prop: "page"},
-                    {op: "=", value: "cameron", prop: "author", func: "or"}
-                ], func: "and"}
+                    {op: '=', value: false, prop: 'page'},
+                    {op: '=', value: 'cameron', prop: 'author', func: 'or'}
+                ], func: 'and'}
             ];
 
-            rejectStatements(statements, testFunction({prop: "tag"})).should.eql([
+            rejectStatements(statements, testFunction({prop: 'tag'})).should.eql([
                 {group: [
-                    {op: "=", value: false, prop: "page"},
-                    {op: "=", value: "cameron", prop: "author", func: "or"}
+                    {op: '=', value: false, prop: 'page'},
+                    {op: '=', value: 'cameron', prop: 'author', func: 'or'}
                 ]}
             ]);
         });
@@ -396,16 +395,16 @@ describe('Lodash Stmt Functions', function () {
         it('should ensure first statement has no func when removing a group from the front', function () {
             var statements = [
                 {group: [
-                    {op: "=", value: "photo", prop: "tag"},
-                    {op: "=", value: "video", prop: "tag", func: "or"}
+                    {op: '=', value: 'photo', prop: 'tag'},
+                    {op: '=', value: 'video', prop: 'tag', func: 'or'}
                 ]},
-                {op: "=", value: false, prop: "page", func: "and"},
-                {op: "=", value: "cameron", prop: "author", func: "or"}
+                {op: '=', value: false, prop: 'page', func: 'and'},
+                {op: '=', value: 'cameron', prop: 'author', func: 'or'}
             ];
 
-            rejectStatements(statements, testFunction({prop: "tag"})).should.eql([
-                {op: "=", value: false, prop: "page"},
-                {op: "=", value: "cameron", prop: "author", func: "or"}
+            rejectStatements(statements, testFunction({prop: 'tag'})).should.eql([
+                {op: '=', value: false, prop: 'page'},
+                {op: '=', value: 'cameron', prop: 'author', func: 'or'}
             ]);
         });
     });
@@ -416,113 +415,113 @@ describe('Lodash Stmt Functions', function () {
         describe('empty object', function () {
             it('should return a valid statement object when passed no args', function () {
                 var result = mergeStatements();
-                result.should.eql({statements: []})
+                result.should.eql({statements: []});
             });
 
             it('should return a valid statement object when passed undefined args', function () {
                 var result = mergeStatements(undefined, undefined);
-                result.should.eql({statements: []})
+                result.should.eql({statements: []});
             });
 
             it('should return a valid statement object when passed null args', function () {
                 var result = mergeStatements(null, null);
-                result.should.eql({statements: []})
+                result.should.eql({statements: []});
             });
         });
 
         it('should merge two simple statements', function () {
             var result = mergeStatements(
-                {prop: "page", op: "=", value: false},
-                {prop: "status", op: "=", value: "published"}
+                {prop: 'page', op: '=', value: false},
+                {prop: 'status', op: '=', value: 'published'}
             );
 
             result.should.eql({statements: [
-                {prop: "page", op: "=", value: false},
-                {prop: "status", op: "=", value: "published", func: "and"}
-            ]})
+                {prop: 'page', op: '=', value: false},
+                {prop: 'status', op: '=', value: 'published', func: 'and'}
+            ]});
         });
 
         it('should correctly merge null and a valid statement', function () {
             var result = mergeStatements(
                 null,
-                {prop: "status", op: "=", value: "published"}
+                {prop: 'status', op: '=', value: 'published'}
             );
 
             result.should.eql({statements: [
-                {prop: "status", op: "=", value: "published"}
-            ]})
+                {prop: 'status', op: '=', value: 'published'}
+            ]});
         });
 
         it('should correctly merge undefined and a valid statement', function () {
             var result = mergeStatements(
                 undefined,
-                {prop: "status", op: "=", value: "published"}
+                {prop: 'status', op: '=', value: 'published'}
             );
 
             result.should.eql({statements: [
-                {prop: "status", op: "=", value: "published"}
-            ]})
+                {prop: 'status', op: '=', value: 'published'}
+            ]});
         });
 
         it('should merge two statement objects', function () {
             var obj1 = {statements: [
-                {prop: "page", op: "=", value: false},
-                {prop: "status", op: "=", value: "published", func: "and"}
+                {prop: 'page', op: '=', value: false},
+                {prop: 'status', op: '=', value: 'published', func: 'and'}
             ]},
                 obj2 = {statements: [
-                    {op: "=", value: "photo", prop: "tag"},
-                    {op: "=", value: "video", prop: "tag", func: "or"}
+                    {op: '=', value: 'photo', prop: 'tag'},
+                    {op: '=', value: 'video', prop: 'tag', func: 'or'}
                 ]},
                 result = mergeStatements(obj1, obj2);
 
             result.should.eql({statements: [
-                {prop: "page", op: "=", value: false},
-                {prop: "status", op: "=", value: "published", func: "and"},
-                {op: "=", value: "photo", prop: "tag", func: "and"},
-                {op: "=", value: "video", prop: "tag", func: "or"}
-            ]})
+                {prop: 'page', op: '=', value: false},
+                {prop: 'status', op: '=', value: 'published', func: 'and'},
+                {op: '=', value: 'photo', prop: 'tag', func: 'and'},
+                {op: '=', value: 'video', prop: 'tag', func: 'or'}
+            ]});
         });
 
         it('should merge two statement objects when one is empty', function () {
             var obj1 = {statements: [
-                    {prop: "page", op: "=", value: false},
-                    {prop: "status", op: "=", value: "published", func: "and"}
+                    {prop: 'page', op: '=', value: false},
+                    {prop: 'status', op: '=', value: 'published', func: 'and'}
                 ]},
                 obj2 = {statements: []},
                 result = mergeStatements(obj1, obj2);
 
             result.should.eql({statements: [
-                {prop: "page", op: "=", value: false},
-                {prop: "status", op: "=", value: "published", func: "and"}
-            ]})
+                {prop: 'page', op: '=', value: false},
+                {prop: 'status', op: '=', value: 'published', func: 'and'}
+            ]});
         });
 
         it('should merge two statement objects when one is null', function () {
             var obj1 = {statements: [
-                    {prop: "page", op: "=", value: false},
-                    {prop: "status", op: "=", value: "published", func: "and"}
+                    {prop: 'page', op: '=', value: false},
+                    {prop: 'status', op: '=', value: 'published', func: 'and'}
                 ]},
                 obj2 = null,
                 result = mergeStatements(obj1, obj2);
 
             result.should.eql({statements: [
-                {prop: "page", op: "=", value: false},
-                {prop: "status", op: "=", value: "published", func: "and"}
-            ]})
+                {prop: 'page', op: '=', value: false},
+                {prop: 'status', op: '=', value: 'published', func: 'and'}
+            ]});
         });
 
         it('should merge two statement objects when one is undefined', function () {
             var obj1 = {statements: [
-                    {prop: "page", op: "=", value: false},
-                    {prop: "status", op: "=", value: "published", func: "and"}
+                    {prop: 'page', op: '=', value: false},
+                    {prop: 'status', op: '=', value: 'published', func: 'and'}
                 ]},
-                obj2 = undefined,
+                obj2,
                 result = mergeStatements(obj1, obj2);
 
             result.should.eql({statements: [
-                {prop: "page", op: "=", value: false},
-                {prop: "status", op: "=", value: "published", func: "and"}
-            ]})
+                {prop: 'page', op: '=', value: false},
+                {prop: 'status', op: '=', value: 'published', func: 'and'}
+            ]});
         });
     });
 
@@ -542,65 +541,64 @@ describe('Lodash Stmt Functions', function () {
             consoleSpy = sandbox.spy(console, 'log');
 
             printStatements([
-                {op: "!=", value: "joe", prop: "author"},
-                {op: "=", value: "photo", prop: "tag", func: "and"},
-                {op: "=", value: "video", prop: "tag", func: "or"}
+                {op: '!=', value: 'joe', prop: 'author'},
+                {op: '=', value: 'photo', prop: 'tag', func: 'and'},
+                {op: '=', value: 'video', prop: 'tag', func: 'or'}
             ]);
 
             consoleSpy.callCount.should.eql(3);
-            consoleSpy.getCall(0).args.should.eql(['', {op: "!=", value: "joe", prop: "author"}]);
-            consoleSpy.getCall(1).args.should.eql(['', {op: "=", value: "photo", prop: "tag", func: "and"}]);
-            consoleSpy.getCall(2).args.should.eql(['', {op: "=", value: "video", prop: "tag", func: "or"}]);
+            consoleSpy.getCall(0).args.should.eql(['', {op: '!=', value: 'joe', prop: 'author'}]);
+            consoleSpy.getCall(1).args.should.eql(['', {op: '=', value: 'photo', prop: 'tag', func: 'and'}]);
+            consoleSpy.getCall(2).args.should.eql(['', {op: '=', value: 'video', prop: 'tag', func: 'or'}]);
         });
 
         it('should iterate through group statements without a group function', function () {
             consoleSpy = sandbox.spy(console, 'log');
 
             printStatements([
-                {op: "!=", value: "joe", prop: "author"},
+                {op: '!=', value: 'joe', prop: 'author'},
                 {
                     group: [
-                        {op: "=", value: "photo", prop: "tag"},
-                        {op: "=", value: "video", prop: "tag", func: "or"}
-                    ], func: "and"
+                        {op: '=', value: 'photo', prop: 'tag'},
+                        {op: '=', value: 'video', prop: 'tag', func: 'or'}
+                    ], func: 'and'
                 }
             ]);
 
             consoleSpy.callCount.should.eql(4);
-            consoleSpy.getCall(0).args.should.eql(['', {op: "!=", value: "joe", prop: "author"}]);
+            consoleSpy.getCall(0).args.should.eql(['', {op: '!=', value: 'joe', prop: 'author'}]);
             consoleSpy.getCall(1).args.should.eql(['', 'group', 'and']);
-            consoleSpy.getCall(2).args.should.eql([' ', {op: "=", value: "photo", prop: "tag"}]);
-            consoleSpy.getCall(3).args.should.eql([' ', {op: "=", value: "video", prop: "tag", func: "or"}]);
+            consoleSpy.getCall(2).args.should.eql([' ', {op: '=', value: 'photo', prop: 'tag'}]);
+            consoleSpy.getCall(3).args.should.eql([' ', {op: '=', value: 'video', prop: 'tag', func: 'or'}]);
         });
 
         it('should iterate through nested group statements without a group function', function () {
             consoleSpy = sandbox.spy(console, 'log');
 
             printStatements([
-                {op: "=", value: false, prop: "page"},
-                {op: "=", value: "published", prop: "status", func: "and"},
+                {op: '=', value: false, prop: 'page'},
+                {op: '=', value: 'published', prop: 'status', func: 'and'},
                 {
                     group: [
-                        {op: "!=", value: "joe", prop: "author"},
+                        {op: '!=', value: 'joe', prop: 'author'},
                         {
                             group: [
-                                {op: "=", value: "photo", prop: "tag"},
-                                {op: "=", value: "video", prop: "tag", func: "or"}
-                            ], func: "and"
+                                {op: '=', value: 'photo', prop: 'tag'},
+                                {op: '=', value: 'video', prop: 'tag', func: 'or'}
+                            ], func: 'and'
                         }
-                    ], func: "and"
+                    ], func: 'and'
                 }
             ]);
 
             consoleSpy.callCount.should.eql(7);
-            consoleSpy.getCall(0).args.should.eql(['', {op: "=", value: false, prop: "page"}]);
-            consoleSpy.getCall(1).args.should.eql(['', {op: "=", value: "published", prop: "status", func: "and"}]);
+            consoleSpy.getCall(0).args.should.eql(['', {op: '=', value: false, prop: 'page'}]);
+            consoleSpy.getCall(1).args.should.eql(['', {op: '=', value: 'published', prop: 'status', func: 'and'}]);
             consoleSpy.getCall(2).args.should.eql(['', 'group', 'and']);
-            consoleSpy.getCall(3).args.should.eql([' ', {op: "!=", value: "joe", prop: "author"}]);
+            consoleSpy.getCall(3).args.should.eql([' ', {op: '!=', value: 'joe', prop: 'author'}]);
             consoleSpy.getCall(4).args.should.eql([' ', 'group', 'and']);
-            consoleSpy.getCall(5).args.should.eql(['  ', {op: "=", value: "photo", prop: "tag"}]);
-            consoleSpy.getCall(6).args.should.eql(['  ', {op: "=", value: "video", prop: "tag", func: "or"}]);
+            consoleSpy.getCall(5).args.should.eql(['  ', {op: '=', value: 'photo', prop: 'tag'}]);
+            consoleSpy.getCall(6).args.should.eql(['  ', {op: '=', value: 'video', prop: 'tag', func: 'or'}]);
         });
     });
 });
-

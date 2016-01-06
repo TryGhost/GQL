@@ -1,5 +1,5 @@
-var should = require('should'),
-    sinon  = require('sinon'),
+/* globals describe, beforeEach, afterEach, it */
+var sinon  = require('sinon'),
     knex = require('knex')({}),
     knexify = require('../lib/knexify');
 
@@ -260,12 +260,12 @@ describe('Knexify', function () {
         it('should correctly build a group query', function () {
             knexify(postKnex, {
                 statements: [
-                    {op: "!=", value: "joe", prop: "author"},
+                    {op: '!=', value: 'joe', prop: 'author'},
                     {
                         group: [
-                            {op: "=", value: "photo", prop: "tag"},
-                            {op: "=", value: "video", prop: "tag", func: "or"}
-                        ], func: "and"
+                            {op: '=', value: 'photo', prop: 'tag'},
+                            {op: '=', value: 'video', prop: 'tag', func: 'or'}
+                        ], func: 'and'
                     }
                 ]
             });
@@ -296,12 +296,12 @@ describe('Knexify', function () {
         it('should correctly build a group query with a not null caluse', function () {
             knexify(postKnex, {
                 statements: [
-                    {op: "!=", value: "joe", prop: "author"},
+                    {op: '!=', value: 'joe', prop: 'author'},
                     {
                         group: [
-                            {op: "=", value: "true", prop: "featured"},
+                            {op: '=', value: 'true', prop: 'featured'},
                             {prop: 'image', op: 'IS NOT', value: null, func: 'or'}
-                        ], func: "and"
+                        ], func: 'and'
                     }
                 ]
             });

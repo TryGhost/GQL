@@ -4,8 +4,10 @@
   "description": "Filter query language for Ghost",
   "main": "index.js",
   "scripts": {
-    "test": "mocha",
-    "build": "grunt build"
+    "lint": "jshint lib/*.js test/*.js && jscs lib/*.js test/*.js",
+    "test": "npm run build && npm run lint && mocha",
+    "build": "jison src/gql.y src/gql.l -o dist/parser.js",
+    "coverage": "istanbul cover -x src --dir=test/coverage --report=lcov ./node_modules/mocha/bin/_mocha -- test/*_spec.js"
   },
   "author": "Ghost Foundation",
   "homepage": "http://ghost.org",
@@ -23,10 +25,10 @@
     "lodash": "3.10.1"
   },
   "devDependencies": {
-    "grunt": "0.4.5",
-    "grunt-mocha-istanbul": "2.4.0",
-    "grunt-shell": "1.1.2",
+    "istanbul": "0.4.0",
     "jison": "0.4.15",
+    "jscs": "2.8.0",
+    "jshint": "2.8.0",
     "knex": "0.8.6",
     "mocha": "2.2.5",
     "should": "7.0.1",
