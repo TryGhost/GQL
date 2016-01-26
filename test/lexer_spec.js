@@ -2,7 +2,7 @@
 var gql = require('../lib/gql');
 
 describe('Lexer', function () {
-    var lexicalError = /^Lexical error on line 1\. Unrecognized text\./;
+    var lexicalError = /^Query Error: unrecognized text/;
 
     describe('Symbols', function () {
         it('can recognise -', function () {
