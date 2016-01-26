@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "istanbul": "0.4.0",
-    "jison": "0.4.15",
+    "jison": "0.4.16",
     "jscs": "2.8.0",
     "jshint": "2.8.0",
     "knex": "0.8.6",
