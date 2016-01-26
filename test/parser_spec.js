@@ -4,7 +4,7 @@ var should = require('should'),
     gql = require('../lib/gql');
 
 describe('Parser', function () {
-    var parserError = /^Parse error on line 1:/;
+    var parserError = /^Query Error: unexpected character in filter at char/;
 
     describe('Operators', function () {
         it('can parse standard equals', function () {
