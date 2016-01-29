@@ -32,7 +32,7 @@ This repository comes in three parts:
 - a set of lodash-like tools for processing the JSON objects returned 
 - some currently Ghost-specific helpers for converting the JSON objects into SQL via [knex's query builder](http://knexjs.org/)
 
-The intention is to eventually move all of the Ghost-specific code and replace it with generic query-buidling code for Knex and perhaps also a bookshelf plugin. It should also be possible to provide other interfaces, e.g. a direct conversion to SQL or NoSQL query formats.
+The intention is to eventually move all of the Ghost-specific code and replace it with generic query-building code for Knex and perhaps also a bookshelf plugin. It should also be possible to provide other interfaces, e.g. a direct conversion to SQL or NoSQL query formats.
 
 ## Usage
 
