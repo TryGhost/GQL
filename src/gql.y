@@ -8,10 +8,16 @@
   */
 
  // console.log("parser object definition: ", this);
+ parser.parseError = function(errStr, object) {
+     var lines = errStr.split("\n");
+     lines[0] = "Query Error: unexpected character in filter at char " + (object.loc.first_column + 1);
+     throw new Error(lines.join("\n"));
+ };
+
 %}
 
 %% /* language grammar */
- 
+
 expressions
     : expression { return {statements: $1}; }
     ;
@@ -30,11 +36,11 @@ filterExpr
     : LPAREN expression RPAREN { $$ = { group: $2 }; }
     | propExpr valueExpr { $2.prop = $1; $$ = $2; }
     ;
- 
+
 propExpr
     : PROP { $1 = $1.replace(/:$/, ''); $$ = $1; }
     ;
- 
+
 valueExpr
     : NOT LBRACKET inExpr RBRACKET { $$ = {op: 'NOT IN', value: $3}; }
     | LBRACKET inExpr RBRACKET { $$ = {op: 'IN', value: $2}; }
@@ -46,7 +52,7 @@ inExpr
     : inExpr OR VALUE { $$.push($3); }
     | VALUE { $$ = [$1]; }
     ;
- 
+
 VALUE
     : NULL { $$ = null }
     | TRUE { $$ = true }
@@ -55,7 +61,7 @@ VALUE
     | LITERAL { $$ = yy.unescape($1); }
     | STRING  { $1 = $1.replace(/^'|'$/g, ''); $$ = yy.unescape($1); }
     ;
- 
+
 OP
     : NOT { $$ = "!="; }
     | GT { $$ = ">"; }

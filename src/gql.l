@@ -32,3 +32,15 @@ escapable                    ['"\+\,\(\)\>\<=\[\]]
 '<'                                                         return 'LT';
 
 %%
+
+lexer.parseError = function(errStr, object) {
+    var lines = errStr.split("\n"),
+        caretPos,
+        char;
+
+    caretPos = lines[2].indexOf("^");
+    char = lines[1].charAt(caretPos);
+    lines[0] = "Query Error: unrecognized text \"" + char + "\" in filter at char " + (caretPos + 1);
+
+    throw Error(lines.join("\n"));
+}
