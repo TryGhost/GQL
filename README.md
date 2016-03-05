@@ -230,9 +230,7 @@ returns this object
 {
     filter: {
         'featured': 1,
-        'tags.$count': {
-            '$gt': 10
-        }
+        'tags.$count': { '$gt': 10 }
     }
 }
 */
