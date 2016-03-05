@@ -193,11 +193,7 @@ is converted to the following JSON object:
             }
         }
     },
-    having: {
-        'posts.$count': {
-            $gt: 1
-        }
-    }
+    having: { 'posts.$count': { $gt: 1 } }
 }
 ```
 
