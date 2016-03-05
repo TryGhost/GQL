@@ -2,9 +2,9 @@
 
 GQL stands for 'Ghost Query Language'
 
-The aim is to provide a simple gmail or github filter-like syntax for specifying conditions, whilst being flexible and powerful enough to support the majority of 'where' expressions available in SQL.
+The aim is to provide a simple gmail or github filter-like syntax for specifying conditions, while being flexible and powerful enough to support the majority of 'where' expressions available in SQL.
 
-GQL itself is parsed and expanded out into a JSON object which can be used to build queries in SQL (and probably No SQL).
+GQL itself is parsed and expanded out into a JSON object known as a 'filter' which can be used to build queries in SQL (and probably No SQL).
 
 ## Beginner
 
@@ -29,9 +29,9 @@ And via Knex, would be further converted to the following SQL:
 string | filter | meaning
 ------ | ------ | -------
 `>` | `$gt` | greater than
-`>=` | `$gte` | means greater than or equal to
-`<` | `$lt` | means less than
-`<=` | `$lte` | means less than or equal to
+`>=` | `$gte` | greater than or equal to
+`<` | `$lt` | less than
+`<=` | `$lte` | less than or equal to
 
 This GQL expression: `published_at:>2016-03-04`
 when executed against the `posts` collection
@@ -53,13 +53,13 @@ And via Knex, would be further converted to the following SQL:
 
 ### Boolean operators
 
-string | filter | meaning
+GQL | filter | SQL
 ------ | ------ | -------
-`+` | &lt;implied&gt; | means AND
-`,` | `$or` | means OR
-`-` | `$not` | means NOT
-`<attribute>` | `$not: { <attribute> : null }` | implies NOT NULL
-`<attribute>:` | `<attribute> : null` | implies NULL
+`+` | &lt;implied&gt; | AND
+`,` | `$or` | OR
+`-` | `$not` | NOT
+`<attribute>` | `<attribute> : { $ne: null }` | NOT NULL
+`<attribute>:` | `<attribute> : null` | NULL
 
 By default, filter expressions are ANDs. So there is no filter element to
 represent AND.
@@ -73,22 +73,19 @@ represented as an array.
 
 This GQL expression: `image:,image`
 when executed against the `posts` collection
-would be converted to the following filter:
+is converted to the following filter:
 
 ```
 {
     $or: {
-        image: null,
-        $not: {
-            image: null
-        }
+        image: [null, { $ne: null }]
     }
 }
 ```
 
 This GQL expression: `-published_at:>2016-01-01`
 when executed against the `posts` collection
-would be converted to the following filter:
+is converted to the following filter:
 
 ```
 {
@@ -104,7 +101,7 @@ would be converted to the following filter:
 
 This GQL expression: `(published_at:>=2015-01-01+published_at:<2015-04-01),(published_at:>=2015-07-01+published_at:<2015-10-01)`
 when executed against the `posts` collection
-would be converted to the following filter:
+is converted to the following filter:
 
 ```
 {
@@ -144,7 +141,7 @@ TODO: examples
 
 This GQL expression: `posts.name:Hello World!`
 when executed against the `tags` collection
-would be converted to the following filter object:
+is converted to the following filter object:
 
 ```
 {
@@ -168,7 +165,7 @@ are the three most prevalent.
 
 This GQL expression: `tags:food`
 when executed against the `posts` collection
-would be converted to the following filter object:
+is converted to the following filter object:
 
 ```
 {
@@ -183,7 +180,7 @@ This JSON alternate representation would be equivalent:
 
 This GQL expression: `tags.slug:food`
 when executed against the `posts` collection
-would be converted to the following filter object:
+is converted to the following filter object:
 
 ```
 {
@@ -209,12 +206,12 @@ the aggregate.
 
 This GQL expression: `image+posts.$count:>1+posts.published_at:<2016-01-01+posts.published_at:>=2015-01-01`
 when executed against the `users` collection
-would be converted to the following JSON object:
+is converted to the following JSON object:
 
 ```
 {
     filter: {
-        image: 1,
+        image: { $ne: null },
         posts: {
             published_at: {
                 $lt: '2016-01-01',
@@ -248,91 +245,53 @@ SELECT users.*, COUNT(DISTINCT posts.id) AS posts_count
 
 In plain English this means "all users that have an image AND who published at least 1 post in the year 2015".
 
-# I HAVEN'T EDITED ANYTHING BELOW HERE
-# IF EVERYONE'S COOL WITH THE FILTERS AND AGGREGATES I'LL UPDATE THE REST OF THE DOCS BELOW
-
-## What's in the box?
-
-This repository comes in three parts:
-- the language parsing functionality, providing `gql.parse()`
-- a set of lodash-like tools for processing the JSON objects returned
-- some currently Ghost-specific helpers for converting the JSON objects into SQL via [knex's query builder](http://knexjs.org/)
-
-The intention is to eventually move all of the Ghost-specific code and replace it with generic query-building code for Knex and perhaps also a bookshelf plugin. It should also be possible to provide other interfaces, e.g. a direct conversion to SQL or NoSQL query formats.
-
 ## Usage
 
-Knex:
+Parse GQL into filters:
 ```
-var filters = gql.parse('featured:true+tags.count:>10');
-gql.knexify(knex('myTable'), filters);
-```
+var filters = gql.parse('featured:true+tags.$count:>10');
 
-Bookshelf:
-```
-var filters = gql.parse('featured:true+tags.count:>10');
-myBookshelfModel.forge().query(function (qb) {
-  gql.knexify(qb, filters);
-});
-```
-
-To get raw SQL via Knex:
-```
-var filters = gql.parse('featured:true+tags.count:>10');
-var myTable = knex('myTable');
-gql.knexify(myTable, filters);
-return myTable.toQuery();
+/*
+returns this object
+{
+    filter: {
+        'featured': 1,
+        'tags.$count': {
+            '$gt': 10
+        }
+    }
+}
+*/
 ```
 
-### Statement processing
+Notice that `featured:true` is not the same as `featured`. `featured:true` becomes `WHERE featured = 1` while `featured` becomes `WHERE featured NOT NULL`. `featured` is a boolean field in this example and we want to check that it's set to true. So we use `featured:true`.
 
-GQL also supported grouped statements, e.g. `author:joe+(tag:photo,image:-null)`
-
-Which result in nested statements like this:
-
+Query through GQL directly:
 ```
-{statements: [
- {op: "!=", value: "joe", prop: "author"},
- {group: [
-    {op: "=", value: "photo", prop: "tag"},
-    {op: "IS NOT", value: null, prop: "image", func: "or"}
-  ], func: "and"}
-]}
+var filters = gql.parse('featured:true+tags.$count:>10');
+var results = gql.findAll('posts').filter(filters).fetch();
+
+// This can also be done in the following way:
+var results = gql.findAll('posts').filter('featured:true+tags.$count:>10').fetch();
 ```
 
-And which should result in the following SQL:
-
-`where "author"."slug" != "joe" and ("posts"."featured" = true or "posts"."image" is not null);`
-
-As the JSON returned by GQL is not always a simple set of objects, performing an operation on every statement requires a recursive loop. GQL provides tools for this:
-
-* eachStatement
-* findStatement
-* matchStatement
-* mergeStatements
-* rejectStatements
-* printStatements
-
-There are currently two ways that you 'could' use these functions externally (e.g. in Ghost) and in the vein of naming things is hard, I can't decide which I prefer.
-
-You could do:
-
+Query through bookshelf model:
 ```
-var _ = require('lodash');
-_.mixin(require('ghost-gql').json);
+var filters = gql.parse('featured:true+tags.$count:>10');
+var results = Post.filter(filters).fetch(); // Post is the bookshelf model
 
-_.eachStatement(statements...);
+// which is equivalent to this
+var results = Post.filter('featured:true+tags.$count:>10').fetch();
 ```
 
-Or you could do
-
+To get the raw query for the connected datasource:
 ```
-var gql = require('ghost-gql');
-gql.json.eachStatement(statements...);
+var filters = gql.parse('featured:true+tags.$count:>10');
+var sql = Post.filter(filters).toQuery(); // Post is the bookshelf model
+
+// which is equivalent to this
+var results = Post.filter('featured:true+tags.$count:>10').toQuery();
 ```
-
-For now you'll need to use the [inline docs](https://github.com/TryGhost/GQL/blob/master/lib/lodash-stmt.js#L10) which explain how to use each function.
-
 
 ## Syntax
 
