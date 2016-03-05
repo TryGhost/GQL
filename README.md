@@ -15,9 +15,7 @@ when executed against the `users` collection
 would be converted to the following filter object:
 
 ```
-{
-    name: 'John'
-}
+{ name: 'John' }
 ```
 
 And via Knex, would be further converted to the following SQL:
@@ -38,11 +36,7 @@ when executed against the `posts` collection
 would be converted to the following filter object:
 
 ```
-{
-    published_at: {
-        $gt: '2016-03-04'
-    }
-}
+{ published_at: { $gt: '2016-03-04' } }
 ```
 
 And via Knex, would be further converted to the following SQL:
@@ -76,11 +70,7 @@ when executed against the `posts` collection
 is converted to the following filter:
 
 ```
-{
-    $or: {
-        image: [null, { $ne: null }]
-    }
-}
+{ $or: [ { image: null }, { image: { $ne: null } } ] }
 ```
 
 This GQL expression: `-published_at:>2016-01-01`
@@ -88,13 +78,7 @@ when executed against the `posts` collection
 is converted to the following filter:
 
 ```
-{
-    $not: {
-        published_at: {
-            $gt: '2016-01-01'
-        }
-    }
-}
+{ $not: { published_at: { $gt: '2016-01-01' } }}
 ```
 
 ### Operator precedence
@@ -144,11 +128,7 @@ when executed against the `tags` collection
 is converted to the following filter object:
 
 ```
-{
-    posts: {
-        name: 'Hello World!'
-    }
-}
+{ posts: { name: 'Hello World!' } }
 ```
 
 ### Matching Across Relations with aliases
