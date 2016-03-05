@@ -148,9 +148,7 @@ when executed against the `posts` collection
 is converted to the following filter object:
 
 ```
-{
-    tags: 'food'
-}
+{ tags: 'food' }
 ```
 
 This query would join posts to tags through posts_tags where tags.slug is 'food'.
@@ -163,11 +161,7 @@ when executed against the `posts` collection
 is converted to the following filter object:
 
 ```
-{
-    tags: {
-        slug: 'food'
-    }
-}
+{ tags: { slug: 'food' } }
 ```
 
 ## Advanced
