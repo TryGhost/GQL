@@ -1,391 +1,170 @@
 /* globals describe, it */
 /* jshint unused:false */
 var should = require('should'),
-    gql = require('../lib/gql');
+    gql = require('../src/gql');
 
 describe('Parser', function () {
     var parserError = /^Query Error: unexpected character in filter at char/;
 
     describe('Operators', function () {
         it('can parse standard equals', function () {
-            gql.parse('count:5').should.eql({
-                statements: [
-                    {prop: 'count', op: '=', value: 5}
-                ]
-            });
+            gql.parse('count:5').should.eql(
+                { count: 5 }
+            );
 
-            gql.parse('tag:getting-started').should.eql({
-                statements: [
-                    {prop: 'tag', op: '=', value: 'getting-started'}
-                ]
-            });
+            gql.parse('tag:getting-started').should.eql(
+                { tag: 'getting-started' }
+            );
 
-            gql.parse('author:\'Joe Bloggs\'').should.eql({
-                statements: [
-                    {prop: 'author', op: '=', value: 'Joe Bloggs'}
-                ]
-            });
+            gql.parse('author:\'Joe Bloggs\'').should.eql(
+                { author: 'Joe Bloggs' }
+            );
         });
 
         it('can parse not equals', function () {
-            gql.parse('count:-5').should.eql({
-                statements: [
-                    {prop: 'count', op: '!=', value: 5}
-                ]
-            });
+            gql.parse('count:-5').should.eql(
+                { count: { '$ne': 5 } }
+            );
 
-            gql.parse('tag:-getting-started').should.eql({
-                statements: [
-                    {prop: 'tag', op: '!=', value: 'getting-started'}
-                ]
-            });
+            gql.parse('tag:-getting-started').should.eql(
+                { tag: { $ne: 'getting-started' } }
+            );
 
-            gql.parse('author:-\'Joe Bloggs\'').should.eql({
-                statements: [
-                    {prop: 'author', op: '!=', value: 'Joe Bloggs'}
-                ]
-            });
+            gql.parse('author:-\'Joe Bloggs\'').should.eql(
+                { author: { $ne: 'Joe Bloggs' } }
+            );
         });
 
         it('can parse greater than', function () {
-            gql.parse('count:>5').should.eql({
-                statements: [
-                    {prop: 'count', op: '>', value: 5}
-                ]
-            });
+            gql.parse('count:>5').should.eql();
 
-            gql.parse('tag:>getting-started').should.eql({
-                statements: [
-                    {prop: 'tag', op: '>', value: 'getting-started'}
-                ]
-            });
+            gql.parse('tag:>getting-started').should.eql();
 
-            gql.parse('author:>\'Joe Bloggs\'').should.eql({
-                statements: [
-                    {prop: 'author', op: '>', value: 'Joe Bloggs'}
-                ]
-            });
+            gql.parse('author:>\'Joe Bloggs\'').should.eql();
         });
 
         it('can parse less than', function () {
-            gql.parse('count:<5').should.eql({
-                statements: [
-                    {prop: 'count', op: '<', value: 5}
-                ]
-            });
+            gql.parse('count:<5').should.eql();
 
-            gql.parse('tag:<getting-started').should.eql({
-                statements: [
-                    {prop: 'tag', op: '<', value: 'getting-started'}
-                ]
-            });
+            gql.parse('tag:<getting-started').should.eql();
 
-            gql.parse('author:<\'Joe Bloggs\'').should.eql({
-                statements: [
-                    {prop: 'author', op: '<', value: 'Joe Bloggs'}
-                ]
-            });
+            gql.parse('author:<\'Joe Bloggs\'').should.eql();
         });
 
         it('can parse greater than or equals', function () {
-            gql.parse('count:>=5').should.eql({
-                statements: [
-                    {prop: 'count', op: '>=', value: 5}
-                ]
-            });
+            gql.parse('count:>=5').should.eql();
 
-            gql.parse('tag:>=getting-started').should.eql({
-                statements: [
-                    {prop: 'tag', op: '>=', value: 'getting-started'}
-                ]
-            });
+            gql.parse('tag:>=getting-started').should.eql();
 
-            gql.parse('author:>=\'Joe Bloggs\'').should.eql({
-                statements: [
-                    {prop: 'author', op: '>=', value: 'Joe Bloggs'}
-                ]
-            });
+            gql.parse('author:>=\'Joe Bloggs\'').should.eql();
         });
 
         it('can parse less than or equals', function () {
-            gql.parse('count:<=5').should.eql({
-                statements: [
-                    {prop: 'count', op: '<=', value: 5}
-                ]
-            });
+            gql.parse('count:<=5').should.eql();
 
-            gql.parse('tag:<=getting-started').should.eql({
-                statements: [
-                    {prop: 'tag', op: '<=', value: 'getting-started'}
-                ]
-            });
+            gql.parse('tag:<=getting-started').should.eql();
 
-            gql.parse('author:<=\'Joe Bloggs\'').should.eql({
-                statements: [
-                    {prop: 'author', op: '<=', value: 'Joe Bloggs'}
-                ]
-            });
+            gql.parse('author:<=\'Joe Bloggs\'').should.eql();
         });
 
         it('can parse IN with single value', function () {
-            gql.parse('count:[5]').should.eql({
-                statements: [
-                    {prop: 'count', op: 'IN', value: [5]}
-                ]
-            });
+            gql.parse('count:[5]').should.eql();
 
-            gql.parse('tag:[getting-started]').should.eql({
-                statements: [
-                    {prop: 'tag', op: 'IN', value: ['getting-started']}
-                ]
-            });
+            gql.parse('tag:[getting-started]').should.eql();
 
-            gql.parse('author:[\'Joe Bloggs\']').should.eql({
-                statements: [
-                    {prop: 'author', op: 'IN', value: ['Joe Bloggs']}
-                ]
-            });
+            gql.parse('author:[\'Joe Bloggs\']').should.eql();
         });
 
         it('can parse NOT IN with single value', function () {
-            gql.parse('count:-[5]').should.eql({
-                statements: [
-                    {prop: 'count', op: 'NOT IN', value: [5]}
-                ]
-            });
+            gql.parse('count:-[5]').should.eql();
 
-            gql.parse('tag:-[getting-started]').should.eql({
-                statements: [
-                    {prop: 'tag', op: 'NOT IN', value: ['getting-started']}
-                ]
-            });
+            gql.parse('tag:-[getting-started]').should.eql();
 
-            gql.parse('author:-[\'Joe Bloggs\']').should.eql({
-                statements: [
-                    {prop: 'author', op: 'NOT IN', value: ['Joe Bloggs']}
-                ]
-            });
+            gql.parse('author:-[\'Joe Bloggs\']').should.eql();
         });
 
         it('can parse IN with multiple values', function () {
-            gql.parse('count:[5, 8, 12]').should.eql({
-                statements: [
-                    {prop: 'count', op: 'IN', value: [5, 8, 12]}
-                ]
-            });
+            gql.parse('count:[5, 8, 12]').should.eql();
 
-            gql.parse('tag:[getting-started, ghost, really-long-1]').should.eql({
-                statements: [
-                    {prop: 'tag', op: 'IN', value: ['getting-started', 'ghost', 'really-long-1']}
-                ]
-            });
+            gql.parse('tag:[getting-started, ghost, really-long-1]').should.eql();
 
-            gql.parse('author:[\'Joe Bloggs\', \'John O\\\'Nolan\', \'Hello World\']').should.eql({
-                statements: [
-                    {prop: 'author', op: 'IN', value: ['Joe Bloggs', 'John O\'Nolan', 'Hello World']}
-                ]
-            });
+            gql.parse('author:[\'Joe Bloggs\', \'John O\\\'Nolan\', \'Hello World\']').should.eql();
         });
 
         it('can parse NOT IN with single value', function () {
-            gql.parse('count:-[5, 8, 12]').should.eql({
-                statements: [
-                    {prop: 'count', op: 'NOT IN', value: [5, 8, 12]}
-                ]
-            });
+            gql.parse('count:-[5, 8, 12]').should.eql();
 
-            gql.parse('tag:-[getting-started, ghost, really-long-1]').should.eql({
-                statements: [
-                    {prop: 'tag', op: 'NOT IN', value: ['getting-started', 'ghost', 'really-long-1']}
-                ]
-            });
+            gql.parse('tag:-[getting-started, ghost, really-long-1]').should.eql();
 
-            gql.parse('author:-[\'Joe Bloggs\', \'John O\\\'Nolan\', \'Hello World\']').should.eql({
-                statements: [
-                    {prop: 'author', op: 'NOT IN', value: ['Joe Bloggs', 'John O\'Nolan', 'Hello World']}
-                ]
-            });
+            gql.parse('author:-[\'Joe Bloggs\', \'John O\\\'Nolan\', \'Hello World\']').should.eql();
         });
     });
 
     describe('Values', function () {
         it('can parse null', function () {
-            gql.parse('image:null').should.eql({
-                statements: [
-                    {prop: 'image', op: 'IS', value: null}
-                ]
-            });
+            gql.parse('image:').should.eql();
         });
 
         it('can parse NOT null', function () {
-            gql.parse('image:-null').should.eql({
-                statements: [
-                    {prop: 'image', op: 'IS NOT', value: null}
-                ]
-            });
+            gql.parse('image').should.eql();
         });
 
         it('can parse true', function () {
-            gql.parse('featured:true').should.eql({
-                statements: [
-                    {prop: 'featured', op: '=', value: true}
-                ]
-            });
+            gql.parse('featured:true').should.eql();
         });
 
         it('can parse NOT true', function () {
-            gql.parse('featured:-true').should.eql({
-                statements: [
-                    {prop: 'featured', op: '!=', value: true}
-                ]
-            });
+            gql.parse('featured:-true').should.eql();
         });
 
         it('can parse false', function () {
-            gql.parse('featured:false').should.eql({
-                statements: [
-                    {prop: 'featured', op: '=', value: false}
-                ]
-            });
+            gql.parse('featured:false').should.eql();
         });
 
         it('can parse NOT false', function () {
-            gql.parse('featured:-false').should.eql({
-                statements: [
-                    {prop: 'featured', op: '!=', value: false}
-                ]
-            });
+            gql.parse('featured:-false').should.eql();
         });
 
         it('can parse a Number', function () {
-            gql.parse('count:5').should.eql({
-                statements: [
-                    {prop: 'count', op: '=', value: 5}
-                ]
-            });
+            gql.parse('count:5').should.eql();
         });
 
         it('can parse NOT a Number', function () {
-            gql.parse('count:-5').should.eql({
-                statements: [
-                    {prop: 'count', op: '!=', value: 5}
-                ]
-            });
+            gql.parse('count:-5').should.eql();
         });
     });
 
     describe('simple expressions', function () {
         it('should parse simple id & value combos', function () {
-            gql.parse('id:3').should.eql({
-                statements: [
-                    {prop: 'id', op: '=', value: 3}
-                ]
-            });
+            gql.parse('id:3').should.eql();
 
-            gql.parse('slug:getting-started').should.eql({
-                statements: [
-                    {prop: 'slug', op: '=', value: 'getting-started'}
-                ]
-            });
+            gql.parse('slug:getting-started').should.eql();
         });
     });
 
     describe('complex examples', function () {
         it('many expressions', function () {
-            gql.parse('tag:photo+featured:true,tag.count:>5').should.eql({
-                statements: [
-                    {op: '=', value: 'photo', prop: 'tag'},
-                    {op: '=', value: true, prop: 'featured', func: 'and'},
-                    {op: '>', value: 5, prop: 'tag.count', func: 'or'}
-                ]
-            });
+            gql.parse('tag:photo+featured:true,tag.count:>5').should.eql();
 
-            gql.parse('tag:photo+image:-null,tag.count:>5').should.eql({
-                statements: [
-                    {op: '=', value: 'photo', prop: 'tag'},
-                    {op: 'IS NOT', value: null, prop: 'image', func: 'and'},
-                    {op: '>', value: 5, prop: 'tag.count', func: 'or'}
-                ]
-            });
+            gql.parse('tag:photo+image:-null,tag.count:>5').should.eql();
         });
 
         it('grouped expressions', function () {
-            gql.parse('author:-joe+(tag:photo,image:-null,featured:true)').should.eql({
-                statements: [
-                    {op: '!=', value: 'joe', prop: 'author'},
-                    {
-                        group: [
-                            {op: '=', value: 'photo', prop: 'tag'},
-                            {op: 'IS NOT', value: null, prop: 'image', func: 'or'},
-                            {op: '=', value: true, prop: 'featured', func: 'or'}
-                        ], func: 'and'
-                    }
-                ]
-            });
+            gql.parse('author:-joe+(tag:photo,image:-null,featured:true)').should.eql();
 
-            gql.parse('(tag:photo,image:-null,featured:true)+author:-joe').should.eql({
-                statements: [
-                    {
-                        group: [
-                            {op: '=', value: 'photo', prop: 'tag'},
-                            {op: 'IS NOT', value: null, prop: 'image', func: 'or'},
-                            {op: '=', value: true, prop: 'featured', func: 'or'}
-                        ]
-                    },
-                    {op: '!=', value: 'joe', prop: 'author', func: 'and'}
-                ]
-            });
+            gql.parse('(tag:photo,image:-null,featured:true)+author:-joe').should.eql();
 
-            gql.parse('author:-joe,(tag:photo,image:-null,featured:true)').should.eql({
-                statements: [
-                    {op: '!=', value: 'joe', prop: 'author'},
-                    {
-                        group: [
-                            {op: '=', value: 'photo', prop: 'tag'},
-                            {op: 'IS NOT', value: null, prop: 'image', func: 'or'},
-                            {op: '=', value: true, prop: 'featured', func: 'or'}
-                        ], func: 'or'
-                    }
-                ]
-            });
+            gql.parse('author:-joe,(tag:photo,image:-null,featured:true)').should.eql();
 
-            gql.parse('(tag:photo,image:-null,featured:false),author:-joe').should.eql({
-                statements: [
-                    {
-                        group: [
-                            {op: '=', value: 'photo', prop: 'tag'},
-                            {op: 'IS NOT', value: null, prop: 'image', func: 'or'},
-                            {op: '=', value: false, prop: 'featured', func: 'or'}
-                        ]
-                    },
-                    {op: '!=', value: 'joe', prop: 'author', func: 'or'}
-                ]
-            });
+            gql.parse('(tag:photo,image:-null,featured:false),author:-joe').should.eql();
         });
 
         it('in expressions', function () {
-            gql.parse('author:-joe+tag:[photo,video]').should.eql({
-                statements: [
-                    {op: '!=', value: 'joe', prop: 'author'},
-                    {op: 'IN', value: ['photo', 'video'], prop: 'tag', func: 'and'}
-                ]
-            });
+            gql.parse('author:-joe+tag:[photo,video]').should.eql();
 
-            gql.parse('author:-joe+tag:-[photo,video,audio]').should.eql({
-                statements: [
-                    {op: '!=', value: 'joe', prop: 'author'},
-                    {op: 'NOT IN', value: ['photo', 'video', 'audio'], prop: 'tag', func: 'and'}
-                ]
-            });
+            gql.parse('author:-joe+tag:-[photo,video,audio]').should.eql();
 
-            gql.parse('author:-joe+tag:[photo,video,magic,\'audio\']+post.count:>5+post.count:<100').should.eql({
-                statements: [
-                    {op: '!=', value: 'joe', prop: 'author'},
-                    {op: 'IN', value: ['photo', 'video', 'magic', 'audio'], prop: 'tag', func: 'and'},
-                    {op: '>', value: 5, prop: 'post.count', func: 'and'},
-                    {op: '<', value: 100, prop: 'post.count', func: 'and'}
-                ]
-            });
+            gql.parse('author:-joe+tag:[photo,video,magic,\'audio\']+post.count:>5+post.count:<100').should.eql();
         });
     });
 
