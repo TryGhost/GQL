@@ -1,5 +1,7 @@
 # GQL
 
+[![Build Status](https://travis-ci.org/laran/GQL.svg?branch=master)](https://travis-ci.org/laran/GQL)
+
 GQL stands for 'Ghost Query Language'
 
 The aim is to provide a simple gmail or github filter-like syntax for specifying conditions, while being flexible and powerful enough to support the majority of 'where' expressions available in SQL.
