@@ -9,29 +9,29 @@ describe.skip('Parser', function () {
     describe('Operators', function () {
         it('can parse standard equals', function () {
             gql.parse('count:5').should.eql(
-                { count: 5 }
+                {count: 5}
             );
 
             gql.parse('tag:getting-started').should.eql(
-                { tag: 'getting-started' }
+                {tag: 'getting-started'}
             );
 
             gql.parse('author:\'Joe Bloggs\'').should.eql(
-                { author: 'Joe Bloggs' }
+                {author: 'Joe Bloggs'}
             );
         });
 
         it('can parse not equals', function () {
             gql.parse('count:-5').should.eql(
-                { count: { $ne: 5 } }
+                {count: {$ne: 5}}
             );
 
             gql.parse('tag:-getting-started').should.eql(
-                { tag: { $ne: 'getting-started' } }
+                {tag: {$ne: 'getting-started'}}
             );
 
             gql.parse('author:-\'Joe Bloggs\'').should.eql(
-                { author: { $ne: 'Joe Bloggs' } }
+                {author: {$ne: 'Joe Bloggs'}}
             );
         });
 
@@ -181,29 +181,51 @@ describe.skip('Parser', function () {
 
     describe('invalid expressions', function () {
         it('CANNOT parse characters outside of a STRING value', function () {
-            (function () { gql.parse('tag:\'My Tag\'-');}).should.throw(parserError);
+            (function () {
+                gql.parse('tag:\'My Tag\'-');
+            }).should.throw(parserError);
         });
 
         it('CANNOT parse property - operator - value in wrong order', function () {
-            (function () { gql.parse('\'My Tag\':tag');}).should.throw(parserError);
-            (function () { gql.parse('5>:tag');}).should.throw(parserError);
+            (function () {
+                gql.parse('\'My Tag\':tag');
+            }).should.throw(parserError);
+            (function () {
+                gql.parse('5>:tag');
+            }).should.throw(parserError);
         });
 
         it('CANNOT parse combination without filter expression', function () {
-            (function () { gql.parse('count:3+');}).should.throw(parserError);
-            (function () { gql.parse(',count:3');}).should.throw(parserError);
+            (function () {
+                gql.parse('count:3+');
+            }).should.throw(parserError);
+            (function () {
+                gql.parse(',count:3');
+            }).should.throw(parserError);
         });
 
         it('CANNOT parse incomplete group', function () {
-            (function () { gql.parse('id:5,(count:3');}).should.throw(parserError);
-            (function () { gql.parse('count:3)');}).should.throw(parserError);
-            (function () { gql.parse('id:5(count:3)');}).should.throw(parserError);
+            (function () {
+                gql.parse('id:5,(count:3');
+            }).should.throw(parserError);
+            (function () {
+                gql.parse('count:3)');
+            }).should.throw(parserError);
+            (function () {
+                gql.parse('id:5(count:3)');
+            }).should.throw(parserError);
         });
 
         it('CANNOT parse invalid IN expression', function () {
-            (function () { gql.parse('id:[test+ing]');}).should.throw(parserError);
-            (function () { gql.parse('id:[test');}).should.throw(parserError);
-            (function () { gql.parse('id:test,ing]');}).should.throw(parserError);
+            (function () {
+                gql.parse('id:[test+ing]');
+            }).should.throw(parserError);
+            (function () {
+                gql.parse('id:[test');
+            }).should.throw(parserError);
+            (function () {
+                gql.parse('id:test,ing]');
+            }).should.throw(parserError);
         });
     });
 });

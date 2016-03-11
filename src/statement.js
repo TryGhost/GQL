@@ -1,6 +1,7 @@
-var _ = require('lodash');
+var _, statement, orAnalogues, applyCondition, applyConditions;
+_ = require('lodash');
 
-var statement = function(collection, conditions) {
+statement = function (collection, conditions) {
     this.collection = collection;
     this.conditions = conditions;
 };
@@ -8,7 +9,7 @@ var statement = function(collection, conditions) {
 // Storing the or equivalents of the where clauses is
 // an efficient way of getting the equivalent without
 // string splitting and concatenation.
-var orAnalogues = {
+orAnalogues = {
     where: 'orWhere',
     whereNot: 'orWhereNot',
     whereIn: 'orWhereIn',
@@ -17,12 +18,12 @@ var orAnalogues = {
     whereNotNull: 'orWhereNotNull'
 };
 
-var applyCondition = function(statement, condition, useOr) {
+applyCondition = function (statement, condition, useOr) {
     // There should be only one attribute in the condition
     // Using forIn is a concise way to iterate over the object.
-    _.forIn(condition, function(value, key){
-        if ('or' === key) {
-            _.forEach(value, function(clause) {
+    _.forIn(condition, function (value, key) {
+        if (key === 'or') {
+            _.forEach(value, function (clause) {
                 applyCondition(statement, clause, true);
             });
         } else {
@@ -31,28 +32,28 @@ var applyCondition = function(statement, condition, useOr) {
     });
 };
 
-var applyConditions = function(statement) {
+applyConditions = function (statement) {
     // or's are explicitly stated
     // and's are implied
 
-    if(!_.isArray(statement.conditions)) {
+    if (!_.isArray(statement.conditions)) {
         applyCondition(statement, statement.conditions);
     } else {
-        _.forEach(statement.conditions, function(condition) {
+        _.forEach(statement.conditions, function (condition) {
             applyCondition(statement, condition);
         });
     }
 };
 
-statement.prototype.fetch = function(showSql) {
+statement.prototype.fetch = function (showSql) {
     applyConditions(this);
-    if(showSql) {
+    if (showSql) {
         console.log(this.collection.toString());
     }
     return this.collection.select();
 };
 
-statement.prototype.toSQL = function() {
+statement.prototype.toSQL = function () {
     return applyConditions(this) && this.collection.toString();
 };
 

@@ -1,6 +1,5 @@
 var parser = {
-    parse: function(gql) {
-
+    parse: function (gql) { // jshint ignore:line
         // FIXME do the actual parsing
 
         return {};

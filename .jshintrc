@@ -19,5 +19,11 @@
     "undef": true,
     "unused": true,
     "indent": 4,
-    "predef": [ "-Promise" ]
+    "predef": [
+        "-Promise",
+        "describe",
+        "it",
+        "before",
+        "beforeEach"
+    ]
 }
