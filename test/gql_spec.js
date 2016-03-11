@@ -1,8 +1,10 @@
 var _ = require('lodash');
 
 var chai = require('chai');
+
 chai.should();
 chai.use(require('chai-bookshelf'));
+chai.use(require("chai-as-promised"));
 
 var knex = require('knex')({
     client: 'sqlite3',
@@ -13,39 +15,52 @@ var gql = require('../src/gql');
 gql = new gql(knex);
 
 describe('gql', function () {
-    before(function(){
+    before(function(done){
         knex.schema.createTableIfNotExists('posts', function(table){
             table.increments();
             table.string('name');
             table.binary('image');
-            table.boolean('featured');
+            table.boolean('featured').defaultTo(false);
             table.timestamps();
+        }).then(function(){
+            done()
         });
     });
 
-    beforeEach(function(){
+    beforeEach(function(done){
         var image = 'asdfghjkl;';
-        knex('posts').del();
-        knex('posts').insert({
-            name: 'sample',
-            created_at: '2016-03-01'
-        });
-        knex('posts').insert({
-            name: 'featured-sample',
-            featured: true,
-            created_at: '2016-03-02'
-        });
-        knex('posts').insert({
-            name: 'sample-with-image',
-            image: image,
-            created_at: '2016-03-03'
-        });
-        knex('posts').insert({
-            name: 'featured-sample-with-image',
-            featured: true,
-            image: image,
-            created_at: '2016-03-04'
-        });
+        knex('posts')
+            .del()
+            .then(function(){
+                return knex('posts').insert({
+                    name: 'sample',
+                    created_at: '2016-03-01'
+                });
+            })
+            .then(function(){
+                return knex('posts').insert({
+                    name: 'featured-sample',
+                    featured: true,
+                    created_at: '2016-03-02'
+                });
+            })
+            .then(function(){
+                return knex('posts').insert({
+                    name: 'sample-with-image',
+                    image: image,
+                    created_at: '2016-03-03'
+                });
+            })
+            .then(function(){
+                return knex('posts').insert({
+                    name: 'featured-sample-with-image',
+                    featured: true,
+                    image: image,
+                    created_at: '2016-03-04'
+                });
+            }).then(function(){
+                done();
+            });
     });
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -183,7 +198,7 @@ describe('gql', function () {
                     { created_at: { $lt: '2016-03-04' } }
                 ]
             }).conditions;
-            console.dir(conditions);
+            console.log(JSON.stringify(conditions));
             _.isEqual(conditions, [
                 { whereNotIn: [ 'created_at', [ '2016-03-01', '2016-03-02' ] ] },
                 { where: [ 'created_at', '<', '2016-03-04']}
@@ -242,14 +257,37 @@ describe('gql', function () {
     // query execution --
     // -----------------------------------------------------------------------------------------------------------------
 
-    it.skip('should return all posts when calling findAll with an empty filter', function() {
-        gql.findAll('posts').filter('').fetch().should.have.length(4);
-        gql.findAll('posts').filter({}).fetch().should.have.length(4);
+    it('should return all posts when calling findAll with an empty string filter', function(done) {
+        gql.findAll('posts')
+            .filter('')
+            .fetch(true)
+            .then(function(result){
+                result.length.should.equal(4);
+                console.log(JSON.stringify(result));
+                done();
+            });
     });
 
-    it.skip('should perform exact string matches', function(){
-        gql.findAll('posts').filter('name:sample').fetch().should.have.length(1);
-        gql.findAll('posts').filter({ name: 'sample' }).fetch().should.have.length(1);
+    it('should return all posts when calling findAll with an empty object filter', function(done) {
+        gql.findAll('posts')
+            .filter({})
+            .fetch(true)
+            .then(function(result){
+                result.length.should.equal(4);
+                console.log(JSON.stringify(result));
+                done();
+            });
+    });
+
+    it('should perform exact string matches', function(done){
+        gql.findAll('posts')
+            .filter({ name: 'sample' })
+            .fetch(true)
+            .then(function(result){
+                result[0].name.should.equal('sample');
+                console.log(JSON.stringify(result));
+                done();
+            });
     });
 
 });
