@@ -6,7 +6,6 @@
   "scripts": {
     "lint": "jshint lib/*.js test/*.js && jscs lib/*.js test/*.js",
     "test": "npm run build && npm run lint && mocha",
-    "build": "jison src/gql.y src/gql.l -o dist/parser.js",
     "coverage": "istanbul cover -x src --dir=test/coverage --report=lcov ./node_modules/mocha/bin/_mocha -- test/*_spec.js",
     "release": "npm-release patch"
   },
