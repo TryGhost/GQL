@@ -72,7 +72,8 @@ describe('gql', function () {
     describe('findAll', function(){
         it('should support a string argument', function(){
             var conditions = gql.findAll('posts').filter('').conditions;
-            //_.isEqual(conditions, { and: { where: [ 'name', 'sample' ]}}).should.equal(true);
+            // TODO Once the parser is complete we can revisit this to ensure that it actually creates the correct
+            // TODO conditions. For now it will suffice to just verify that it accepts a string argument without error.
         });
 
         it('should support exact not matches', function(){
@@ -107,25 +108,25 @@ describe('gql', function () {
 
         it('should support less than equal matches', function(){
             var conditions = gql.findAll('posts').filter({ created_at: { $lte: '2016-03-02' } }).conditions;
-            //console.log(JSON.stringify(conditions));
+            console.log(JSON.stringify(conditions));
             _.isEqual(conditions, { where: [ 'created_at', '<=', '2016-03-02' ] }).should.equal(true);
         });
 
         it('should support not less than equal matches', function(){
             var conditions = gql.findAll('posts').filter({ created_at: { $not: { $lte: '2016-03-02' } } }).conditions;
-            //console.log(JSON.stringify(conditions));
+            console.log(JSON.stringify(conditions));
             _.isEqual(conditions, { whereNot: [ 'created_at', '<=', '2016-03-02' ] }).should.equal(true);
         });
 
         it('should support greater than equal matches', function(){
             var conditions = gql.findAll('posts').filter({ created_at: { $gte: '2016-03-02' } }).conditions;
-            //console.log(JSON.stringify(conditions));
+            console.log(JSON.stringify(conditions));
             _.isEqual(conditions, { where: [ 'created_at', '>=', '2016-03-02' ] }).should.equal(true);
         });
 
         it('should support not greater than equal matches', function(){
             var conditions = gql.findAll('posts').filter({ created_at: { $not: { $gte: '2016-03-02' } } }).conditions;
-            //console.log(JSON.stringify(conditions));
+            console.log(JSON.stringify(conditions));
             _.isEqual(conditions, { whereNot: [ 'created_at', '>=', '2016-03-02' ] }).should.equal(true);
         });
 
@@ -182,7 +183,7 @@ describe('gql', function () {
                     { created_at: { $lt: '2016-03-04' } }
                 ]
             }).conditions;
-            //console.log(JSON.stringify(conditions));
+            console.dir(conditions);
             _.isEqual(conditions, [
                 { whereNotIn: [ 'created_at', [ '2016-03-01', '2016-03-02' ] ] },
                 { where: [ 'created_at', '<', '2016-03-04']}
@@ -201,7 +202,7 @@ describe('gql', function () {
                     }
                 ]
             }).conditions;
-            //console.log(JSON.stringify(conditions));
+            console.log(JSON.stringify(conditions));
             _.isEqual(conditions, {
                 or: [
                     [
