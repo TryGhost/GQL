@@ -12,7 +12,7 @@ gql.prototype.parse = function (query) {
 };
 
 gql.prototype.findAll = function (collection) {
-    return new Knector(this.knex(collection)); // jshint ignore:line
+    return new Knector(this.knex(collection));
 };
 
 module.exports = gql;

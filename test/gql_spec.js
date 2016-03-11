@@ -93,85 +93,85 @@ describe('gql', function () {
 
         it('should support exact not matches', function () {
             var conditions = gql.findAll('posts').filter({$not: {name: 'sample'}}).conditions;
-            console.log(JSON.stringify(conditions));
+            // console.log(JSON.stringify(conditions));
             _.isEqual(conditions, {whereNot: ['name', 'sample']}).should.equal(true);
         });
 
         it('should support less than matches', function () {
             var conditions = gql.findAll('posts').filter({created_at: {$lt: '2016-03-02'}}).conditions;
-            console.log(JSON.stringify(conditions));
+            // console.log(JSON.stringify(conditions));
             _.isEqual(conditions, {where: ['created_at', '<', '2016-03-02']}).should.equal(true);
         });
 
         it('should support not less than matches', function () {
             var conditions = gql.findAll('posts').filter({created_at: {$not: {$lt: '2016-03-02'}}}).conditions;
-            console.log(JSON.stringify(conditions));
+            // console.log(JSON.stringify(conditions));
             _.isEqual(conditions, {whereNot: ['created_at', '<', '2016-03-02']}).should.equal(true);
         });
 
         it('should support greater than matches', function () {
             var conditions = gql.findAll('posts').filter({created_at: {$gt: '2016-03-02'}}).conditions;
-            console.log(JSON.stringify(conditions));
+            // console.log(JSON.stringify(conditions));
             _.isEqual(conditions, {where: ['created_at', '>', '2016-03-02']}).should.equal(true);
         });
 
         it('should support not greater than matches', function () {
             var conditions = gql.findAll('posts').filter({created_at: {$not: {$gt: '2016-03-02'}}}).conditions;
-            console.log(JSON.stringify(conditions));
+            // console.log(JSON.stringify(conditions));
             _.isEqual(conditions, {whereNot: ['created_at', '>', '2016-03-02']}).should.equal(true);
         });
 
         it('should support less than equal matches', function () {
             var conditions = gql.findAll('posts').filter({created_at: {$lte: '2016-03-02'}}).conditions;
-            console.log(JSON.stringify(conditions));
+            // console.log(JSON.stringify(conditions));
             _.isEqual(conditions, {where: ['created_at', '<=', '2016-03-02']}).should.equal(true);
         });
 
         it('should support not less than equal matches', function () {
             var conditions = gql.findAll('posts').filter({created_at: {$not: {$lte: '2016-03-02'}}}).conditions;
-            console.log(JSON.stringify(conditions));
+            // console.log(JSON.stringify(conditions));
             _.isEqual(conditions, {whereNot: ['created_at', '<=', '2016-03-02']}).should.equal(true);
         });
 
         it('should support greater than equal matches', function () {
             var conditions = gql.findAll('posts').filter({created_at: {$gte: '2016-03-02'}}).conditions;
-            console.log(JSON.stringify(conditions));
+            // console.log(JSON.stringify(conditions));
             _.isEqual(conditions, {where: ['created_at', '>=', '2016-03-02']}).should.equal(true);
         });
 
         it('should support not greater than equal matches', function () {
             var conditions = gql.findAll('posts').filter({created_at: {$not: {$gte: '2016-03-02'}}}).conditions;
-            console.log(JSON.stringify(conditions));
+            // console.log(JSON.stringify(conditions));
             _.isEqual(conditions, {whereNot: ['created_at', '>=', '2016-03-02']}).should.equal(true);
         });
 
         it('should support null matches', function () {
             var conditions = gql.findAll('posts').filter({created_at: null}).conditions;
-            console.log(JSON.stringify(conditions));
+            // console.log(JSON.stringify(conditions));
             _.isEqual(conditions, {whereNull: ['created_at']}).should.equal(true);
         });
 
         it('should support not null matches', function () {
             var conditions = gql.findAll('posts').filter({created_at: {$ne: null}}).conditions;
-            console.log(JSON.stringify(conditions));
+            // console.log(JSON.stringify(conditions));
             _.isEqual(conditions, {whereNotNull: ['created_at']}).should.equal(true);
         });
 
         it('should support not null matches', function () {
             var conditions = gql.findAll('posts').filter({created_at: {$ne: null}}).conditions;
-            console.log(JSON.stringify(conditions));
+            // console.log(JSON.stringify(conditions));
             _.isEqual(conditions, {whereNotNull: ['created_at']}).should.equal(true);
         });
 
         it('should support in matches', function () {
             var conditions = gql.findAll('posts').filter({created_at: ['2016-03-01', '2016-03-02']}).conditions;
-            console.log(JSON.stringify(conditions));
+            // console.log(JSON.stringify(conditions));
             _.isEqual(conditions, {whereIn: ['created_at', ['2016-03-01', '2016-03-02']]}).should.equal(true);
         });
 
         it('should support not in matches', function () {
             var conditions = gql.findAll('posts').filter({$not: {created_at: ['2016-03-01', '2016-03-02']}}).conditions;
-            console.log(JSON.stringify(conditions));
+            // console.log(JSON.stringify(conditions));
             _.isEqual(conditions, {whereNotIn: ['created_at', ['2016-03-01', '2016-03-02']]}).should.equal(true);
         });
 
@@ -203,7 +203,7 @@ describe('gql', function () {
                     {created_at: {$lt: '2016-03-04'}}
                 ]
             ).conditions;
-            console.log(JSON.stringify(conditions));
+            // console.log(JSON.stringify(conditions));
             _.isEqual(conditions, [
                 {whereNotIn: ['created_at', ['2016-03-01', '2016-03-02']]},
                 {where: ['created_at', '<', '2016-03-04']}
@@ -220,7 +220,7 @@ describe('gql', function () {
                     }
                 ]
             }).conditions;
-            console.log(JSON.stringify(conditions));
+            // console.log(JSON.stringify(conditions));
             _.isEqual(conditions, {
                 or: [
                     [
@@ -245,13 +245,13 @@ describe('gql', function () {
 
     it('should support and queries', function () {
         var conditions = gql.findAll('posts').filter([{name: 'sample'}, {featured: false}]).conditions;
-        console.log(JSON.stringify(conditions));
+        // console.log(JSON.stringify(conditions));
         _.isEqual(conditions, [{where: ['name', 'sample']}, {where: ['featured', false]}]).should.equal(true);
     });
 
     it('should support or queries', function () {
         var conditions = gql.findAll('posts').filter({$or: [{name: 'sample'}, {featured: false}]}).conditions;
-        console.log(JSON.stringify(conditions));
+        // console.log(JSON.stringify(conditions));
         _.isEqual(conditions, {or: [{where: ['name', 'sample']}, {where: ['featured', false]}]}).should.equal(true);
     });
 
@@ -262,10 +262,10 @@ describe('gql', function () {
     it('should return all posts when calling findAll with an empty string filter', function (done) {
         gql.findAll('posts')
             .filter('')
-            .fetch(true)
+            .fetch()
             .then(function (result) {
                 result.length.should.equal(4);
-                console.log(JSON.stringify(result));
+                // console.log(JSON.stringify(result));
                 done();
             });
     });
@@ -273,10 +273,10 @@ describe('gql', function () {
     it('should return all posts when calling findAll with an empty object filter', function (done) {
         gql.findAll('posts')
             .filter({})
-            .fetch(true)
+            .fetch()
             .then(function (result) {
                 result.length.should.equal(4);
-                console.log(JSON.stringify(result));
+                // console.log(JSON.stringify(result));
                 done();
             });
     });
@@ -284,10 +284,10 @@ describe('gql', function () {
     it('should perform exact string matches', function (done) {
         gql.findAll('posts')
             .filter({name: 'sample'})
-            .fetch(true)
+            .fetch()
             .then(function (result) {
                 result[0].name.should.equal('sample');
-                console.log(JSON.stringify(result));
+                // console.log(JSON.stringify(result));
                 done();
             });
     });

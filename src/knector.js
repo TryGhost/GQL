@@ -11,9 +11,7 @@ knector.prototype.filter = function (filters) {
         filters = parser.parse(filters);
     }
 
-    /* jshint ignore:start */
     return new Statement(this.collection, this.buildConditions(filters));
-    /* jshint ignore:end */
 };
 
 knector.prototype.buildConditions = function (filter, negated, parentKey) {
@@ -62,13 +60,13 @@ knector.prototype.buildCondition = function (key, value, negated, parentKey) {
         if (key.charAt(0) === '$') {
             // could be $gt, $gte, $lt, $lte, $ne
             if (key === '$gt') {
-                condition[!!negated ? 'whereNot' : 'where'] = [parentKey, '>', value];
+                condition[negated ? 'whereNot' : 'where'] = [parentKey, '>', value];
             } else if (key === '$gte') {
-                condition[!!negated ? 'whereNot' : 'where'] = [parentKey, '>=', value];
+                condition[negated ? 'whereNot' : 'where'] = [parentKey, '>=', value];
             } else if (key === '$lt') {
-                condition[!!negated ? 'whereNot' : 'where'] = [parentKey, '<', value];
+                condition[negated ? 'whereNot' : 'where'] = [parentKey, '<', value];
             } else if (key === '$lte') {
-                condition[!!negated ? 'whereNot' : 'where'] = [parentKey, '<=', value];
+                condition[negated ? 'whereNot' : 'where'] = [parentKey, '<=', value];
             } else if (key === '$ne') {
                 condition = this.buildCondition(parentKey, value, true);
             } else {
@@ -76,11 +74,11 @@ knector.prototype.buildCondition = function (key, value, negated, parentKey) {
             }
         } else {
             if (_.isNull(value)) {
-                condition[!!negated ? 'whereNotNull' : 'whereNull'] = [key];
+                condition[negated ? 'whereNotNull' : 'whereNull'] = [key];
             } else if (_.isArray(value)) {
-                condition[!!negated ? 'whereNotIn' : 'whereIn'] = [key, value];
+                condition[negated ? 'whereNotIn' : 'whereIn'] = [key, value];
             } else if (!_.isPlainObject(value)) {
-                condition[!!negated ? 'whereNot' : 'where'] = [key, value];
+                condition[negated ? 'whereNot' : 'where'] = [key, value];
             } else {
                 condition = this.buildConditions(value, false, key);
             }
