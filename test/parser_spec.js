@@ -23,7 +23,7 @@ describe.skip('Parser', function () {
 
         it('can parse not equals', function () {
             gql.parse('count:-5').should.eql(
-                { count: { '$ne': 5 } }
+                { count: { $ne: 5 } }
             );
 
             gql.parse('tag:-getting-started').should.eql(

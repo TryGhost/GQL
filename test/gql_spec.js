@@ -192,12 +192,11 @@ describe('gql', function () {
         // -------------------------------------------------------------------------------------------------------------
 
         it('should support queries nested one level deep', function(){
-            var conditions = gql.findAll('posts').filter({
-                $and: [
+            var conditions = gql.findAll('posts').filter([
                     { $not: { created_at: [ '2016-03-01', '2016-03-02' ] } },
                     { created_at: { $lt: '2016-03-04' } }
                 ]
-            }).conditions;
+            ).conditions;
             console.log(JSON.stringify(conditions));
             _.isEqual(conditions, [
                 { whereNotIn: [ 'created_at', [ '2016-03-01', '2016-03-02' ] ] },
@@ -242,7 +241,7 @@ describe('gql', function () {
     // -----------------------------------------------------------------------------------------------------------------
 
     it('should support and queries', function(){
-        var conditions = gql.findAll('posts').filter( { $and: [ { name: 'sample' }, { featured: false } ] }).conditions;
+        var conditions = gql.findAll('posts').filter( [ { name: 'sample' }, { featured: false } ] ).conditions;
         console.log(JSON.stringify(conditions));
         _.isEqual(conditions, [{ where: [ 'name', 'sample' ] }, { where: [ 'featured', false ]}]).should.equal(true);
     });

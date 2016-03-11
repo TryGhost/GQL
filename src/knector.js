@@ -36,9 +36,6 @@ knector.prototype.buildConditions = function(filter, negated, parentKey) {
                     } else {
                         throw new Error('$or conditions only accept arrays as a value');
                     }
-                } else if('$and' === key) {
-                    conditions.push( self.buildConditions(value) );
-                    //conditions.push({ and: self.buildConditions(value) });
                 } else if('$not' === key) {
                     conditions.push(self.buildConditions(value, true, parentKey));
                 } else {

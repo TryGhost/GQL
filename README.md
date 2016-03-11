@@ -37,7 +37,7 @@ when executed against the `posts` collection
 would be converted to the following filter object:
 
 ```
-{ published_at: { '$gt': '2016-03-04' } }
+{ published_at: { $gt: '2016-03-04' } }
 ```
 
 And via Knex, would be further converted to the following SQL:
@@ -53,7 +53,7 @@ GQL | filter | SQL
 `+` | &lt;implied&gt; | AND
 `,` | `$or` | OR
 `-` | `$not` | NOT
-`<attribute>` | `<attribute> : { '$ne': null }` | NOT NULL
+`<attribute>` | `<attribute> : { $ne: null }` | NOT NULL
 `<attribute>:` | `<attribute> : null` | NULL
 
 By default, filter expressions are ANDs. So there is no filter element to
@@ -71,7 +71,7 @@ when executed against the `posts` collection
 is converted to the following filter:
 
 ```
-{ '$or': [ { image: null }, { image: { '$ne': null } } ] }
+{ $or: [ { image: null }, { image: { $ne: null } } ] }
 ```
 
 This GQL expression: `-published_at:>2016-01-01`
@@ -79,7 +79,7 @@ when executed against the `posts` collection
 is converted to the following filter:
 
 ```
-{ '$not': { published_at: { '$gt': '2016-01-01' } }}
+{ $not: { published_at: { $gt: '2016-01-01' } }}
 ```
 
 ### Operator precedence
@@ -90,17 +90,17 @@ is converted to the following filter:
 
 ```
 {
-    '$or': [
+    $or: [
         {
             published_at: [
-                { '$gte': '2015-01-01' },
-                { '$lt':  '2015-04-01' }            
+                { $gte: '2015-01-01' },
+                { $lt:  '2015-04-01' }            
             ]
         },
         {
             published_at: [
-                { '$gte': '2015-01-01' },
-                { '$lt':  '2015-04-01' }            
+                { $gte: '2015-01-01' },
+                { $lt:  '2015-04-01' }            
             ]
         }
     ]
@@ -186,15 +186,15 @@ is converted to the following JSON object:
 ```
 {
     filter: {
-        image: { '$ne': null },
+        image: { $ne: null },
         posts: {
             published_at: {
-                '$lt': '2016-01-01',
-                '$gte': '2015-01-01'
+                $lt: '2016-01-01',
+                $gte: '2015-01-01'
             }
         }
     },
-    having: { 'posts.$count': { '$gt': 1 } }
+    having: { 'posts.$count': { $gt: 1 } }
 }
 ```
 
@@ -227,7 +227,7 @@ returns this object
 {
     filter: {
         'featured': 1,
-        'tags.$count': { '$gt': 10 }
+        'tags.$count': { $gt: 10 }
     }
 }
 */
