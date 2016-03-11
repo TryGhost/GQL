@@ -1,1 +1,1 @@
-module.exports = require('./lib/gql');
+module.exports = require('./src/gql');

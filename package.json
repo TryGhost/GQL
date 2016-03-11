@@ -15,15 +15,18 @@
   "keywords": [
     "ghost",
     "api",
-    "query"
+    "query",
+    "sql",
+    "search"
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/laran/Ghost-GQL.git"
+    "url": "git://github.com/laran/GQL.git"
   },
   "license": "MIT",
   "dependencies": {
-    "lodash": "3.10.1"
+    "lodash": "3.10.1",
+    "knex": "0.8.6"
   },
   "devDependencies": {
     "chai": "^3.5.0",
@@ -33,7 +36,6 @@
     "jison": "0.4.16",
     "jscs": "2.8.0",
     "jshint": "2.8.0",
-    "knex": "0.8.6",
     "mocha": "2.2.5",
     "npm-release": "1.0.0",
     "should": "7.0.1",
