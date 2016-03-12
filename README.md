@@ -290,7 +290,7 @@ var posts = gql.findAll('posts')
 ## Syntax
 
 The original spec for GQL can be found in [Ghost Issue #5604](https://github.com/TryGhost/Ghost/issues/5604).
-I have changed the syntax to some degree to make it more concise, a bit
+I have changed the syntax to some degree to make it more concise,
 more flexible, to provide more consistent support for aggregate queries,
 to more simply clearly null/not-null queries from true/false boolean 
 queries, and to better handle negation.
