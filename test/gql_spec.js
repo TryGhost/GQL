@@ -197,7 +197,7 @@ describe('gql', function () {
         // nested queries --
         // -------------------------------------------------------------------------------------------------------------
 
-        it('should support queries nested one level deep', function () {
+        it('should support $and queries nested one level deep', function () {
             var conditions = gql.findAll('posts').filter([
                     {$not: {created_at: ['2016-03-01', '2016-03-02']}},
                     {created_at: {$lt: '2016-03-04'}}
@@ -210,14 +210,12 @@ describe('gql', function () {
             ]).should.equal(true);
         });
 
-        it('should support queries nested one level deep', function () {
+        it('should support $or queries nested one level deep', function () {
             var conditions = gql.findAll('posts').filter({
                 $or: [
                     [{created_at: {$lt: '2016-03-04'}},
                         {$not: {created_at: ['2016-03-01', '2016-03-02']}}],
-                    {
-                        featured: false
-                    }
+                    {featured: false}
                 ]
             }).conditions;
             // console.log(JSON.stringify(conditions));
