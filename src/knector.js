@@ -43,10 +43,6 @@ buildLogicalDollarCondition = function (self, conditions, key, value, negated, p
 knector.prototype.buildConditions = function (filter, negated, parentKey) {
     var self = this, conditions = [];
     _.forIn(filter, function (value, key) {
-        if (!key) {
-            return;
-        }
-
         if (key.charAt(0) === '$') {
             buildLogicalDollarCondition(self, conditions, key, value, negated, parentKey);
         } else if (-1 !== key.indexOf('.$')) {
