@@ -19,17 +19,27 @@ orAnalogues = {
 };
 
 applyCondition = function (statement, condition, useOr) {
-    // There should be only one attribute in the condition
-    // Using forIn is a concise way to iterate over the object.
-    _.forIn(condition, function (value, key) {
-        if (key === 'or') {
-            _.forEach(value, function (clause) {
-                applyCondition(statement, clause, true);
-            });
-        } else {
-            statement.collection = statement.collection[!!useOr ? orAnalogues[key] : key].apply(statement.collection, value);
-        }
-    });
+    if(_.isArray(condition)) { // it's a clause/group.
+        statement.collection = statement.collection[useOr ? 'orWhere' : 'where'].apply(statement.collection, [function (){
+            return function() {
+                _.each(condition, function(_condition){
+                    // FIXME This needs to get properly wired into what's referred to as a 'Grouped chain' here
+                    // FIXME http://knexjs.org/#Builder-where
+                    applyCondition(statement, _condition);
+                });
+            };
+        }()]);
+    } else {
+        // There should be only one attribute in the condition
+        // Using forIn is a concise way to iterate over the object.
+        _.forIn(condition, function (value, key) {
+            if (key === 'or') { // flip the and to an or
+                applyCondition(statement, value, true);
+            } else {
+                statement.collection = statement.collection[useOr ? orAnalogues[key] : key].apply(statement.collection, value);
+            }
+        });
+    }
 };
 
 applyConditions = function (statement) {

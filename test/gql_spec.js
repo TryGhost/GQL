@@ -211,14 +211,16 @@ describe('gql', function () {
         });
 
         it('should support $or queries nested one level deep', function () {
-            var conditions = gql.findAll('posts').filter({
+            var conditions, filter;
+            filter = gql.findAll('posts').filter({
                 $or: [
                     [{created_at: {$lt: '2016-03-04'}},
                         {$not: {created_at: ['2016-03-01', '2016-03-02']}}],
                     {featured: false}
                 ]
-            }).conditions;
-            // console.log(JSON.stringify(conditions));
+            });
+            conditions = filter.conditions;
+            console.log(JSON.stringify(conditions));
             _.isEqual(conditions, {
                 or: [
                     [
@@ -234,6 +236,10 @@ describe('gql', function () {
                     {where: ['featured', false]}
                 ]
             }).should.equal(true);
+
+            var sql = filter.fetch().toSQL();
+            console.log(sql);
+            sql.should.equal('');
         });
     });
 
