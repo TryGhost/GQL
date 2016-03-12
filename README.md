@@ -18,7 +18,7 @@ when executed against the `users` collection
 would be converted to the following filter object:
 
 ```
-{ name: 'John' }
+{name: 'John'}
 ```
 
 And via Knex, would be further converted to the following SQL:
@@ -29,18 +29,19 @@ And via Knex, would be further converted to the following SQL:
 
 string | filter | meaning
 ------ | ------ | -------
-`>` | `$gt` | greater than
-`>=` | `$gte` | greater than or equal to
-`<` | `$lt` | less than
-`<=` | `$lte` | less than or equal to
-`-` | `$ne` | not equal to
+`:` | `$eq` | equals
+`!` | `$ne` | does not equal
+`>` | `$gt` | is greater than
+`>=` | `$gte` | is greater than or equal to
+`<` | `$lt` | is less than
+`<=` | `$lte` | is less than or equal to
 
-This GQL expression: `published_at:>2016-03-04`
+This GQL expression: `published_at>2016-03-04`
 when executed against the `posts` collection
 would be converted to the following filter object:
 
 ```
-{ published_at: { $gt: '2016-03-04' } }
+{published_at: {$gt: '2016-03-04'}}
 ```
 
 And via Knex, would be further converted to the following SQL:
@@ -74,20 +75,20 @@ when executed against the `posts` collection
 is converted to the following filter:
 
 ```
-{ $or: [ { image: null }, { image: { $ne: null } } ] }
+{$or: [{image: null}, {image: {$ne: null}}]}
 ```
 
-This GQL expression: `-published_at:>2016-01-01`
+This GQL expression: `-published_at>2016-01-01`
 when executed against the `posts` collection
 is converted to the following filter:
 
 ```
-{ $not: { published_at: { $gt: '2016-01-01' } }}
+{$not: {published_at: {$gt: '2016-01-01'}}}
 ```
 
 ### Operator precedence
 
-This GQL expression: `(published_at:>=2015-01-01+published_at:<2015-04-01),(published_at:>=2015-07-01+published_at:<2015-10-01)`
+This GQL expression: `(published_at>=2015-01-01+published_at<2015-04-01),(published_at>=2015-07-01+published_at<2015-10-01)`
 when executed against the `posts` collection
 is converted to the following filter:
 
@@ -96,14 +97,14 @@ is converted to the following filter:
     $or: [
         {
             published_at: [
-                { $gte: '2015-01-01' },
-                { $lt:  '2015-04-01' }            
+                {$gte: '2015-01-01'},
+                {$lt:  '2015-04-01'}            
             ]
         },
         {
             published_at: [
-                { $gte: '2015-01-01' },
-                { $lt:  '2015-04-01' }            
+                {$gte: '2015-01-01'},
+                {$lt:  '2015-04-01'}            
             ]
         }
     ]
@@ -132,7 +133,7 @@ when executed against the `tags` collection
 is converted to the following filter object:
 
 ```
-{ posts: { name: 'Hello World!' } }
+{posts: {name: 'Hello World!'}}
 ```
 
 ### Matching Across Relations with aliases
@@ -152,7 +153,7 @@ when executed against the `posts` collection
 is converted to the following filter object:
 
 ```
-{ tags: 'food' }
+{tags: 'food'}
 ```
 
 This query would join posts to tags through posts_tags where tags.slug is 'food'.
@@ -165,7 +166,7 @@ when executed against the `posts` collection
 is converted to the following filter object:
 
 ```
-{ tags: { slug: 'food' } }
+{tags: {slug: 'food'}}
 ```
 
 ## Advanced
@@ -176,20 +177,27 @@ The syntax for [aggregate functions](https://en.wikipedia.org/wiki/Aggregate_fun
 is slightly different than basic matching. And aggregate queries are modeled
 slightly differently than basic matches.
 
+string | meaning
+------ | -------
+`<relation>.<column>.$count` | counts distinct results based on distinct values of &lt;column&gt;
+`<relation>.<column>.$sum` | calculates the sum of &lt;column&gt; values
+`<relation>.<column>.$max` | calculates the max value of &lt;column&gt;
+`<relation>.<column>.$min` | calculates the min value of &lt;column&gt;
+
 The basic matching portions that are covered above are referred to as the `filter`.
 
 You'll see the filter in this example. The structure of the filter is exactly the
 same as for basic matching. We just add to it the "having" element to encapsulate
 the aggregate.
 
-This GQL expression: `image+posts.$count:>1+posts.published_at:<2016-01-01+posts.published_at:>=2015-01-01`
+This GQL expression: `image+posts.id.$count>1+posts.published_at<2016-01-01+posts.published_at>=2015-01-01`
 when executed against the `users` collection
 is converted to the following JSON object:
 
 ```
 {
     filter: {
-        image: { $ne: null },
+        image: {$ne: null},
         posts: {
             published_at: {
                 $lt: '2016-01-01',
@@ -197,7 +205,7 @@ is converted to the following JSON object:
             }
         }
     },
-    having: { 'posts.$count': { $gt: 1 } }
+    having: {'posts.id.$count': {$gt: 1}}
 }
 ```
 
@@ -223,46 +231,39 @@ In plain English this means "all users that have an image AND who published at l
 
 Parse GQL into filters:
 ```
-var filters = gql.parse('featured:true+tags.$count:>10');
+var filters = gql.parse('featured:true+tags.id.$count:>10');
 
-/*
-returns this object
-{
-    filter: {
-        'featured': 1,
-        'tags.$count': { $gt: 10 }
-    }
-}
-*/
+// returns this object
+// {filter: {featured: 1, 'tags.id.$count': {$gt: 10}}}
 ```
 
 Notice that `featured:true` is not the same as `featured`. `featured:true` becomes `WHERE featured = 1` while `featured` becomes `WHERE featured NOT NULL`. `featured` is a boolean field in this example and we want to check that it's set to true. So we use `featured:true`.
 
 Query through GQL directly:
 ```
-var filters = gql.parse('featured:true+tags.$count:>10');
+var filters = gql.parse('featured:true+tags.id.$count>10');
 var results = gql.findAll('posts').filter(filters).fetch();
 
 // This can also be done in the following way:
-var results = gql.findAll('posts').filter('featured:true+tags.$count:>10').fetch();
+var results = gql.findAll('posts').filter('featured:true+tags.id.$count>10').fetch();
 ```
 
 Query through bookshelf model:
 ```
-var filters = gql.parse('featured:true+tags.$count:>10');
+var filters = gql.parse('featured:true+tags.id.$count>10');
 var results = Post.filter(filters).fetch(); // Post is the bookshelf model
 
 // which is equivalent to this
-var results = Post.filter('featured:true+tags.$count:>10').fetch();
+var results = Post.filter('featured:true+tags.id.$count>10').fetch();
 ```
 
 To get the raw query for the connected datasource:
 ```
-var filters = gql.parse('featured:true+tags.$count:>10');
+var filters = gql.parse('featured:true+tags.id.$count>10');
 var sql = Post.filter(filters).toQuery(); // Post is the bookshelf model
 
 // which is equivalent to this
-var results = Post.filter('featured:true+tags.$count:>10').toQuery();
+var results = Post.filter('featured:true+tags.id.$count:>10').toQuery();
 ```
 
 ## Syntax
