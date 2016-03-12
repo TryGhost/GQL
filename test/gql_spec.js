@@ -210,8 +210,8 @@ describe('gql', function () {
             ]).should.equal(true);
         });
 
-        it('should support $or queries nested one level deep', function () {
-            var conditions, filter;
+        it('should be able to execute queries containing groups of clauses', function () {
+            var conditions, filter, sql;
             filter = gql.findAll('posts').filter({
                 $or: [
                     [{created_at: {$lt: '2016-03-04'}},
@@ -220,7 +220,7 @@ describe('gql', function () {
                 ]
             });
             conditions = filter.conditions;
-            console.log(JSON.stringify(conditions));
+            // console.log(JSON.stringify(conditions));
             _.isEqual(conditions, {
                 or: [
                     [
@@ -237,7 +237,7 @@ describe('gql', function () {
                 ]
             }).should.equal(true);
 
-            var sql = filter.fetch().toSQL();
+            sql = filter.fetch().toSQL();
             console.log(sql);
             sql.should.equal('');
         });
@@ -270,7 +270,7 @@ describe('gql', function () {
             .then(function (result) {
                 result.length.should.equal(4);
                 Object.keys(result[0]).length.should.equal(6);
-                console.log(JSON.stringify(result));
+                // console.log(JSON.stringify(result));
                 done();
             });
     });
@@ -282,7 +282,7 @@ describe('gql', function () {
             .then(function (result) {
                 result.length.should.equal(4);
                 Object.keys(result[0]).length.should.equal(6);
-                console.log(JSON.stringify(result));
+                // console.log(JSON.stringify(result));
                 done();
             });
     });
@@ -294,7 +294,7 @@ describe('gql', function () {
             .then(function (result) {
                 result.length.should.equal(4);
                 Object.keys(result[0]).length.should.equal(1);
-                console.log(JSON.stringify(result));
+                // console.log(JSON.stringify(result));
                 done();
             });
     });
@@ -306,7 +306,7 @@ describe('gql', function () {
             .then(function (result) {
                 result.length.should.equal(4);
                 Object.keys(result[0]).length.should.equal(1);
-                console.log(JSON.stringify(result));
+                // console.log(JSON.stringify(result));
                 done();
             });
     });
@@ -319,7 +319,7 @@ describe('gql', function () {
             .then(function (result) {
                 result.length.should.equal(1);
                 Object.keys(result[0]).length.should.equal(1);
-                console.log(JSON.stringify(result));
+                // console.log(JSON.stringify(result));
                 done();
             });
     });
