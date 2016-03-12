@@ -31,6 +31,7 @@ string | filter | meaning
 ------ | ------ | -------
 `:` | `$eq` | equals
 `!` | `$ne` | does not equal
+`~` | `$like` | like 
 `>` | `$gt` | is greater than
 `>=` | `$gte` | is greater than or equal to
 `<` | `$lt` | is less than
