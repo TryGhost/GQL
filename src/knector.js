@@ -70,6 +70,8 @@ buildDollarComparisonCondition = function (self, condition, key, value, negated,
         condition[negated ? 'whereNot' : 'where'] = [parentKey, '<', value];
     } else if (key === '$lte') {
         condition[negated ? 'whereNot' : 'where'] = [parentKey, '<=', value];
+    } else if (key === '$like') {
+        condition[negated ? 'whereNot' : 'where'] = [parentKey, 'like', value];
     } else if (key === '$ne') {
         condition = self.buildCondition(parentKey, value, true);
     } else {
