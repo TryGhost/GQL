@@ -79,7 +79,13 @@ statement.prototype.offset = function (offset) {
 };
 
 statement.prototype.join = function (farTable, nearColumn, farColumn) {
-    this.collection.innerJoin(farTable, this.collectionName+'.'+nearColumn, farTable+'.'+farColumn);
+    this.collection.innerJoin(farTable, this.collectionName + '.' + nearColumn, farTable + '.' + farColumn);
+    return this;
+};
+
+statement.prototype.joinThrough = function (nearColumn, middleTable, middleColumnJoinedWithNearColumn, middleColumnJoinedWithFarColumn, farTable, farColumn) {
+    this.collection.innerJoin(middleTable, this.collectionName + '.' + nearColumn, middleTable + '.' + middleColumnJoinedWithNearColumn);
+    this.collection.innerJoin(farTable, middleTable + '.' + middleColumnJoinedWithFarColumn, farTable + '.' + farColumn);
     return this;
 };
 
