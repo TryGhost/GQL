@@ -232,7 +232,7 @@ In plain English this means "all users that have an image AND who published at l
 
 Parse GQL into filters:
 ```
-var filters = gql.parse('featured:true+tags.id.$count:>10');
+var filters = gql.parse('featured:true+tags.id.$count>10');
 
 // returns this object
 // {filter: {featured: 1, 'tags.id.$count': {$gt: 10}}}
@@ -264,7 +264,7 @@ var filters = gql.parse('featured:true+tags.id.$count>10');
 var sql = Post.filter(filters).toQuery(); // Post is the bookshelf model
 
 // which is equivalent to this
-var results = Post.filter('featured:true+tags.id.$count:>10').toQuery();
+var results = Post.filter('featured:true+tags.id.$count>10').toQuery();
 ```
 
 ## Syntax
