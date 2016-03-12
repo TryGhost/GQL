@@ -1,7 +1,8 @@
 var _, statement, orAnalogues, applyCondition, applyConditions;
 _ = require('lodash');
 
-statement = function (collection, conditions) {
+statement = function (collectionName, collection, conditions) {
+    this.collectionName = collectionName;
     this.collection = collection;
     this.conditions = conditions;
 };
@@ -74,6 +75,11 @@ statement.prototype.limit = function (limit) {
 
 statement.prototype.offset = function (offset) {
     this.collection.offset(offset);
+    return this;
+};
+
+statement.prototype.join = function (farTable, nearColumn, farColumn) {
+    this.collection.innerJoin(farTable, this.collectionName+'.'+nearColumn, farTable+'.'+farColumn);
     return this;
 };
 

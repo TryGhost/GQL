@@ -15,7 +15,7 @@ knector.prototype.filter = function (filters) {
         filters = parser.parse(filters);
     }
 
-    return new Statement(this.collection, this.buildConditions(filters));
+    return new Statement(this.collectionName, this.collection, this.buildConditions(filters));
 };
 
 buildLogicalDollarCondition = function (self, conditions, key, value, negated, parentKey) {

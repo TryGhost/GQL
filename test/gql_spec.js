@@ -183,7 +183,7 @@ describe('gql', function () {
 
         it('should throw an error for an aggregate query', function () {
             (function () {
-                gql.findAll('posts').filter({'posts.$count': {$gt: 0}});
+                gql.findAll('posts').filter({'posts.id.$count': {$gt: 0}});
             }).should.throw();
         });
 
