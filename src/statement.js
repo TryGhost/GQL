@@ -45,16 +45,30 @@ applyConditions = function (statement) {
     }
 };
 
-statement.prototype.fetch = function (showSql) {
+statement.prototype.fetch = function (fields) {
     applyConditions(this);
-    if (showSql) {
-        console.log(this.collection.toString());
-    }
-    return this.collection.select();
+
+    var _fields = fields ? _.isString(fields) ? [fields] : fields : ['*'];
+    return this.collection.select.apply(this.collection, _fields);
 };
 
-statement.prototype.toSQL = function () {
-    return applyConditions(this) && this.collection.toString();
+statement.prototype.orderBy = function (attribute, direction) {
+    this.collection.orderBy(attribute, direction);
+    return this;
+};
+
+statement.prototype.limit = function (limit) {
+    this.collection.limit(limit);
+    return this;
+};
+
+statement.prototype.offset = function (offset) {
+    this.collection.offset(offset);
+    return this;
+};
+
+statement.prototype.toSQL = function (fields) {
+    return this.fetch(fields).toString();
 };
 
 module.exports = statement;
