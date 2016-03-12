@@ -6,7 +6,8 @@ _ = require('lodash');
 parser = require('./parser');
 Statement = require('./statement');
 
-knector = function (collection) {
+knector = function (name, collection) {
+    this.collectionName = name; // will be used for aggregates and joins
     this.collection = collection;
 };
 knector.prototype.filter = function (filters) {
