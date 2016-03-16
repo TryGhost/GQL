@@ -14,43 +14,107 @@
      throw new Error(lines.join("\n"));
  };
 
+ unescape = function (value) {
+    var re = new RegExp('\\\\([\'"])', 'g');
+    return value.replace(re, '$1');
+ };
+
+ isArray = function(o) {
+    return Array.isArray(o);
+ };
+
+ andMerge = function(a, b) {
+    var c;
+    if(isArray(a)) {
+        a.push(b);
+        c = a;
+    } else {
+        if(a.hasOwnProperty(Object.keys(b)[0])) {
+            c = [];
+            c.push(a);
+            c.push(b);
+        } else {
+            var k = Object.keys(b)[0];
+            a[k]=b[k];
+            c = a;
+        }
+    }
+    return c;
+ }
+
+ orMerge = function(a, b) {
+    var c;
+
+    if(a.hasOwnProperty('$or')) {
+      a.$or.push(b);
+    } else {
+      c = {$or:[b]}
+    }
+    return c;
+ }
+
+ setNot = function(a, b) {
+    console.log('--');
+    console.dir(a);
+    console.dir(b);
+    console.log('--');
+    a.$not[Object.keys(a.$not)[0]]=b;
+    return a;
+ }
+
+ setProp = function(p) {
+    var o = {}, v = null;
+
+    if(p.match(/:$/)) {
+      p = p.replace(/:$/, '');
+    } else {
+      v = {$ne: null};
+    }
+    o[p] = v;
+    return o;
+ }
+
 %}
 
 %% /* language grammar */
 
 expressions
-    : expression { return {statements: $1}; }
+    : expression { return $1; }
     ;
 
 expression
     : andCondition { $$ = $1; }
-    | expression OR andCondition { $$ = $1; $3[0].func = 'or'; $1.push($3[0]); }
+    | expression OR andCondition { $$ = orMerge($1, $3); }
     ;
 
 andCondition
-    : filterExpr { $$ = [$1] }
-    | andCondition AND filterExpr { $$ = $1; $3.func = 'and'; $1.push($3); }
+    : filterExpr { $$ = $1 }
+    | andCondition AND filterExpr { $$ = andMerge($1, $3); }
     ;
 
 filterExpr
-    : LPAREN expression RPAREN { $$ = { group: $2 }; }
-    | propExpr valueExpr { $2.prop = $1; $$ = $2; }
+    : LPAREN expression RPAREN { var _e = []; _e.push($2); $$ = _e; }
+    | notPropExpr valueExpr { $$ = setNot($1, $2); }
+    | propExpr valueExpr { $1[Object.keys($1)[0]] = $2; $$ = $1; }
+    ;
+
+notPropExpr
+    : NOTPROP { $1 = $1.replace(/^!/, '').replace(/:$/, ''); var _p = {}; _p[$1]=undefined; $$ = {'$not': _p}; }
     ;
 
 propExpr
-    : PROP { $1 = $1.replace(/:$/, ''); $$ = $1; }
+    : PROP { $$ = setProp($1); }
     ;
 
 valueExpr
-    : NOT LBRACKET inExpr RBRACKET { $$ = {op: 'NOT IN', value: $3}; }
-    | LBRACKET inExpr RBRACKET { $$ = {op: 'IN', value: $2}; }
-    | OP VALUE { $$ = {op: yy.resolveOp($1, $2), value: $2}; }
-    | VALUE { $$ = {op: yy.resolveOp('=', $1), value: $1}; }
+    : LBRACKET inExpr RBRACKET { $$=[]; $$.push($2); }
+    | OP VALUE { $$={}; $$[$1]= $2; }
+    | VALUE { $$ = $1; }
     ;
 
 inExpr
-    : inExpr OR VALUE { $$.push($3); }
-    | VALUE { $$ = [$1]; }
+    : inExpr OR VALUE { if(isArray($1)) { $1.push($3); } else { var a = []; a.push($1); a.push($3); $1 = a }; $$ = $1 ; }
+    | VALUE { $$ = $1; }
     ;
 
 VALUE
@@ -58,14 +122,14 @@ VALUE
     | TRUE { $$ = true }
     | FALSE { $$ = false }
     | NUMBER { $$ = parseInt(yytext); }
-    | LITERAL { $$ = yy.unescape($1); }
-    | STRING  { $1 = $1.replace(/^'|'$/g, ''); $$ = yy.unescape($1); }
+    | LITERAL { $$ = $1; }
     ;
 
 OP
-    : NOT { $$ = "!="; }
-    | GT { $$ = ">"; }
-    | LT { $$ = "<"; }
-    | GTE { $$ = ">="; }
-    | LTE { $$ = "<="; }
+    : NOT { $$ = "$ne"; }
+    | GT { $$ = "$gt"; }
+    | LT { $$ = "$lt"; }
+    | GTE { $$ = "$gte"; }
+    | LTE { $$ = "$lte"; }
+    | LIKE { $$ = "$like"; }
     ;

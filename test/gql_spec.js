@@ -77,7 +77,8 @@ describe('gql', function () {
     // -----------------------------------------------------------------------------------------------------------------
 
     it('should parse an empty string into an empty filter object', function () {
-        _.isEmpty(gql.parse('')).should.equal(true);
+        var p = gql.parse('');
+        _.isEmpty(p).should.equal([]);
     });
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -346,7 +347,6 @@ describe('gql', function () {
                 results.length.should.equal(4);
                 Object.keys(results[0]).length.should.equal(1);
                 // console.log(JSON.stringify(results));
-
                 var names = [];
                 _.each(results, function (result) {
                     names.push(result.name);
@@ -366,7 +366,6 @@ describe('gql', function () {
                 results.length.should.equal(4);
                 Object.keys(results[0]).length.should.equal(1);
                 // console.log(JSON.stringify(results));
-
                 var names = [];
                 _.each(results, function (result) {
                     names.push(result.name);

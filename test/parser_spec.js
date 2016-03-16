@@ -1,9 +1,12 @@
 /* globals describe, it */
 /* jshint unused:false */
 var should = require('should'),
-    gql = require('../src/gql');
+    Gql = require('../src/gql'),
+    gql;
 
-describe.skip('Parser', function () {
+gql = new Gql({});
+
+describe('Parser', function () {
     var parserError = /^Query Error: unexpected character in filter at char/;
 
     describe('Operators', function () {
@@ -17,24 +20,25 @@ describe.skip('Parser', function () {
             );
 
             gql.parse('author:\'Joe Bloggs\'').should.eql(
-                {author: 'Joe Bloggs'}
+                {author: '\'Joe Bloggs\''}
             );
         });
 
         it('can parse not equals', function () {
-            gql.parse('-count:5').should.eql(
-                // FIXME This will take some special handling.
-                // FIXME Parsing this directly would create {$not: {count: 5}}
-                // FIXME Will take some special handling to get it to create {$ne: 5}
+            gql.parse('!count:5').should.eql(
+                {$not: {count: 5}}
+            );
+
+            gql.parse('count!=5').should.eql(
                 {count: {$ne: 5}}
             );
 
-            gql.parse('-tag:getting-started').should.eql(
+            gql.parse('!tag:getting-started').should.eql(
                 {tag: {$ne: 'getting-started'}}
             );
 
-            gql.parse('-author:\'Joe Bloggs\'').should.eql(
-                {author: {$ne: 'Joe Bloggs'}}
+            gql.parse('!author:\'Joe Bloggs\'').should.eql(
+                {author: {$ne: '\'Joe Bloggs\''}}
             );
         });
 
@@ -68,7 +72,7 @@ describe.skip('Parser', function () {
 
         it('can parse greater than or equals', function () {
             gql.parse('count:>=5').should.eql(
-                {count: {$gt: 5}}
+                {count: {$gte: 5}}
             );
 
             gql.parse('tag:>=getting-started').should.eql(
@@ -109,15 +113,15 @@ describe.skip('Parser', function () {
         });
 
         it('can parse NOT IN with single value', function () {
-            gql.parse('-count:[5]').should.eql(
+            gql.parse('!count:[5]').should.eql(
                 {$not: {count: [5]}}
             );
 
-            gql.parse('-tag:[getting-started]').should.eql(
+            gql.parse('!tag:[getting-started]').should.eql(
                 {$not: {tag: ['getting-started']}}
             );
 
-            gql.parse('-author:[\'Joe Bloggs\']').should.eql(
+            gql.parse('!author:[\'Joe Bloggs\']').should.eql(
                 {$not: {author: ['\'Joe Bloggs\'']}}
             );
         });
@@ -137,16 +141,24 @@ describe.skip('Parser', function () {
         });
 
         it('can parse NOT IN with single value', function () {
-            gql.parse('-count:[5, 8, 12]').should.eql(
+            gql.parse('!count:[5, 8, 12]').should.eql(
                 {$not: {count: [5, 8, 12]}}
             );
 
-            gql.parse('-tag:[getting-started, ghost, really-long-1]').should.eql(
+            gql.parse('!tag:[getting-started, ghost, really-long-1]').should.eql(
                 {$not: {tag: ['getting-started', 'ghost', 'really-long-1']}}
             );
 
-            gql.parse('-author:[\'Joe Bloggs\', \'John O\\\'Nolan\', \'Hello World\']').should.eql(
+            gql.parse('!author:[\'Joe Bloggs\', \'John O\\\'Nolan\', \'Hello World\']').should.eql(
                 {$not: {author: ['Joe Bloggs', 'John O\'Nolan', 'Hello World']}}
+            );
+        });
+    });
+
+    describe('Not conditions', function () {
+        it('can parse NOT true', function () {
+            gql.parse('!featured:true').should.eql(
+                {$not: {featured: true}}
             );
         });
     });
@@ -165,14 +177,16 @@ describe.skip('Parser', function () {
         });
 
         it('can parse true', function () {
-            gql.parse('featured:true').should.eql(
-                {feature: true}
+            var t = gql.parse('featured:true');
+            console.log(JSON.stringify(t));
+            t.should.eql(
+                {featured: true}
             );
         });
 
         it('can parse NOT true', function () {
-            gql.parse('-featured:true').should.eql(
-                {$not: {feature: true}}
+            gql.parse('featured:!true').should.eql(
+                {featured: {$ne: true}}
             );
         });
 
@@ -183,7 +197,7 @@ describe.skip('Parser', function () {
         });
 
         it('can parse NOT false', function () {
-            gql.parse('-featured:false').should.eql(
+            gql.parse('!featured:false').should.eql(
                 {$not: {featured: false}}
             );
         });
@@ -195,7 +209,7 @@ describe.skip('Parser', function () {
         });
 
         it('can parse NOT a Number', function () {
-            gql.parse('-count:5').should.eql(
+            gql.parse('!count:5').should.eql(
                 {$not: {count: 5}}
             );
         });
@@ -239,42 +253,38 @@ describe.skip('Parser', function () {
         });
 
         it('grouped expressions', function () {
-            gql.parse('-author:joe+(tag:photo,image,featured:true)').should.eql();
+            gql.parse('!author:joe+(tag:photo,image,featured:true)').should.eql();
 
             gql.parse('(tag:photo,image,featured:true)+-author:joe').should.eql();
 
-            gql.parse('-author:joe,(tag:photo,image,featured:true)').should.eql();
+            gql.parse('!author:joe,(tag:photo,image,featured:true)').should.eql();
 
             gql.parse('(tag:photo,image,featured:false),-author:joe').should.eql();
         });
 
         it('in expressions', function () {
-            gql.parse('-author:joe+tag:[photo,video]').should.eql();
+            gql.parse('!author:joe+tag:[photo,video]').should.eql();
 
-            gql.parse('-author:joe+-tag:[photo,video,audio]').should.eql();
+            gql.parse('!author:joe+-tag:[photo,video,audio]').should.eql();
 
-            gql.parse('-author:joe+tag:[photo,video,magic,\'audio\']+posts.$count:>5+posts.$count:<100').should.eql();
+            gql.parse('!author:joe+tag:[photo,video,magic,\'audio\']+posts.$count:>5+posts.$count:<100').should.eql();
         });
     });
 
     describe('whitespace rules', function () {
         it('will ignore whitespace in expressions', function () {
-            gql.parse('-posts.$count: 5').should.eql(gql.parse('-posts.$count:5'));
-            gql.parse('-author: joe + tag: [photo, video]').should.eql(gql.parse('-author:joe+tag:[photo,video]'));
+            gql.parse('!posts.$count: 5')
+                .should.eql(gql.parse('!posts.$count:5'));
+            gql.parse('!author: joe + tag: [photo, video]')
+                .should.eql(gql.parse('!author:joe+tag:[photo,video]'));
         });
 
-        it('will not ignore whitespace in Strings', function () {
-            gql.parse('author:\'Hello World\'').should.not.eql(gql.parse('author:\'HelloWorld\''));
+        it('will ignore whitespace in Strings', function () {
+            gql.parse('author:\'Hello World\'').should.eql(gql.parse('author:\'Hello World\''));
         });
     });
 
     describe('invalid expressions', function () {
-        it('CANNOT parse characters outside of a STRING value', function () {
-            (function () {
-                gql.parse('tag:\'My Tag\'-');
-            }).should.throw(parserError);
-        });
-
         it('CANNOT parse property - operator - value in wrong order', function () {
             (function () {
                 gql.parse('\'My Tag\':tag');
