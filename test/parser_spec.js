@@ -165,14 +165,14 @@ describe('Parser', function () {
 
     describe('Values', function () {
         it('can parse null', function () {
-            gql.parse('image:').should.eql(
+            gql.parse('image:null').should.eql(
                 {image: null}
             );
         });
 
         it('can parse NOT null', function () {
-            gql.parse('image').should.eql(
-                {image: {$ne: null}}
+            gql.parse('!image:null').should.eql(
+                {$not: {image: null}}
             );
         });
 
