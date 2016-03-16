@@ -342,12 +342,14 @@ parse: function parse(input) {
  }
 
  orMerge = function(a, b) {
-    var c;
+    var c, d;
 
-    if(a.hasOwnProperty('$or')) {
-      a.$or.push(b);
+    if(isArray(a)) {
+      a.push({$or: b});
+      c = a;
     } else {
-      c = {$or:[b]}
+      c = {};
+      c['$or'] = b;
     }
     return c;
  }

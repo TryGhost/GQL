@@ -227,65 +227,82 @@ describe('Parser', function () {
 
     describe('complex examples', function () {
         it('many expressions', function () {
-            gql.parse('tag:photo+featured:true,tag.id.$count:>5').should.eql(
-                [
-                    {tag: 'photo'},
-                    {featured: true},
-                    {$or: {'tag.id.$count': {$gt: 5}}}
-                ]
-            );
+            var one, oneTest, two, twoTest;
+            one = gql.parse('tag:photo+featured:true,tag.id.$count:>5');
+            oneTest = [
+                {tag: 'photo'},
+                {featured: true},
+                {$or: {'tag.id.$count': {$gt: 5}}}
+            ];
 
-            gql.parse('tag:photo+!image:null,tags.count:>5').should.eql(
-                [
-                    {tag: 'photo'},
-                    {$not: {image: null}},
-                    {$or: {'tags.$count': {$gt: 5}}}
-                ]
-            );
+            // console.log(JSON.stringify(one));
+            // console.log(JSON.stringify(oneTest));
+            one.should.eql(oneTest);
+
+            two = gql.parse('tag:photo+!image:null,tags.id.$count:>5');
+            twoTest = [
+                {tag: 'photo'},
+                {$not: {image: null}},
+                {$or: {'tags.id.$count': {$gt: 5}}}
+            ];
+
+            // console.log(JSON.stringify(two));
+            // console.log(JSON.stringify(twoTest));
+            two.should.eql(twoTest);
         });
 
         it('grouped expressions', function () {
-            gql.parse('!author:joe+(tag:photo,!image:null,featured:true)').should.eql(
-                [
-                    {$not: {author: 'joe'}},
-                    [
-                        {tag: 'photo'},
-                        {$not: {image: null}},
-                        {featured: true}
-                    ]
-                ]
-            );
-
-            gql.parse('(tag:photo,!image:null,featured:true)+!author:joe').should.eql(
+            var one, oneTest, two, twoTest, three, threeTest, four, fourTest;
+            one = gql.parse('!author:joe+(tag:photo,!image:null,featured:true)');
+            oneTest = [
+                {$not: {author: 'joe'}},
                 [
                     {tag: 'photo'},
                     {$not: {image: null}},
-                    {featured: true},
-                    {$not: {author: 'joe'}}
+                    {featured: true}
                 ]
-            );
+            ];
 
-            gql.parse('!author:joe,(tag:photo,!image:null,featured:true)').should.eql(
+            console.log(JSON.stringify(one));
+            console.log(JSON.stringify(oneTest));
+            one.should.eql(oneTest);
+
+            two = gql.parse('(tag:photo,!image:null,featured:true)+!author:joe');
+            twoTest = [
+                {tag: 'photo'},
+                {$not: {image: null}},
+                {featured: true},
+                {$not: {author: 'joe'}}
+            ];
+            console.log(JSON.stringify(two));
+            console.log(JSON.stringify(twoTest));
+            two.should.eql(twoTest);
+
+            three = gql.parse('!author:joe,(tag:photo,!image:null,featured:true)');
+            threeTest = [
+                {$not: {author: 'joe'}},
                 [
-                    {$not: {author: 'joe'}},
-                    [
-                        {tag: 'photo'},
-                        {$not: {image: null}},
-                        {featured: true}
-                    ]
+                    {tag: 'photo'},
+                    {$not: {image: null}},
+                    {featured: true}
                 ]
-            );
+            ];
+            console.log(JSON.stringify(three));
+            console.log(JSON.stringify(threeTest));
+            three.should.eql(threeTest);
 
-            gql.parse('(tag:photo,!image:null,featured:false),!author:joe').should.eql(
-                [
+            four = gql.parse('(tag:photo,!image:null,featured:false),!author:joe');
+            fourTest = [
                     [
                         {tag: 'photo'},
                         {$not: {image: null}},
                         {featured: false}
                     ],
                     {$not: {author: 'joe'}}
-                ]
-            );
+                ];
+            console.log(JSON.stringify(four));
+            console.log(JSON.stringify(fourTest));
+            four.should.eql(fourTest);
         });
 
         it('in expressions', function () {
