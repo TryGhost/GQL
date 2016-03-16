@@ -4,9 +4,9 @@
 
 %options case-insensitive
 
-badcharsincnot               [^\+\,\(\)\>\<=\[\]!]
-badcharsnonot                [^\+\,\(\)\>\<=\[\]]
-escapable                    [\+\,\(\)\[\]]
+badcharsincnot               [^\s'"\+\,\(\)\>\<=\[\]!]
+badcharsnonot                [^\s'"\+\,\(\)\>\<=\[\]]
+escapable                    ['"\+\,\(\)\>\<=\[\]]
 
 %%
 
@@ -14,12 +14,13 @@ escapable                    [\+\,\(\)\[\]]
 'NULL'                                                      return 'NULL';
 'TRUE'                                                      return 'TRUE';
 'FALSE'                                                     return 'FALSE';
-[!][a-zA-Z_][a-zA-Z0-9_\.\$]*[:]                            return 'NOTPROP';
-[a-zA-Z_][a-zA-Z0-9_\.\$]*[:]                               return 'PROP';
+[!][a-zA-Z_][a-zA-Z0-9_\.\$\-]*[:]                          return 'NOTPROP';
+[a-zA-Z_][a-zA-Z0-9_\.\$\-]*[:]                             return 'PROP';
 [-]?[0-9]+("."[0-9]+)?\b                                    return 'NUMBER';
 '['                                                         return 'LBRACKET';
 ']'                                                         return 'RBRACKET';
 {badcharsincnot}(\\{escapable}|{badcharsnonot})+            return 'LITERAL';
+['](\\['"]|[^'"])+?[']                                      return 'STRING';
 '('                                                         return 'LPAREN';
 ')'                                                         return 'RPAREN';
 ','                                                         return 'OR';

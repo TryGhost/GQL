@@ -72,14 +72,14 @@
   }
 */
 var parser = (function(){
-var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,5],$V1=[1,8],$V2=[1,9],$V3=[1,10],$V4=[1,6,10],$V5=[1,11],$V6=[1,6,8,10],$V7=[1,14],$V8=[1,23],$V9=[1,24],$Va=[1,25],$Vb=[1,26],$Vc=[1,27],$Vd=[1,17],$Ve=[1,18],$Vf=[1,19],$Vg=[1,20],$Vh=[1,21],$Vi=[1,22],$Vj=[16,21,22,23,24,25,26,27,28,29,30,31],$Vk=[21,22,23,24,25],$Vl=[1,6,8,10,18],$Vm=[6,18];
+var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,5],$V1=[1,8],$V2=[1,9],$V3=[1,10],$V4=[1,6,10],$V5=[1,11],$V6=[1,6,8,10],$V7=[1,14],$V8=[1,23],$V9=[1,24],$Va=[1,25],$Vb=[1,26],$Vc=[1,27],$Vd=[1,28],$Ve=[1,17],$Vf=[1,18],$Vg=[1,19],$Vh=[1,20],$Vi=[1,21],$Vj=[1,22],$Vk=[16,21,22,23,24,25,26,27,28,29,30,31,32],$Vl=[21,22,23,24,25,26],$Vm=[1,6,8,10,18],$Vn=[6,18];
 var parser = {trace: function trace() {
         Jison.print.apply(null, arguments);
     },
 yy: {},
-symbols_: {"error":2,"expressions":3,"expression":4,"andCondition":5,"OR":6,"filterExpr":7,"AND":8,"LPAREN":9,"RPAREN":10,"notPropExpr":11,"valueExpr":12,"propExpr":13,"NOTPROP":14,"PROP":15,"LBRACKET":16,"inExpr":17,"RBRACKET":18,"OP":19,"VALUE":20,"NULL":21,"TRUE":22,"FALSE":23,"NUMBER":24,"LITERAL":25,"NOT":26,"GT":27,"LT":28,"GTE":29,"LTE":30,"LIKE":31,"$accept":0,"$end":1},
-terminals_: {2:"error",6:"OR",8:"AND",9:"LPAREN",10:"RPAREN",14:"NOTPROP",15:"PROP",16:"LBRACKET",18:"RBRACKET",21:"NULL",22:"TRUE",23:"FALSE",24:"NUMBER",25:"LITERAL",26:"NOT",27:"GT",28:"LT",29:"GTE",30:"LTE",31:"LIKE"},
-productions_: [0,[3,1],[4,1],[4,3],[5,1],[5,3],[7,3],[7,2],[7,2],[11,1],[13,1],[12,3],[12,2],[12,1],[17,3],[17,1],[20,1],[20,1],[20,1],[20,1],[20,1],[19,1],[19,1],[19,1],[19,1],[19,1],[19,1]],
+symbols_: {"error":2,"expressions":3,"expression":4,"andCondition":5,"OR":6,"filterExpr":7,"AND":8,"LPAREN":9,"RPAREN":10,"notPropExpr":11,"valueExpr":12,"propExpr":13,"NOTPROP":14,"PROP":15,"LBRACKET":16,"inExpr":17,"RBRACKET":18,"OP":19,"VALUE":20,"NULL":21,"TRUE":22,"FALSE":23,"NUMBER":24,"LITERAL":25,"STRING":26,"NOT":27,"GT":28,"LT":29,"GTE":30,"LTE":31,"LIKE":32,"$accept":0,"$end":1},
+terminals_: {2:"error",6:"OR",8:"AND",9:"LPAREN",10:"RPAREN",14:"NOTPROP",15:"PROP",16:"LBRACKET",18:"RBRACKET",21:"NULL",22:"TRUE",23:"FALSE",24:"NUMBER",25:"LITERAL",26:"STRING",27:"NOT",28:"GT",29:"LT",30:"GTE",31:"LTE",32:"LIKE"},
+productions_: [0,[3,1],[4,1],[4,3],[5,1],[5,3],[7,3],[7,2],[7,2],[11,1],[13,1],[12,3],[12,2],[12,1],[17,3],[17,1],[20,1],[20,1],[20,1],[20,1],[20,1],[20,1],[19,1],[19,1],[19,1],[19,1],[19,1],[19,1]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */, options) {
 /* this == yyval */
 
@@ -116,7 +116,7 @@ case 10:
  this.$ = setProp($$[$0]); 
 break;
 case 11:
- this.$=[]; this.$.push($$[$0-1]); 
+ this.$=$$[$0-1]; 
 break;
 case 12:
  this.$={}; this.$[$$[$0-1]]= $$[$0]; 
@@ -137,26 +137,29 @@ case 19:
  this.$ = parseInt(yytext); 
 break;
 case 21:
- this.$ = "$ne"; 
+ $$[$0] = $$[$0].replace(/^'|'$/g, ''); this.$ = unescape($$[$0]); 
 break;
 case 22:
- this.$ = "$gt"; 
+ this.$ = "$ne"; 
 break;
 case 23:
- this.$ = "$lt"; 
+ this.$ = "$gt"; 
 break;
 case 24:
- this.$ = "$gte"; 
+ this.$ = "$lt"; 
 break;
 case 25:
- this.$ = "$lte"; 
+ this.$ = "$gte"; 
 break;
 case 26:
+ this.$ = "$lte"; 
+break;
+case 27:
  this.$ = "$like"; 
 break;
 }
 },
-table: [{3:1,4:2,5:3,7:4,9:$V0,11:6,13:7,14:$V1,15:$V2},{1:[3]},{1:[2,1],6:$V3},o($V4,[2,2],{8:$V5}),o($V6,[2,4]),{4:12,5:3,7:4,9:$V0,11:6,13:7,14:$V1,15:$V2},{12:13,16:$V7,19:15,20:16,21:$V8,22:$V9,23:$Va,24:$Vb,25:$Vc,26:$Vd,27:$Ve,28:$Vf,29:$Vg,30:$Vh,31:$Vi},{12:28,16:$V7,19:15,20:16,21:$V8,22:$V9,23:$Va,24:$Vb,25:$Vc,26:$Vd,27:$Ve,28:$Vf,29:$Vg,30:$Vh,31:$Vi},o($Vj,[2,9]),o($Vj,[2,10]),{5:29,7:4,9:$V0,11:6,13:7,14:$V1,15:$V2},{7:30,9:$V0,11:6,13:7,14:$V1,15:$V2},{6:$V3,10:[1,31]},o($V6,[2,7]),{17:32,20:33,21:$V8,22:$V9,23:$Va,24:$Vb,25:$Vc},{20:34,21:$V8,22:$V9,23:$Va,24:$Vb,25:$Vc},o($V6,[2,13]),o($Vk,[2,21]),o($Vk,[2,22]),o($Vk,[2,23]),o($Vk,[2,24]),o($Vk,[2,25]),o($Vk,[2,26]),o($Vl,[2,16]),o($Vl,[2,17]),o($Vl,[2,18]),o($Vl,[2,19]),o($Vl,[2,20]),o($V6,[2,8]),o($V4,[2,3],{8:$V5}),o($V6,[2,5]),o($V6,[2,6]),{6:[1,36],18:[1,35]},o($Vm,[2,15]),o($V6,[2,12]),o($V6,[2,11]),{20:37,21:$V8,22:$V9,23:$Va,24:$Vb,25:$Vc},o($Vm,[2,14])],
+table: [{3:1,4:2,5:3,7:4,9:$V0,11:6,13:7,14:$V1,15:$V2},{1:[3]},{1:[2,1],6:$V3},o($V4,[2,2],{8:$V5}),o($V6,[2,4]),{4:12,5:3,7:4,9:$V0,11:6,13:7,14:$V1,15:$V2},{12:13,16:$V7,19:15,20:16,21:$V8,22:$V9,23:$Va,24:$Vb,25:$Vc,26:$Vd,27:$Ve,28:$Vf,29:$Vg,30:$Vh,31:$Vi,32:$Vj},{12:29,16:$V7,19:15,20:16,21:$V8,22:$V9,23:$Va,24:$Vb,25:$Vc,26:$Vd,27:$Ve,28:$Vf,29:$Vg,30:$Vh,31:$Vi,32:$Vj},o($Vk,[2,9]),o($Vk,[2,10]),{5:30,7:4,9:$V0,11:6,13:7,14:$V1,15:$V2},{7:31,9:$V0,11:6,13:7,14:$V1,15:$V2},{6:$V3,10:[1,32]},o($V6,[2,7]),{17:33,20:34,21:$V8,22:$V9,23:$Va,24:$Vb,25:$Vc,26:$Vd},{20:35,21:$V8,22:$V9,23:$Va,24:$Vb,25:$Vc,26:$Vd},o($V6,[2,13]),o($Vl,[2,22]),o($Vl,[2,23]),o($Vl,[2,24]),o($Vl,[2,25]),o($Vl,[2,26]),o($Vl,[2,27]),o($Vm,[2,16]),o($Vm,[2,17]),o($Vm,[2,18]),o($Vm,[2,19]),o($Vm,[2,20]),o($Vm,[2,21]),o($V6,[2,8]),o($V4,[2,3],{8:$V5}),o($V6,[2,5]),o($V6,[2,6]),{6:[1,37],18:[1,36]},o($Vn,[2,15]),o($V6,[2,12]),o($V6,[2,11]),{20:38,21:$V8,22:$V9,23:$Va,24:$Vb,25:$Vc,26:$Vd},o($Vn,[2,14])],
 defaultActions: {},
 parseError: function parseError(str, hash) {
     if (hash.recoverable) {
@@ -309,11 +312,7 @@ parse: function parse(input) {
     return true;
 }};
 
- /*
-  * This chunk is included in the parser code, before the lexer definition section and after the parser has been defined.
-  */
 
- // console.log("parser object definition: ", this);
  parser.parseError = function(errStr, object) {
      var lines = errStr.split("\n");
      lines[0] = "Query Error: unexpected character in filter at char " + (object.loc.first_column + 1);
@@ -360,10 +359,6 @@ parse: function parse(input) {
  }
 
  setNot = function(a, b) {
-    console.log('--');
-    console.dir(a);
-    console.dir(b);
-    console.log('--');
     a.$not[Object.keys(a.$not)[0]]=b;
     return a;
  }
@@ -728,30 +723,32 @@ case 8:return 18;
 break;
 case 9:return 25;
 break;
-case 10:return 9;
+case 10:return 26;
 break;
-case 11:return 10;
+case 11:return 9;
 break;
-case 12:return 6;
+case 12:return 10;
 break;
-case 13:return 8;
+case 13:return 6;
 break;
-case 14:return 29;
+case 14:return 8;
 break;
 case 15:return 30;
 break;
-case 16:return 26;
+case 16:return 31;
 break;
 case 17:return 27;
 break;
 case 18:return 28;
 break;
-case 19:return 31;
+case 19:return 29;
+break;
+case 20:return 32;
 break;
 }
 },
-rules: [/^(?:\s+)/i,/^(?:NULL\b)/i,/^(?:TRUE\b)/i,/^(?:FALSE\b)/i,/^(?:[!][a-zA-Z_][a-zA-Z0-9_\.\$]*[:])/i,/^(?:[a-zA-Z_][a-zA-Z0-9_\.\$]*[:])/i,/^(?:[-]?[0-9]+(\.[0-9]+)?\b)/i,/^(?:\[)/i,/^(?:\])/i,/^(?:([^\+\,\(\)\>\<=\[\]!])(\\([\+\,\(\)\[\]])|([^\+\,\(\)\>\<=\[\]]))+)/i,/^(?:\()/i,/^(?:\))/i,/^(?:,)/i,/^(?:\+)/i,/^(?:>=)/i,/^(?:<=)/i,/^(?:!)/i,/^(?:>)/i,/^(?:<)/i,/^(?:~)/i],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19],"inclusive":true}}
+rules: [/^(?:\s+)/i,/^(?:NULL\b)/i,/^(?:TRUE\b)/i,/^(?:FALSE\b)/i,/^(?:[!][a-zA-Z_][a-zA-Z0-9_\.\$\-]*[:])/i,/^(?:[a-zA-Z_][a-zA-Z0-9_\.\$\-]*[:])/i,/^(?:[-]?[0-9]+(\.[0-9]+)?\b)/i,/^(?:\[)/i,/^(?:\])/i,/^(?:([^\s'"\+\,\(\)\>\<=\[\]!])(\\(['"\+\,\(\)\>\<=\[\]])|([^\s'"\+\,\(\)\>\<=\[\]]))+)/i,/^(?:['](\\['"]|[^'"])+?['])/i,/^(?:\()/i,/^(?:\))/i,/^(?:,)/i,/^(?:\+)/i,/^(?:>=)/i,/^(?:<=)/i,/^(?:!)/i,/^(?:>)/i,/^(?:<)/i,/^(?:~)/i],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],"inclusive":true}}
 });
 lexer.parseError = function(errStr, object) {
     var lines = errStr.split("\n"),

@@ -83,14 +83,14 @@ describe('Lexer', function () {
             gql.lex('strueth').should.eql([{token: 'LITERAL', matched: 'strueth'}]);
             gql.lex('trueth').should.eql([{token: 'LITERAL', matched: 'trueth'}]);
             gql.lex('true_thing').should.eql([{token: 'LITERAL', matched: 'true_thing'}]);
-            // gql.lex("true-thing").should.eql([{token: "LITERAL", matched: "true-thing"}]);
+            // gql.lex('true-thing').should.eql([{token: 'LITERAL', matched: 'true-thing'}]);
         });
 
         it('does not confuse values in STRINGs', function () {
-            gql.lex('\'strueth\'').should.eql([{token: 'LITERAL', matched: '\'strueth\''}]);
-            gql.lex('\'trueth\'').should.eql([{token: 'LITERAL', matched: '\'trueth\''}]);
-            gql.lex('\'true_thing\'').should.eql([{token: 'LITERAL', matched: '\'true_thing\''}]);
-            gql.lex('\'true-thing\'').should.eql([{token: 'LITERAL', matched: '\'true-thing\''}]);
+            gql.lex('\'strueth\'').should.eql([{token: 'STRING', matched: '\'strueth\''}]);
+            gql.lex('\'trueth\'').should.eql([{token: 'STRING', matched: '\'trueth\''}]);
+            gql.lex('\'true_thing\'').should.eql([{token: 'STRING', matched: '\'true_thing\''}]);
+            gql.lex('\'true-thing\'').should.eql([{token: 'STRING', matched: '\'true-thing\''}]);
         });
     });
 
@@ -129,7 +129,7 @@ describe('Lexer', function () {
             (function () { gql.lex('t)st');}).should.throw(lexicalError);
             (function () { gql.lex('t>st');}).should.throw(lexicalError);
             (function () { gql.lex('t<st');}).should.throw(lexicalError);
-            (function () { gql.lex('t!st');}).should.throw(lexicalError);
+            (function () { gql.lex('t=st');}).should.throw(lexicalError);
             (function () { gql.lex('t[st');}).should.throw(lexicalError);
             (function () { gql.lex('t]st');}).should.throw(lexicalError);
             (function () { gql.lex('t\'st');}).should.throw(lexicalError);
@@ -269,28 +269,30 @@ describe('Lexer', function () {
 
     describe('STRING values', function () {
         it('can recognise simple STRING', function () {
-            gql.lex('\'magic\'').should.eql([{token: 'LITERAL', matched: '\'magic\''}]);
+            gql.lex('\'magic\'').should.eql([{token: 'STRING', matched: '\'magic\''}]);
             gql.lex('\'magic mystery\'').should.eql([{token: 'STRING', matched: '\'magic mystery\''}]);
             gql.lex('\'magic 123\'').should.eql([{token: 'STRING', matched: '\'magic 123\''}]);
         });
 
         it('can recognise multiple STRING values', function () {
             gql.lex('\'magic\'\'mystery\'').should.eql([
-                {token: 'LITERAL', matched: '\'magic\'\'mystery\''}
+                {token: 'STRING', matched: '\'magic\''},
+                {token: 'STRING', matched: '\'mystery\''}
             ]);
             gql.lex('\'magic\' \'mystery\'').should.eql([
-                {token: 'LITERAL', matched: '\'magic\' \'mystery\''}
+                {token: 'STRING', matched: '\'magic\''},
+                {token: 'STRING', matched: '\'mystery\''}
             ]);
             gql.lex('\'magic\',\'mystery\'').should.eql([
-                {token: 'LITERAL', matched: '\'magic\''},
+                {token: 'STRING', matched: '\'magic\''},
                 {token: 'OR', matched: ','},
-                {token: 'LITERAL', matched: '\'mystery\''}
+                {token: 'STRING', matched: '\'mystery\''}
             ]);
             gql.lex('[\'magic\',\'mystery\']').should.eql([
                 {token: 'LBRACKET', matched: '['},
-                {token: 'LITERAL', matched: '\'magic\''},
+                {token: 'STRING', matched: '\'magic\''},
                 {token: 'OR', matched: ','},
-                {token: 'LITERAL', matched: '\'mystery\''},
+                {token: 'STRING', matched: '\'mystery\''},
                 {token: 'RBRACKET', matched: ']'}
             ]);
         });
@@ -321,8 +323,8 @@ describe('Lexer', function () {
         });
 
         it('should permit escaped quotes inside a String', function () {
-            gql.lex('\'t\\\'st\'').should.eql([{token: 'LITERAL', matched: '\'t\\\'st\''}]);
-            gql.lex('\'t\\"st\'').should.eql([{token: 'LITERAL', matched: '\'t\\"st\''}]);
+            gql.lex('\'t\\\'st\'').should.eql([{token: 'STRING', matched: '\'t\\\'st\''}]);
+            gql.lex('\'t\\"st\'').should.eql([{token: 'STRING', matched: '\'t\\"st\''}]);
         });
     });
 
@@ -334,10 +336,10 @@ describe('Lexer', function () {
             gql.lex('thing\\\'amabob').should.eql([{token: 'LITERAL', matched: 'thing\\\'amabob'}]);
         });
         it('CAN match an escaped double quote in a STRING', function () {
-            gql.lex('\'thing\\"amabob\'').should.eql([{token: 'LITERAL', matched: '\'thing\\"amabob\''}]);
+            gql.lex('\'thing\\"amabob\'').should.eql([{token: 'STRING', matched: '\'thing\\"amabob\''}]);
         });
         it('CAN match an escaped single quote in a STRING', function () {
-            gql.lex('\'thing\\\'amabob\'').should.eql([{token: 'LITERAL', matched: '\'thing\\\'amabob\''}]);
+            gql.lex('\'thing\\\'amabob\'').should.eql([{token: 'STRING', matched: '\'thing\\\'amabob\''}]);
         });
     });
 

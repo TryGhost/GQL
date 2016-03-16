@@ -77,8 +77,7 @@ describe('gql', function () {
     // -----------------------------------------------------------------------------------------------------------------
 
     it('should parse an empty string into an empty filter object', function () {
-        var p = gql.parse('');
-        _.isEmpty(p).should.equal([]);
+        _.isEmpty(gql.parse('')).should.equal(true);
     });
 
     // -----------------------------------------------------------------------------------------------------------------

@@ -3,11 +3,7 @@
 %start expressions
 
 %{
- /*
-  * This chunk is included in the parser code, before the lexer definition section and after the parser has been defined.
-  */
 
- // console.log("parser object definition: ", this);
  parser.parseError = function(errStr, object) {
      var lines = errStr.split("\n");
      lines[0] = "Query Error: unexpected character in filter at char " + (object.loc.first_column + 1);
@@ -54,10 +50,6 @@
  }
 
  setNot = function(a, b) {
-    console.log('--');
-    console.dir(a);
-    console.dir(b);
-    console.log('--');
     a.$not[Object.keys(a.$not)[0]]=b;
     return a;
  }
@@ -107,7 +99,7 @@ propExpr
     ;
 
 valueExpr
-    : LBRACKET inExpr RBRACKET { $$=[]; $$.push($2); }
+    : LBRACKET inExpr RBRACKET { $$=$2; }
     | OP VALUE { $$={}; $$[$1]= $2; }
     | VALUE { $$ = $1; }
     ;
@@ -123,6 +115,7 @@ VALUE
     | FALSE { $$ = false }
     | NUMBER { $$ = parseInt(yytext); }
     | LITERAL { $$ = $1; }
+    | STRING  { $1 = $1.replace(/^'|'$/g, ''); $$ = unescape($1); }
     ;
 
 OP

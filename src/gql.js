@@ -21,7 +21,7 @@ gql.prototype.lex = function (input) {
 
 // returns a filter object
 gql.prototype.parse = function (input) {
-    return parser.parse(input);
+    return input ? parser.parse(input) : {};
 };
 
 gql.prototype.findAll = function (collection) {
