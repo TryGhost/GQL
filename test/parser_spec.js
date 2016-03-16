@@ -227,57 +227,83 @@ describe('Parser', function () {
 
     describe('complex examples', function () {
         it('many expressions', function () {
-            gql.parse('tag:photo+featured:true,tag.$count:>5').should.eql(
-                {
-                    $or: [
-                        {tag: 'photo', featured: true},
-
-                        // The and above could also be written this way
-                        // [ {tag: photo}, {featured: true} ],
-
-                        {'tag.$count': {$gt: 5}}
-                    ]
-                }
+            gql.parse('tag:photo+featured:true,tag.id.$count:>5').should.eql(
+                [
+                    {tag: 'photo'},
+                    {featured: true},
+                    {$or: {'tag.id.$count': {$gt: 5}}}
+                ]
             );
 
-            gql.parse('tag:photo+image,tags.count:>5').should.eql(
-                {
-                    $or: [
-                        {tag: 'photo', image: {$ne: null}},
-                        {'tags.$count': {$gt: 5}}
-                    ]
-                }
+            gql.parse('tag:photo+!image:null,tags.count:>5').should.eql(
+                [
+                    {tag: 'photo'},
+                    {$not: {image: null}},
+                    {$or: {'tags.$count': {$gt: 5}}}
+                ]
             );
         });
 
-        it.skip('grouped expressions', function () {
-            gql.parse('!author:joe+(tag:photo,image,featured:true)').should.eql(
-                // {
-                //    $not: {author: 'joe'},
-                //    [{tag: 'photo', image: {$ne: null}, featured: true}]
-                // }
+        it('grouped expressions', function () {
+            gql.parse('!author:joe+(tag:photo,!image:null,featured:true)').should.eql(
+                [
+                    {$not: {author: 'joe'}},
+                    [
+                        {tag: 'photo'},
+                        {$not: {image: null}},
+                        {featured: true}
+                    ]
+                ]
             );
 
-            gql.parse('(tag:photo,image,featured:true)+!author:joe').should.eql();
+            gql.parse('(tag:photo,!image:null,featured:true)+!author:joe').should.eql(
+                [
+                    {tag: 'photo'},
+                    {$not: {image: null}},
+                    {featured: true},
+                    {$not: {author: 'joe'}}
+                ]
+            );
 
-            gql.parse('!author:joe,(tag:photo,image,featured:true)').should.eql();
+            gql.parse('!author:joe,(tag:photo,!image:null,featured:true)').should.eql(
+                [
+                    {$not: {author: 'joe'}},
+                    [
+                        {tag: 'photo'},
+                        {$not: {image: null}},
+                        {featured: true}
+                    ]
+                ]
+            );
 
-            gql.parse('(tag:photo,image,featured:false),!author:joe').should.eql();
+            gql.parse('(tag:photo,!image:null,featured:false),!author:joe').should.eql(
+                [
+                    [
+                        {tag: 'photo'},
+                        {$not: {image: null}},
+                        {featured: false}
+                    ],
+                    {$not: {author: 'joe'}}
+                ]
+            );
         });
 
         it('in expressions', function () {
             gql.parse('!author:joe+tag:[photo,video]').should.eql(
-                {$not: {author: 'joe'}, tag:['photo','video']}
+                [{$not: {author: 'joe'}}, {tag:['photo','video']}]
             );
 
             gql.parse('!author:joe+!tag:[photo,video,audio]').should.eql(
-                {$not: {author: 'joe', tag: ['photo','video','audio']}}
+                [{$not: {author: 'joe'}}, {$not: {tag: ['photo','video','audio']}}]
             );
 
             gql.parse('!author:joe+tag:[photo,video,magic,\'audio\']+posts.id.$count:>5+posts.id.$count:<100').should.eql(
-                {$not: {author: 'joe'},
-                    tag: ['photo','video','magic','\'audio\''],
-                    'posts.id.$count': [{$gt: 5}, {$lt: 100}]}
+                [
+                    {$not: {author: 'joe'}},
+                    {tag: ['photo','video','magic','audio']},
+                    {'posts.id.$count': {$gt: 5}},
+                    {'posts.id.$count': {$lt: 100}}
+                ]
             );
         });
     });
