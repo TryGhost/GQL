@@ -25,15 +25,9 @@
         a.push(b);
         c = a;
     } else {
-        if(a.hasOwnProperty(Object.keys(b)[0])) {
-            c = [];
-            c.push(a);
-            c.push(b);
-        } else {
-            var k = Object.keys(b)[0];
-            a[k]=b[k];
-            c = a;
-        }
+        c = [];
+        c.push(a);
+        c.push(b);
     }
     return c;
  }

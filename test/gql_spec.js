@@ -86,9 +86,7 @@ describe('gql', function () {
 
     describe('findAll', function () {
         it('should support a string argument', function () {
-            // var conditions = gql.findAll('posts').filter('').conditions;
-            // TODO Once the parser is complete we can revisit this to ensure that it actually creates the correct
-            // TODO conditions. For now it will suffice to just verify that it accepts a string argument without error.
+            _.isEmpty(gql.findAll('posts').filter('').conditions).should.equal(true);
         });
 
         it('should support exact not matches', function () {
@@ -254,9 +252,10 @@ describe('gql', function () {
     });
 
     it('should support or queries', function () {
-        var conditions = gql.findAll('posts').filter({$or: [{name: 'sample'}, {featured: false}]}).conditions;
-        // console.log(JSON.stringify(conditions));
-        _.isEqual(conditions, {or: [{where: ['name', 'sample']}, {where: ['featured', false]}]}).should.equal(true);
+        var conditions, test;
+        conditions = gql.findAll('posts').filter([{$or: [{name: 'sample'}, {featured: false}]}]).conditions;
+        test = {or: [{where: ['name', 'sample']}, {where: ['featured', false]}]};
+        conditions.should.eql(test);
     });
 
     // -----------------------------------------------------------------------------------------------------------------
