@@ -75,27 +75,35 @@ describe('GQL', function () {
             .should.eql('select * from "posts" where "posts"."id" = \'1 and a=\\\'1`\'');
     });
 
-    // -----------------------------------------------------------------------------------------------------------------
-    // parser tests
-    // -----------------------------------------------------------------------------------------------------------------
+    describe('filter with a string', function (){
 
-    it('should parse an empty string into an empty filter object', function () {
-        (function () {
-            gql.parse('').toSQL();
-        }).should.throw();
-    });
-
-    // -----------------------------------------------------------------------------------------------------------------
-    // filter tests
-    // -----------------------------------------------------------------------------------------------------------------
-
-    describe('findAll', function () {
         it('should support a string argument', function (done) {
             gql.findAll('posts').filter('name:sample').fetch().then(function (result) {
                 result.length.should.eql(1);
                 Object.keys(result[0]).length.should.eql(6);
                 done();
             });
+        });
+
+        it('should not accept an empty string filter', function () {
+            (function () {
+                gql.parse('').toSQL();
+            }).should.throw();
+        });
+
+    });
+
+    describe('basic matching', function (){
+
+        it('should perform exact string matches', function (done) {
+            gql.findAll('posts')
+                .filter({name: 'sample'})
+                .fetch()
+                .then(function (result) {
+                    result[0].name.should.eql('sample');
+                    // console.log(JSON.stringify(result));
+                    done();
+                });
         });
 
         it('should support exact not matches', function () {
@@ -158,6 +166,9 @@ describe('GQL', function () {
                 .should.eql({whereNotNull: ['created_at']});
         });
 
+    });
+
+    describe('in clauses', function(){
         it('should support in matches', function () {
             gql.findAll('posts').filter({created_at: ['2016-03-01', '2016-03-02']}).conditions
                 .should.eql({whereIn: ['created_at', ['2016-03-01', '2016-03-02']]});
@@ -167,7 +178,9 @@ describe('GQL', function () {
             gql.findAll('posts').filter({$not: {created_at: ['2016-03-01', '2016-03-02']}}).conditions
                 .should.eql({whereNotIn: ['created_at', ['2016-03-01', '2016-03-02']]});
         });
+    });
 
+    describe('invalid filters', function(){
         it('should throw an error for a bad comparison operator', function () {
             (function () {
                 gql.findAll('posts').filter({$bad: {created_at: ['2016-03-01', '2016-03-02']}});
@@ -185,10 +198,9 @@ describe('GQL', function () {
                 gql.findAll('posts').filter({$or: {name: 'sample'}});
             }).should.throw();
         });
+    });
 
-        // -------------------------------------------------------------------------------------------------------------
-        // nested queries --
-        // -------------------------------------------------------------------------------------------------------------
+    describe('nested groups', function () {
 
         it('should support $and queries nested one level deep', function () {
             var conditions = gql.findAll('posts').filter([
@@ -236,171 +248,175 @@ describe('GQL', function () {
     // logical grouping --
     // -----------------------------------------------------------------------------------------------------------------
 
-    it('should support and queries', function () {
-        var conditions = gql.findAll('posts').filter([{name: 'sample'}, {featured: false}]).conditions;
-        // console.log(JSON.stringify(conditions));
-        _.isEqual(conditions, [{where: ['name', 'sample']}, {where: ['featured', false]}]).should.eql(true);
-    });
+    describe('grouping by logical operators', function(){
+        it('should support and queries', function () {
+            var conditions = gql.findAll('posts').filter([{name: 'sample'}, {featured: false}]).conditions;
+            // console.log(JSON.stringify(conditions));
+            _.isEqual(conditions, [{where: ['name', 'sample']}, {where: ['featured', false]}]).should.eql(true);
+        });
 
-    it('should support or queries', function () {
-        var conditions, test;
-        conditions = gql.findAll('posts').filter([{$or: [{name: 'sample'}, {featured: false}]}]).conditions;
-        test = {or: [{where: ['name', 'sample']}, {where: ['featured', false]}]};
-        conditions.should.eql(test);
+        it('should support or queries', function () {
+            var conditions, test;
+            conditions = gql.findAll('posts').filter([{$or: [{name: 'sample'}, {featured: false}]}]).conditions;
+            test = {or: [{where: ['name', 'sample']}, {where: ['featured', false]}]};
+            conditions.should.eql(test);
+        });
     });
 
     // -----------------------------------------------------------------------------------------------------------------
     // query execution --
     // -----------------------------------------------------------------------------------------------------------------
 
-    it('should return all fields of all posts when calle with an empty string filter and no fetch fields', function (done) {
-        gql.findAll('posts')
-            .filter()
-            .fetch()
-            .then(function (result) {
-                result.length.should.eql(4);
-                Object.keys(result[0]).length.should.eql(6);
-                // console.log(JSON.stringify(result));
-                done();
-            });
-    });
-
-    it('should return all fields of all posts when called string filter and \'*\'', function (done) {
-        gql.findAll('posts')
-            .filter()
-            .fetch('*')
-            .then(function (result) {
-                result.length.should.eql(4);
-                Object.keys(result[0]).length.should.eql(6);
-                // console.log(JSON.stringify(result));
-                done();
-            });
-    });
-
-    it('should return only id when called with fields \'id\' as a string', function (done) {
-        gql.findAll('posts')
-            .filter()
-            .fetch('id')
-            .then(function (result) {
-                result.length.should.eql(4);
-                Object.keys(result[0]).length.should.eql(1);
-                // console.log(JSON.stringify(result));
-                done();
-            });
-    });
-
-    it('should return only id when called with fields [\'id\'] as an array', function (done) {
-        gql.findAll('posts')
-            .filter()
-            .fetch(['id'])
-            .then(function (result) {
-                result.length.should.eql(4);
-                Object.keys(result[0]).length.should.eql(1);
-                // console.log(JSON.stringify(result));
-                done();
-            });
-    });
-
-    it('should return only 1 record after calling limit(1)', function (done) {
-        gql.findAll('posts')
-            .filter()
-            .limit(1)
-            .fetch('id')
-            .then(function (result) {
-                result.length.should.eql(1);
-                Object.keys(result[0]).length.should.eql(1);
-                // console.log(JSON.stringify(result));
-                done();
-            });
-    });
-
-    it('should return only 2 records after calling offset(2)', function (done) {
-        gql.findAll('posts')
-            .filter()
-            .offset(2)
-            .fetch('id')
-            .then(function (result) {
-                result.length.should.eql(2);
-                Object.keys(result[0]).length.should.eql(1);
-                // console.log(JSON.stringify(result));
-                done();
-            });
-    });
-
-    it('should return all posts in descending order after calling orderBy(\'name\', \'desc\')', function (done) {
-        gql.findAll('posts')
-            .filter({})
-            .orderBy('name', 'desc')
-            .fetch('name')
-            .then(function (results) {
-                results.length.should.eql(4);
-                Object.keys(results[0]).length.should.eql(1);
-                // console.log(JSON.stringify(results));
-                var names = [];
-                _.each(results, function (result) {
-                    names.push(result.name);
+    describe('returned field selection', function(){
+        it('should return all fields of all posts when called with no filter and no fetch fields', function (done) {
+            gql.findAll('posts')
+                .filter()
+                .fetch()
+                .then(function (result) {
+                    result.length.should.eql(4);
+                    Object.keys(result[0]).length.should.eql(6);
+                    // console.log(JSON.stringify(result));
+                    done();
                 });
+        });
 
-                _.isMatch(names, _.sortBy(names).reverse()).should.eql(true);
-                done();
-            });
-    });
-
-    it('should return all posts in ascending order after calling orderBy(\'name\')', function (done) {
-        gql.findAll('posts')
-            .filter({})
-            .orderBy('name')
-            .fetch('name')
-            .then(function (results) {
-                results.length.should.eql(4);
-                Object.keys(results[0]).length.should.eql(1);
-                // console.log(JSON.stringify(results));
-                var names = [];
-                _.each(results, function (result) {
-                    names.push(result.name);
+        it('should return all fields of all posts when called with no filter and \'*\'', function (done) {
+            gql.findAll('posts')
+                .filter()
+                .fetch('*')
+                .then(function (result) {
+                    result.length.should.eql(4);
+                    Object.keys(result[0]).length.should.eql(6);
+                    // console.log(JSON.stringify(result));
+                    done();
                 });
+        });
 
-                _.isMatch(names, _.sortBy(names)).should.eql(true);
-                done();
-            });
+        it('should return only id when called with fields \'id\' as a string', function (done) {
+            gql.findAll('posts')
+                .filter()
+                .fetch('id')
+                .then(function (result) {
+                    result.length.should.eql(4);
+                    Object.keys(result[0]).length.should.eql(1);
+                    // console.log(JSON.stringify(result));
+                    done();
+                });
+        });
+
+        it('should return only id when called with fields [\'id\'] as an array', function (done) {
+            gql.findAll('posts')
+                .filter()
+                .fetch(['id'])
+                .then(function (result) {
+                    result.length.should.eql(4);
+                    Object.keys(result[0]).length.should.eql(1);
+                    // console.log(JSON.stringify(result));
+                    done();
+                });
+        });
     });
 
-    it('should correctly convert statement to SQL string', function () {
-        gql.findAll('posts')
-            .filter({})
-            .orderBy('name')
-            .fetch('name')
-            .toString()
-            .should.eql('select "name" from "posts" order by "name" asc');
+    describe('limit queries', function(){
+        it('should return only 1 record after calling limit(1)', function (done) {
+            gql.findAll('posts')
+                .filter()
+                .limit(1)
+                .fetch('id')
+                .then(function (result) {
+                    result.length.should.eql(1);
+                    Object.keys(result[0]).length.should.eql(1);
+                    // console.log(JSON.stringify(result));
+                    done();
+                });
+        });
     });
 
-    it('should accept and properly query given an array of filters', function () {
-        gql.findAll('posts')
-            .filter([{name: 'sample'}, {featured: true}])
-            .orderBy('name')
-            .toSQL('name')
-            .should.eql('select "name" from "posts" where "name" = \'sample\' and "featured" = true order by "name" asc');
+    describe('offset queries', function() {
+        it('should return only 2 records after calling offset(2)', function (done) {
+            gql.findAll('posts')
+                .filter()
+                .offset(2)
+                .fetch('id')
+                .then(function (result) {
+                    result.length.should.eql(2);
+                    Object.keys(result[0]).length.should.eql(1);
+                    // console.log(JSON.stringify(result));
+                    done();
+                });
+        });
     });
 
-    it('should return all posts when calling findAll with an empty object filter', function (done) {
-        gql.findAll('posts')
-            .filter({})
-            .fetch()
-            .then(function (result) {
-                result.length.should.eql(4);
-                // console.log(JSON.stringify(result));
-                done();
-            });
+    describe('orderBy queries', function() {
+        it('should return all posts in descending order after calling orderBy(\'name\', \'desc\')', function (done) {
+            gql.findAll('posts')
+                .filter({})
+                .orderBy('name', 'desc')
+                .fetch('name')
+                .then(function (results) {
+                    results.length.should.eql(4);
+                    Object.keys(results[0]).length.should.eql(1);
+                    // console.log(JSON.stringify(results));
+                    var names = [];
+                    _.each(results, function (result) {
+                        names.push(result.name);
+                    });
+
+                    _.isMatch(names, _.sortBy(names).reverse()).should.eql(true);
+                    done();
+                });
+        });
+
+        it('should return all posts in ascending order after calling orderBy(\'name\')', function (done) {
+            gql.findAll('posts')
+                .filter({})
+                .orderBy('name')
+                .fetch('name')
+                .then(function (results) {
+                    results.length.should.eql(4);
+                    Object.keys(results[0]).length.should.eql(1);
+                    // console.log(JSON.stringify(results));
+                    var names = [];
+                    _.each(results, function (result) {
+                        names.push(result.name);
+                    });
+
+                    _.isMatch(names, _.sortBy(names)).should.eql(true);
+                    done();
+                });
+        });
     });
 
-    it('should perform exact string matches', function (done) {
-        gql.findAll('posts')
-            .filter({name: 'sample'})
-            .fetch()
-            .then(function (result) {
-                result[0].name.should.eql('sample');
-                // console.log(JSON.stringify(result));
-                done();
-            });
+    describe('fetch().toSQL()', function() {
+        it('should correctly convert statement to SQL string', function () {
+            gql.findAll('posts')
+                .filter({})
+                .orderBy('name')
+                .fetch('name')
+                .toString()
+                .should.eql('select "name" from "posts" order by "name" asc');
+        });
     });
+
+    describe('filter with objects', function() {
+        it('should accept and properly query given an array of filters', function () {
+            gql.findAll('posts')
+                .filter([{name: 'sample'}, {featured: true}])
+                .orderBy('name')
+                .toSQL('name')
+                .should.eql('select "name" from "posts" where "name" = \'sample\' and "featured" = true order by "name" asc');
+        });
+
+        it('should return all posts when calling findAll with an empty object filter', function (done) {
+            gql.findAll('posts')
+                .filter({})
+                .fetch()
+                .then(function (result) {
+                    result.length.should.eql(4);
+                    // console.log(JSON.stringify(result));
+                    done();
+                });
+        });
+    });
+
 });
