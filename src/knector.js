@@ -3,7 +3,7 @@ var _, parser, Statement, knector,
     buildDollarComparisonCondition,
     buildSimpleComparisonCondition;
 _ = require('lodash');
-parser = require('./parser');
+parser = require('../dist/parser').parser,
 Statement = require('./statement');
 
 knector = function (name, collection) {

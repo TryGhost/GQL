@@ -67,9 +67,10 @@ describe('gql', function () {
     // safety tests
     // -----------------------------------------------------------------------------------------------------------------
 
-    it.skip('should correctly escape bad sequences', function () {
-        //    (function () {toSQL('id:\'1 and 1‘=\'1`\'', 'posts');}).should.throw();
-        //    toSQL('id:\'1 and 1‘=\\\'1`\'', 'posts').should.eql('select * from "posts" where "posts"."id" = \'1 and 1‘=\\\'1`\'');
+    it('should correctly escape bad sequences', function () {
+        (function () {gql.parse('id:\'1 and 1‘=\'1`\'').toSQL();}).should.throw();
+        gql.findAll('posts').filter('posts.id:\'1 and a=\\\'1`\'').toSQL()
+            .should.eql('select * from "posts" where "posts"."id" = \'1 and a=\\\'1`\'');
     });
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -77,7 +78,7 @@ describe('gql', function () {
     // -----------------------------------------------------------------------------------------------------------------
 
     it('should parse an empty string into an empty filter object', function () {
-        _.isEmpty(gql.parse('')).should.equal(true);
+        (function() {gql.parse('').toSQL();}).should.throw();
     });
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -85,8 +86,12 @@ describe('gql', function () {
     // -----------------------------------------------------------------------------------------------------------------
 
     describe('findAll', function () {
-        it('should support a string argument', function () {
-            _.isEmpty(gql.findAll('posts').filter('').conditions).should.equal(true);
+        it('should support a string argument', function (done) {
+            gql.findAll('posts').filter('name:sample').fetch().then(function(result){
+                result.length.should.eql(1);
+                Object.keys(result[0]).length.should.equal(6);
+                done();
+            });
         });
 
         it('should support exact not matches', function () {
@@ -264,7 +269,7 @@ describe('gql', function () {
 
     it('should return all fields of all posts when calle with an empty string filter and no fetch fields', function (done) {
         gql.findAll('posts')
-            .filter('')
+            .filter()
             .fetch()
             .then(function (result) {
                 result.length.should.equal(4);
@@ -276,7 +281,7 @@ describe('gql', function () {
 
     it('should return all fields of all posts when called string filter and \'*\'', function (done) {
         gql.findAll('posts')
-            .filter('')
+            .filter()
             .fetch('*')
             .then(function (result) {
                 result.length.should.equal(4);
@@ -288,7 +293,7 @@ describe('gql', function () {
 
     it('should return only id when called with fields \'id\' as a string', function (done) {
         gql.findAll('posts')
-            .filter('')
+            .filter()
             .fetch('id')
             .then(function (result) {
                 result.length.should.equal(4);
@@ -300,7 +305,7 @@ describe('gql', function () {
 
     it('should return only id when called with fields [\'id\'] as an array', function (done) {
         gql.findAll('posts')
-            .filter('')
+            .filter()
             .fetch(['id'])
             .then(function (result) {
                 result.length.should.equal(4);
@@ -312,7 +317,7 @@ describe('gql', function () {
 
     it('should return only 1 record after calling limit(1)', function (done) {
         gql.findAll('posts')
-            .filter('')
+            .filter()
             .limit(1)
             .fetch('id')
             .then(function (result) {
@@ -325,7 +330,7 @@ describe('gql', function () {
 
     it('should return only 2 records after calling offset(2)', function (done) {
         gql.findAll('posts')
-            .filter('')
+            .filter()
             .offset(2)
             .fetch('id')
             .then(function (result) {
