@@ -14,7 +14,7 @@ knex = require('knex')({
 Gql = require('../src/gql');
 gql = new Gql(knex);
 
-describe('gql', function () {
+describe('GQL', function () {
     before(function (done) {
         knex.schema.createTableIfNotExists('posts', function (table) {
             table.increments();
@@ -99,85 +99,73 @@ describe('gql', function () {
         });
 
         it('should support exact not matches', function () {
-            gql.findAll('posts').filter({$not: {name: 'sample'}}).conditions.should.eql({whereNot: ['name', 'sample']});
+            gql.findAll('posts').filter({$not: {name: 'sample'}}).conditions
+                .should.eql({whereNot: ['name', 'sample']});
         });
 
         it('should support less than matches', function () {
-            var conditions = gql.findAll('posts').filter({created_at: {$lt: '2016-03-02'}}).conditions;
-            // console.log(JSON.stringify(conditions));
-            _.isEqual(conditions, {where: ['created_at', '<', '2016-03-02']}).should.eql(true);
+            gql.findAll('posts').filter({created_at: {$lt: '2016-03-02'}}).conditions
+                .should.eql({where: ['created_at', '<', '2016-03-02']});
         });
 
         it('should support not less than matches', function () {
-            var conditions = gql.findAll('posts').filter({created_at: {$not: {$lt: '2016-03-02'}}}).conditions;
-            // console.log(JSON.stringify(conditions));
-            _.isEqual(conditions, {whereNot: ['created_at', '<', '2016-03-02']}).should.eql(true);
+            gql.findAll('posts').filter({created_at: {$not: {$lt: '2016-03-02'}}}).conditions
+                .should.eql({whereNot: ['created_at', '<', '2016-03-02']});
         });
 
         it('should support greater than matches', function () {
-            var conditions = gql.findAll('posts').filter({created_at: {$gt: '2016-03-02'}}).conditions;
-            // console.log(JSON.stringify(conditions));
-            _.isEqual(conditions, {where: ['created_at', '>', '2016-03-02']}).should.eql(true);
+            gql.findAll('posts').filter({created_at: {$gt: '2016-03-02'}}).conditions
+                .should.eql({where: ['created_at', '>', '2016-03-02']});
         });
 
         it('should support not greater than matches', function () {
-            var conditions = gql.findAll('posts').filter({created_at: {$not: {$gt: '2016-03-02'}}}).conditions;
-            // console.log(JSON.stringify(conditions));
-            _.isEqual(conditions, {whereNot: ['created_at', '>', '2016-03-02']}).should.eql(true);
+            gql.findAll('posts').filter({created_at: {$not: {$gt: '2016-03-02'}}}).conditions
+                .should.eql({whereNot: ['created_at', '>', '2016-03-02']});
         });
 
         it('should support less than equal matches', function () {
-            var conditions = gql.findAll('posts').filter({created_at: {$lte: '2016-03-02'}}).conditions;
-            // console.log(JSON.stringify(conditions));
-            _.isEqual(conditions, {where: ['created_at', '<=', '2016-03-02']}).should.eql(true);
+            gql.findAll('posts').filter({created_at: {$lte: '2016-03-02'}}).conditions
+                .should.eql({where: ['created_at', '<=', '2016-03-02']});
         });
 
         it('should support not less than equal matches', function () {
-            var conditions = gql.findAll('posts').filter({created_at: {$not: {$lte: '2016-03-02'}}}).conditions;
-            // console.log(JSON.stringify(conditions));
-            _.isEqual(conditions, {whereNot: ['created_at', '<=', '2016-03-02']}).should.eql(true);
+            gql.findAll('posts').filter({created_at: {$not: {$lte: '2016-03-02'}}}).conditions
+                .should.eql({whereNot: ['created_at', '<=', '2016-03-02']});
         });
 
         it('should support greater than equal matches', function () {
-            var conditions = gql.findAll('posts').filter({created_at: {$gte: '2016-03-02'}}).conditions;
-            // console.log(JSON.stringify(conditions));
-            _.isEqual(conditions, {where: ['created_at', '>=', '2016-03-02']}).should.eql(true);
+            gql.findAll('posts').filter({created_at: {$gte: '2016-03-02'}}).conditions
+                .should.eql({where: ['created_at', '>=', '2016-03-02']});
         });
 
         it('should support not greater than equal matches', function () {
-            var conditions = gql.findAll('posts').filter({created_at: {$not: {$gte: '2016-03-02'}}}).conditions;
-            // console.log(JSON.stringify(conditions));
-            _.isEqual(conditions, {whereNot: ['created_at', '>=', '2016-03-02']}).should.eql(true);
+            gql.findAll('posts').filter({created_at: {$not: {$gte: '2016-03-02'}}}).conditions
+                .should.eql({whereNot: ['created_at', '>=', '2016-03-02']});
         });
 
         it('should support null matches', function () {
-            var conditions = gql.findAll('posts').filter({created_at: null}).conditions;
-            // console.log(JSON.stringify(conditions));
-            _.isEqual(conditions, {whereNull: ['created_at']}).should.eql(true);
+            gql.findAll('posts').filter({created_at: null}).conditions
+                .should.eql({whereNull: ['created_at']});
         });
 
         it('should support not null matches', function () {
-            var conditions = gql.findAll('posts').filter({created_at: {$ne: null}}).conditions;
-            // console.log(JSON.stringify(conditions));
-            _.isEqual(conditions, {whereNotNull: ['created_at']}).should.eql(true);
+            gql.findAll('posts').filter({created_at: {$ne: null}}).conditions
+                .should.eql({whereNotNull: ['created_at']});
         });
 
         it('should support not null matches', function () {
-            var conditions = gql.findAll('posts').filter({created_at: {$ne: null}}).conditions;
-            // console.log(JSON.stringify(conditions));
-            _.isEqual(conditions, {whereNotNull: ['created_at']}).should.eql(true);
+            gql.findAll('posts').filter({created_at: {$ne: null}}).conditions
+                .should.eql({whereNotNull: ['created_at']});
         });
 
         it('should support in matches', function () {
-            var conditions = gql.findAll('posts').filter({created_at: ['2016-03-01', '2016-03-02']}).conditions;
-            // console.log(JSON.stringify(conditions));
-            _.isEqual(conditions, {whereIn: ['created_at', ['2016-03-01', '2016-03-02']]}).should.eql(true);
+            gql.findAll('posts').filter({created_at: ['2016-03-01', '2016-03-02']}).conditions
+                .should.eql({whereIn: ['created_at', ['2016-03-01', '2016-03-02']]});
         });
 
         it('should support not in matches', function () {
-            var conditions = gql.findAll('posts').filter({$not: {created_at: ['2016-03-01', '2016-03-02']}}).conditions;
-            // console.log(JSON.stringify(conditions));
-            _.isEqual(conditions, {whereNotIn: ['created_at', ['2016-03-01', '2016-03-02']]}).should.eql(true);
+            gql.findAll('posts').filter({$not: {created_at: ['2016-03-01', '2016-03-02']}}).conditions
+                .should.eql({whereNotIn: ['created_at', ['2016-03-01', '2016-03-02']]});
         });
 
         it('should throw an error for a bad comparison operator', function () {
