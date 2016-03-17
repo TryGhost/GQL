@@ -19,55 +19,70 @@
     return Array.isArray(o);
  };
 
- andMerge = function(a, b) {
+ _merge = function(a, b) {
     var c;
     if(isArray(a)) {
-        a.push(b);
-        c = a;
-    } else {
-        c = [];
-        c.push(a);
-        c.push(b);
-    }
-    return c;
- }
-
- orMerge = function(a, b) {
-    var c, d;
-
-    if(isArray(a)) {
-      a.push({$or: b});
       c = a;
     } else {
-      c = {};
-      c['$or'] = b;
+      c = [];
+      c.push(a);
     }
+
     return c;
- }
+ };
+
+ andMerge = function(a, b) {
+    var c = _merge(a, b);
+    c.push(b);
+    return c;
+ };
+
+ orMerge = function(a, b) {
+    var c = _merge(a, b);
+    c.push({$or: b});
+    return c;
+ };
 
  setNot = function(a, b) {
     a.$not[Object.keys(a.$not)[0]]=b;
     return a;
- }
+ };
 
  setProp = function(p) {
     var o = {}, v = null;
-
     if(p.match(/:$/)) {
       p = p.replace(/:$/, '');
-    } else {
-      v = {$ne: null};
     }
     o[p] = v;
     return o;
- }
+ };
+
+ deGroup = function(g) {
+    if(!g) {
+      return g;
+    }
+    if(isArray(g)) {
+      for(var i = 0; i < g.length; i++) {
+        g[i] = deGroup(g[i]);
+      }
+    } else if(g.hasOwnProperty('$group')) {
+      return g.$group;
+    } else if(typeof g === 'object'){
+      for(var p in g) {
+        if(g.hasOwnProperty(p)) {
+          g[p] = deGroup(g[p]);
+        }
+      }
+    }
+    return g;
+ };
 
 %}
 
 %% /* language grammar */
 
 expressions
-    : expression { return $1; }
+    : expression { return deGroup($1); }
     ;
 
 expression
@@ -76,12 +91,12 @@ expression
     ;
 
 andCondition
-    : filterExpr { $$ = $1 }
+    : filterExpr { $$ = $1; }
     | andCondition AND filterExpr { $$ = andMerge($1, $3); }
     ;
 
 filterExpr
-    : LPAREN expression RPAREN { var _e = []; _e.push($2); $$ = _e; }
+    : LPAREN expression RPAREN { $$ = {$group: $2}; }
     | notPropExpr valueExpr { $$ = setNot($1, $2); }
     | propExpr valueExpr { $1[Object.keys($1)[0]] = $2; $$ = $1; }
     ;
