@@ -75,8 +75,7 @@ describe('GQL', function () {
             .should.eql('select * from "posts" where "posts"."id" = \'1 and a=\\\'1`\'');
     });
 
-    describe('filter with a string', function (){
-
+    describe('filter with a string', function () {
         it('should support a string argument', function (done) {
             gql.findAll('posts').filter('name:sample').fetch().then(function (result) {
                 result.length.should.eql(1);
@@ -90,11 +89,9 @@ describe('GQL', function () {
                 gql.parse('').toSQL();
             }).should.throw();
         });
-
     });
 
-    describe('basic matching', function (){
-
+    describe('basic matching', function () {
         it('should perform exact string matches', function (done) {
             gql.findAll('posts')
                 .filter({name: 'sample'})
@@ -165,10 +162,9 @@ describe('GQL', function () {
             gql.findAll('posts').filter({created_at: {$ne: null}}).conditions
                 .should.eql({whereNotNull: ['created_at']});
         });
-
     });
 
-    describe('in clauses', function(){
+    describe('in clauses', function () {
         it('should support in matches', function () {
             gql.findAll('posts').filter({created_at: ['2016-03-01', '2016-03-02']}).conditions
                 .should.eql({whereIn: ['created_at', ['2016-03-01', '2016-03-02']]});
@@ -180,7 +176,7 @@ describe('GQL', function () {
         });
     });
 
-    describe('invalid filters', function(){
+    describe('invalid filters', function () {
         it('should throw an error for a bad comparison operator', function () {
             (function () {
                 gql.findAll('posts').filter({$bad: {created_at: ['2016-03-01', '2016-03-02']}});
@@ -201,7 +197,6 @@ describe('GQL', function () {
     });
 
     describe('nested groups', function () {
-
         it('should support $and queries nested one level deep', function () {
             var conditions = gql.findAll('posts').filter([
                     {$not: {created_at: ['2016-03-01', '2016-03-02']}},
@@ -248,7 +243,7 @@ describe('GQL', function () {
     // logical grouping --
     // -----------------------------------------------------------------------------------------------------------------
 
-    describe('grouping by logical operators', function(){
+    describe('grouping by logical operators', function () {
         it('should support and queries', function () {
             var conditions = gql.findAll('posts').filter([{name: 'sample'}, {featured: false}]).conditions;
             // console.log(JSON.stringify(conditions));
@@ -267,7 +262,7 @@ describe('GQL', function () {
     // query execution --
     // -----------------------------------------------------------------------------------------------------------------
 
-    describe('returned field selection', function(){
+    describe('returned field selection', function () {
         it('should return all fields of all posts when called with no filter and no fetch fields', function (done) {
             gql.findAll('posts')
                 .filter()
@@ -317,7 +312,7 @@ describe('GQL', function () {
         });
     });
 
-    describe('limit queries', function(){
+    describe('limit queries', function () {
         it('should return only 1 record after calling limit(1)', function (done) {
             gql.findAll('posts')
                 .filter()
@@ -332,7 +327,7 @@ describe('GQL', function () {
         });
     });
 
-    describe('offset queries', function() {
+    describe('offset queries', function () {
         it('should return only 2 records after calling offset(2)', function (done) {
             gql.findAll('posts')
                 .filter()
@@ -347,7 +342,7 @@ describe('GQL', function () {
         });
     });
 
-    describe('orderBy queries', function() {
+    describe('orderBy queries', function () {
         it('should return all posts in descending order after calling orderBy(\'name\', \'desc\')', function (done) {
             gql.findAll('posts')
                 .filter({})
@@ -387,7 +382,7 @@ describe('GQL', function () {
         });
     });
 
-    describe('fetch().toSQL()', function() {
+    describe('fetch().toSQL()', function () {
         it('should correctly convert statement to SQL string', function () {
             gql.findAll('posts')
                 .filter({})
@@ -398,7 +393,7 @@ describe('GQL', function () {
         });
     });
 
-    describe('filter with objects', function() {
+    describe('filter with objects', function () {
         it('should accept and properly query given an array of filters', function () {
             gql.findAll('posts')
                 .filter([{name: 'sample'}, {featured: true}])
@@ -418,5 +413,4 @@ describe('GQL', function () {
                 });
         });
     });
-
 });
