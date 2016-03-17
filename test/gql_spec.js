@@ -68,7 +68,9 @@ describe('gql', function () {
     // -----------------------------------------------------------------------------------------------------------------
 
     it('should correctly escape bad sequences', function () {
-        (function () {gql.parse('id:\'1 and 1‘=\'1`\'').toSQL();}).should.throw();
+        (function () {
+            gql.parse('id:\'1 and 1‘=\'1`\'').toSQL();
+        }).should.throw();
         gql.findAll('posts').filter('posts.id:\'1 and a=\\\'1`\'').toSQL()
             .should.eql('select * from "posts" where "posts"."id" = \'1 and a=\\\'1`\'');
     });
@@ -78,7 +80,9 @@ describe('gql', function () {
     // -----------------------------------------------------------------------------------------------------------------
 
     it('should parse an empty string into an empty filter object', function () {
-        (function() {gql.parse('').toSQL();}).should.throw();
+        (function () {
+            gql.parse('').toSQL();
+        }).should.throw();
     });
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -87,7 +91,7 @@ describe('gql', function () {
 
     describe('findAll', function () {
         it('should support a string argument', function (done) {
-            gql.findAll('posts').filter('name:sample').fetch().then(function(result){
+            gql.findAll('posts').filter('name:sample').fetch().then(function (result) {
                 result.length.should.eql(1);
                 Object.keys(result[0]).length.should.equal(6);
                 done();
@@ -390,7 +394,7 @@ describe('gql', function () {
 
     it('should accept and properly query given an array of filters', function () {
         gql.findAll('posts')
-            .filter([{name: 'sample'},{featured:true}])
+            .filter([{name: 'sample'}, {featured: true}])
             .orderBy('name')
             .toSQL('name')
             .should.equal('select "name" from "posts" where "name" = \'sample\' and "featured" = true order by "name" asc');
