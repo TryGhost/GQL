@@ -28,7 +28,7 @@ buildLogicalDollarCondition = function (self, conditions, key, value, negated, p
             _.forEach(value, function (_value) {
                 _conditions.push(self.buildConditions(_value));
             });
-        } else if(_.isPlainObject(value)) {
+        } else if (_.isPlainObject(value)) {
             // it was an or condition with a single value
             _conditions.push(self.buildConditions(value));
         } else {
