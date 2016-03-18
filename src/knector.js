@@ -94,7 +94,7 @@ buildSimpleComparisonCondition = function (self, condition, key, value, negated)
     return condition;
 };
 
-buildAggregateCondition = function (self, condition, key, value, negated, parentKey) {
+var buildAggregateCondition = function (self, condition, key, value, negated, parentKey) {
     if(key.match(/\.\$count\.distinct$/)) {
 
     } else if(key.match(/\.\$count$/)) {
