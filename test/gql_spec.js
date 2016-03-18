@@ -364,6 +364,18 @@ describe('GQL', function () {
                 });
         });
 
+        it.only('should return id and name when called with fields \'id, name\' as a comma-separated string', function (done) {
+            gql.findAll('posts')
+                .filter()
+                .fetch('id, name')
+                .then(function (result) {
+                    result.length.should.eql(4);
+                    Object.keys(result[0]).length.should.eql(2);
+                    // console.log(JSON.stringify(result));
+                    done();
+                });
+        });
+
         it('should return only id when called with fields [\'id\'] as an array', function (done) {
             gql.findAll('posts')
                 .filter()

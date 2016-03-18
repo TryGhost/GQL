@@ -68,7 +68,18 @@ statement.prototype.debug = function () {
 statement.prototype.fetch = function (fields) {
     applyConditions(this);
 
-    var _fields = fields ? _.isString(fields) ? [fields] : fields : ['*'];
+    var _fields = [];
+    if(_.isString(fields)) {
+        _fields = fields.split(',');
+        _.each(function(v, k){
+            _fields[k] = v.trim();
+        });
+    } else if(fields) {
+        _fields = fields;
+    } else {
+        _fields = ['*'];
+    }
+
     return this.collection.select.apply(this.collection, _fields);
 };
 
