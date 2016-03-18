@@ -246,7 +246,7 @@ describe('Parser', function () {
         });
 
         it('grouped expressions', function () {
-            var one, oneTest, two, twoTest, three, threeTest, four, fourTest;
+            var one, oneTest, two, twoTest, three, threeTest, four, fourTest, five, fiveTest;
             one = gql.parse('!author:joe+(tag:photo,!image:null,featured:true)');
             oneTest = [
                 {$not: {author: 'joe'}},
@@ -299,6 +299,23 @@ describe('Parser', function () {
             // console.log(JSON.stringify(four));
             // console.log(JSON.stringify(fourTest));
             four.should.eql(fourTest);
+
+            five = gql.parse('name:sample,(!name:sample+created_at:<=\'2016-03-03\'),(!name:sample+(created_at:\'2016-03-03\',created_at:\'2016-03-04\'))');
+            fiveTest = [
+                {name: 'sample'},
+                {$or: [
+                    {$not: {name: 'sample'}},
+                    {created_at: {$lte: '2016-03-03'}}
+                ]},
+                {$or: [
+                    {$not: {name: 'sample'}},
+                    [
+                        {created_at: '2016-03-03'},
+                        {$or: {created_at: '2016-03-04'}}
+                    ]
+                ]}
+            ];
+            five.should.eql(fiveTest);
         });
 
         it('in expressions', function () {

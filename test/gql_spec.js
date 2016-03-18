@@ -421,7 +421,7 @@ describe('GQL', function () {
     });
 
     describe('grouped clauses', function () {
-        it('should support or queries', function () {
+        describe('should support or queries', function () {
             it('containing a nested and', function (done) {
                 var query = 'name:sample,(!name:sample+created_at:<=\'2016-03-03\')';
                 gql.parse(query).should.eql([
@@ -431,6 +431,28 @@ describe('GQL', function () {
                             // no nested array because the outer array had only one element and was therefore reduced
                             {$not: {name: 'sample'}},
                             {created_at: {$lte: '2016-03-03'}}
+                        ]
+                    }
+                ]);
+
+                gql.findAll('posts')
+                    .filter(query)
+                    .fetch()
+                    .then(function (result) {
+                        result.length.should.eql(3);
+                        done();
+                    });
+            });
+
+            it('containing a nested or', function (done) {
+                var query = 'name:sample,(created_at:\'2016-03-03\',created_at:\'2016-03-04\')';
+                gql.parse(query).should.eql([
+                    {name: 'sample'},
+                    {
+                        $or: [
+                            // no nested array because the outer array had only one element and was therefore reduced
+                            {created_at: '2016-03-03'},
+                            {$or: {created_at: '2016-03-04'}}
                         ]
                     }
                 ]);
@@ -461,7 +483,7 @@ describe('GQL', function () {
             });
         });
 
-        it('should support and queries', function () {
+        describe('should support and queries', function () {
             it('containing a nested and', function (done) {
                 var query = 'name:sample+(!name:sample+created_at:<=\'2016-03-03\')';
                 gql.parse(query).should.eql([
@@ -522,18 +544,18 @@ describe('GQL', function () {
         });
 
         it('should support nested or queries', function (done) {
-            var query = 'name:sample,(!name:sample+created_at:<=\'2016-03-03\'),(created_at:\'2016-03-03\',created_at:\'2016-03-04\')';
+            var query = 'name:sample,(!name:sample+created_at:<=\'2016-03-03\'),(!name:sample+(created_at:\'2016-03-03\',created_at:\'2016-03-04\'))';
             gql.parse(query).should.eql([
                 {name: 'sample'},
-                {$or: [ {$not: {name: 'sample'}}, {created_at: {$lte: '2016-03-03'}} ]},
-                {$or: [ {created_at: '2016-03-03'}, {$or: {created_at: '2016-03-04'}} ]}
+                {$or: [{$not: {name: 'sample'}}, {created_at: {$lte: '2016-03-03'}}]},
+                {$or: [{$not: {name: 'sample'}}, [{created_at: '2016-03-03'}, {$or: {created_at: '2016-03-04'}}]]}
             ]);
 
             gql.findAll('posts')
                 .filter(query)
                 .fetch()
                 .then(function (result) {
-                    result.length.should.eql(3);
+                    result.length.should.eql(4);
                     done();
                 });
         });
