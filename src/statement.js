@@ -24,7 +24,7 @@ applyCondition = function (statement, condition, useOr, _qb) {
     if (_.isArray(condition)) { // it's a clause/group.
         qb = qb[useOr ? 'orWhere' : 'where'].apply(qb, [(function () {
             var f = function () {
-                for(var i = 0; i < condition.length; i++) {
+                for (var i = 0; i < condition.length; i = i + 1) {
                     applyCondition(statement, condition[i], false, this);
                 }
             };
@@ -36,7 +36,7 @@ applyCondition = function (statement, condition, useOr, _qb) {
         // Using forIn is a concise way to iterate over the object.
         _.forIn(condition, function (value, key) {
             if (key === 'or') { // flip the and to an or
-                applyCondition(statement, value, true);
+                applyCondition(statement, value, true, qb);
             } else {
                 qb = qb[useOr ? orAnalogues[key] : key].apply(qb, value);
             }
@@ -57,9 +57,9 @@ applyConditions = function (statement) {
     }
 };
 
-statement.prototype.debug = function(debug) {
-    this.collection.on('query', function(data){
-        console.log(JSON.stringify(data));
+statement.prototype.debug = function () {
+    this.collection.on('query', function (data) {
+        console.dir(data); // prints the substituted sql query
     });
     return this;
 };
