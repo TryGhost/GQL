@@ -66,7 +66,7 @@
         g[i] = deGroup(g[i]);
       }
     } else if(g.hasOwnProperty('$group')) {
-      return g.$group;
+      return deGroup(g.$group);
     } else if(typeof g === 'object'){
       for(var p in g) {
         if(g.hasOwnProperty(p)) {
