@@ -57,6 +57,13 @@ applyConditions = function (statement) {
     }
 };
 
+statement.prototype.debug = function(debug) {
+    this.collection.on('query', function(data){
+        console.log(JSON.stringify(data));
+    });
+    return this;
+};
+
 statement.prototype.fetch = function (fields) {
     applyConditions(this);
 
