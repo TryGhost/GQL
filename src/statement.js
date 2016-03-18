@@ -1,10 +1,11 @@
 var _, statement, orAnalogues, applyCondition, applyConditions;
 _ = require('lodash');
 
-statement = function (collectionName, collection, conditions) {
+statement = function (collectionName, collection, conditions, joins) {
     this.collectionName = collectionName;
     this.collection = collection;
     this.conditions = conditions;
+    this.joins = joins;
 };
 
 // Storing the or equivalents of the where clauses is
@@ -83,17 +84,6 @@ statement.prototype.limit = function (limit) {
 
 statement.prototype.offset = function (offset) {
     this.collection.offset(offset);
-    return this;
-};
-
-statement.prototype.join = function (farTable, nearColumn, farColumn) {
-    this.collection.innerJoin(farTable, this.collectionName + '.' + nearColumn, farTable + '.' + farColumn);
-    return this;
-};
-
-statement.prototype.joinThrough = function (nearColumn, middleTable, middleColumnJoinedWithNearColumn, middleColumnJoinedWithFarColumn, farTable, farColumn) {
-    this.collection.innerJoin(middleTable, this.collectionName + '.' + nearColumn, middleTable + '.' + middleColumnJoinedWithNearColumn);
-    this.collection.innerJoin(farTable, middleTable + '.' + middleColumnJoinedWithFarColumn, farTable + '.' + farColumn);
     return this;
 };
 

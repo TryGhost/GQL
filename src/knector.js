@@ -9,13 +9,14 @@ Statement = require('./statement');
 knector = function (name, collection) {
     this.collectionName = name; // will be used for aggregates and joins
     this.collection = collection;
+    this.joins = [];
 };
 knector.prototype.filter = function (filters) {
     if (_.isString(filters)) {
         filters = parser.parse(filters);
     }
 
-    return new Statement(this.collectionName, this.collection, this.buildConditions(filters));
+    return new Statement(this.collectionName, this.collection, this.buildConditions(filters), this.joins);
 };
 
 buildLogicalDollarCondition = function (self, conditions, key, value, negated, parentKey) {
@@ -48,9 +49,6 @@ knector.prototype.buildConditions = function (filter, negated, parentKey) {
     _.forIn(filter, function (value, key) {
         if (key.charAt(0) === '$') {
             buildLogicalDollarCondition(self, conditions, key, value, negated, parentKey);
-        } else if (-1 !== key.indexOf('.$')) {
-            // it's an aggregate query such as 'posts.$count'
-            throw new Error('Aggregate queries are not yet supported');
         } else {
             // it's an attribute matcher such as { name : 'sample' }
             conditions.push(self.buildCondition(key, value, negated));
@@ -96,16 +94,49 @@ buildSimpleComparisonCondition = function (self, condition, key, value, negated)
     return condition;
 };
 
+buildAggregateCondition = function (self, condition, key, value, negated, parentKey) {
+    if(key.match(/\.\$count\.distinct$/)) {
+
+    } else if(key.match(/\.\$count$/)) {
+    } else if(key.match(/\.\$sum$/)) {
+    } else if(key.match(/\.\$max$/)) {
+    } else if(key.match(/\.\$min$/)) {
+    }
+    // it's an aggregate query such as 'posts.$count'
+    throw new Error('Aggregate queries are not yet supported');
+};
+
 knector.prototype.buildCondition = function (key, value, negated, parentKey) {
     if (key) {
         var condition = {};
         if (key.charAt(0) === '$') {
             condition = buildDollarComparisonCondition(this, condition, key, value, negated, parentKey);
+        } else if (-1 !== key.indexOf('.$')) {
+            condition = buildAggregateCondition(this, condition, key, value, negated, parentKey);
         } else {
             condition = buildSimpleComparisonCondition(this, condition, key, value, negated);
         }
         return condition;
     }
+};
+
+var joinTables = function(self, nearTable, nearColumn, farTable, farColumn) {
+    self.joins.push([[nearTable, nearColumn],[farTable, farColumn]]);
+};
+
+knector.prototype.join = function (nearColumn, farTable, farColumn) {
+    // This data structure ensures exactly one join to a far table column from a near column
+    joinTables(this, this.collectionName, nearColumn, farTable, farColumn);
+    this.collection.innerJoin(farTable, this.collectionName + '.' + nearColumn, farTable + '.' + farColumn);
+    return this;
+};
+
+knector.prototype.joinThrough = function (nearColumn, middleTable, middleColumnJoinedWithNearColumn, middleColumnJoinedWithFarColumn, farTable, farColumn) {
+    joinTables(this, this.collectionName, nearColumn, middleTable, middleColumnJoinedWithNearColumn);
+    joinTables(this, middleTable, middleColumnJoinedWithFarColumn, farTable, farColumn);
+    this.collection.innerJoin(middleTable, this.collectionName + '.' + nearColumn, middleTable + '.' + middleColumnJoinedWithNearColumn);
+    this.collection.innerJoin(farTable, middleTable + '.' + middleColumnJoinedWithFarColumn, farTable + '.' + farColumn);
+    return this;
 };
 
 module.exports = knector;
