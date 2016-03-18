@@ -19,16 +19,17 @@ orAnalogues = {
     whereNotNull: 'orWhereNotNull'
 };
 
-applyCondition = function (statement, condition, useOr) {
+applyCondition = function (statement, condition, useOr, _qb) {
+    var qb = _qb ? _qb : statement.collection;
     if (_.isArray(condition)) { // it's a clause/group.
-        statement.collection = statement.collection[useOr ? 'orWhere' : 'where'].apply(statement.collection, [(function () {
-            return function () {
-                _.each(condition, function (_condition) {
-                    // FIXME This needs to get properly wired into what's referred to as a 'Grouped chain' here
-                    // FIXME http://knexjs.org/#Builder-where
-                    applyCondition(statement, _condition);
-                });
+        qb = qb[useOr ? 'orWhere' : 'where'].apply(qb, [(function () {
+            var f = function () {
+                for(var i = 0; i < condition.length; i++) {
+                    applyCondition(statement, condition[i], false, this);
+                }
             };
+            f.bind(qb);
+            return f;
         }())]);
     } else {
         // There should be only one attribute in the condition
@@ -37,7 +38,7 @@ applyCondition = function (statement, condition, useOr) {
             if (key === 'or') { // flip the and to an or
                 applyCondition(statement, value, true);
             } else {
-                statement.collection = statement.collection[useOr ? orAnalogues[key] : key].apply(statement.collection, value);
+                qb = qb[useOr ? orAnalogues[key] : key].apply(qb, value);
             }
         });
     }
