@@ -189,10 +189,16 @@ describe('GQL', function () {
             }).should.throw();
         });
 
-        it('should throw an error for an $or clause that does not have an array value', function () {
+        it('should throw an error for an $or clause that does not have objects for values.', function () {
+            (function () {
+                gql.findAll('posts').filter({$or: ['sample']});
+            }).should.not.throw();
+        });
+
+        it('should not throw an error for an $or clause that has a single object value', function () {
             (function () {
                 gql.findAll('posts').filter({$or: {name: 'sample'}});
-            }).should.throw();
+            }).should.not.throw();
         });
     });
 
@@ -411,6 +417,36 @@ describe('GQL', function () {
                     // console.log(JSON.stringify(result));
                     done();
                 });
+        });
+    });
+
+    describe('grouped clauses', function () {
+        it('should support nested or queries one level deep', function (done) {
+            var query = 'name:sample,(!name:sample+created_at:<=\'2016-03-03\'),(created_at:>\'2016-03-03\')';
+            gql.parse(query).should.eql([
+                {name: 'sample'},
+                {$or: [
+                    // no nested array because the outer array had only one element and was therefore reduced
+                    {$not: {name: 'sample'}},
+                    {created_at: {$lte: '2016-03-03'}}
+                ]},
+                {$or: {created_at: {$gt: '2016-03-03'}}}
+            ]);
+
+            query = 'name:sample,(!name:sample+created_at:<=\'2016-03-03\'),(created_at:\'2016-03-03\',created_at:\'2016-03-04\')';
+            gql.parse(query).should.eql([
+                {name: 'sample'},
+                {$or: [ {$not: {name: 'sample'}}, {created_at: {$lte: '2016-03-03'}} ]},
+                {$or: [ {created_at: '2016-03-03'}, {$or: {created_at: '2016-03-04'}} ]}
+            ]);
+
+            gql.findAll('posts')
+                .filter(query)
+                .fetch().then(function (result) {
+                    console.log(JSON.stringify(result));
+                    result.length.should.eql(3);
+                    done();
+            });
         });
     });
 });
