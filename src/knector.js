@@ -23,15 +23,18 @@ buildLogicalDollarCondition = function (self, conditions, key, value, negated, p
     if (key === '$or') {
         // or queries always come in as an array.
         // they need to be treated specially to prevent them from being confused with an in query
+        var _conditions = [];
         if (_.isArray(value)) {
-            var _conditions = [];
             _.forEach(value, function (_value) {
                 _conditions.push(self.buildConditions(_value));
             });
-            conditions.push({or: _conditions});
+        } else if(_.isPlainObject(value)) {
+            // it was an or condition with a single value
+            _conditions.push(self.buildConditions(value));
         } else {
-            throw new Error('$or conditions only accept arrays as a value');
+            throw new Error('$or conditions only accept arrays or an object (which represents an array of length 1) as a value');
         }
+        conditions.push({or: _conditions});
     } else if (key === '$not') {
         conditions.push(self.buildConditions(value, true, parentKey));
     } else {
