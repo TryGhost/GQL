@@ -20,8 +20,57 @@ describe('GQL', function () {
             table.increments();
             table.string('name');
             table.binary('image');
+            table.integer('author_id');
             table.boolean('featured').defaultTo(false);
             table.timestamps();
+        }).then(function() {
+            knex.schema.createTableIfNotExists('users', function (table) {
+                table.increments();
+                table.string('username');
+                table.string('name');
+                table.timestamps();
+            })
+        }).then(function() {
+            knex.schema.createTableIfNotExists('comments', function (table) {
+                table.increments();
+                table.integer('author_id');
+                table.string('comment');
+                table.timestamps();
+            })
+        }).then(function() {
+            knex.schema.createTableIfNotExists('tags', function (table) {
+                table.increments();
+                table.string('name');
+                table.string('slug');
+                table.timestamps();
+            })
+        }).then(function() {
+            knex.schema.createTableIfNotExists('posts_tags', function (table) {
+                table.integer('post_id');
+                table.integer('tag_id');
+                table.timestamps();
+            })
+        }).then(function() {
+            knex.schema.createTableIfNotExists('products', function (table) {
+                table.increments();
+                table.string('name');
+                table.decimal('price');
+                table.timestamps();
+            })
+        }).then(function() {
+            knex.schema.createTableIfNotExists('customers', function (table) {
+                table.increments();
+                table.string('name');
+                table.timestamps();
+            })
+        }).then(function() {
+            knex.schema.createTableIfNotExists('orders', function (table) {
+                table.increments();
+                table.integer('customer_id');
+                table.integer('product_id');
+                table.integer('quantity');
+                table.timestamps();
+            })
         }).then(function () {
             done();
         });
@@ -79,7 +128,7 @@ describe('GQL', function () {
         it('should support a string argument', function (done) {
             gql.findAll('posts').filter('name:sample').fetch().then(function (result) {
                 result.length.should.eql(1);
-                Object.keys(result[0]).length.should.eql(6);
+                Object.keys(result[0]).length.should.eql(7);
                 done();
             });
         });
@@ -334,7 +383,7 @@ describe('GQL', function () {
                 .fetch()
                 .then(function (result) {
                     result.length.should.eql(4);
-                    Object.keys(result[0]).length.should.eql(6);
+                    Object.keys(result[0]).length.should.eql(7);
                     // console.log(JSON.stringify(result));
                     done();
                 });
@@ -346,7 +395,7 @@ describe('GQL', function () {
                 .fetch('*')
                 .then(function (result) {
                     result.length.should.eql(4);
-                    Object.keys(result[0]).length.should.eql(6);
+                    Object.keys(result[0]).length.should.eql(7);
                     // console.log(JSON.stringify(result));
                     done();
                 });
@@ -364,7 +413,7 @@ describe('GQL', function () {
                 });
         });
 
-        it.only('should return id and name when called with fields \'id, name\' as a comma-separated string', function (done) {
+        it('should return id and name when called with fields \'id, name\' as a comma-separated string', function (done) {
             gql.findAll('posts')
                 .filter()
                 .fetch('id, name')
