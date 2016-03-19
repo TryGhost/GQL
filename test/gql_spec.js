@@ -16,6 +16,7 @@ gql = new Gql(knex);
 
 describe('GQL', function () {
     before(function (done) {
+        var image = 'asdfghjkl;';
         knex.schema.createTable('posts', function (table) {
             table.increments();
             table.string('name');
@@ -24,47 +25,47 @@ describe('GQL', function () {
             table.boolean('featured').defaultTo(false);
             table.timestamps();
         }).then(function() {
-            knex.schema.createTable('users', function (table) {
+            return knex.schema.createTable('users', function (table) {
                 table.increments();
                 table.string('username');
                 table.string('name');
                 table.timestamps();
             })
         }).then(function() {
-            knex.schema.createTable('comments', function (table) {
+            return knex.schema.createTable('comments', function (table) {
                 table.increments();
                 table.integer('author_id');
                 table.string('comment');
                 table.timestamps();
             })
         }).then(function() {
-            knex.schema.createTable('tags', function (table) {
+            return knex.schema.createTable('tags', function (table) {
                 table.increments();
                 table.string('name');
                 table.string('slug');
                 table.timestamps();
             })
         }).then(function() {
-            knex.schema.createTable('posts_tags', function (table) {
+            return knex.schema.createTable('posts_tags', function (table) {
                 table.integer('post_id');
                 table.integer('tag_id');
                 table.timestamps();
             })
         }).then(function() {
-            knex.schema.createTable('products', function (table) {
+            return knex.schema.createTable('products', function (table) {
                 table.increments();
                 table.string('name');
                 table.decimal('price');
                 table.timestamps();
             })
         }).then(function() {
-            knex.schema.createTable('customers', function (table) {
+            return knex.schema.createTable('customers', function (table) {
                 table.increments();
                 table.string('name');
                 table.timestamps();
             })
         }).then(function() {
-            knex.schema.createTable('orders', function (table) {
+            return knex.schema.createTable('orders', function (table) {
                 table.increments();
                 table.integer('customer_id');
                 table.integer('product_id');
@@ -72,42 +73,30 @@ describe('GQL', function () {
                 table.timestamps();
             })
         }).then(function () {
-            done();
-        });
-    });
-
-    beforeEach(function (done) {
-        var image = 'asdfghjkl;';
-        knex('posts')
-            .del()
-            .then(function () {
-                return knex('posts').insert({
-                    name: 'sample',
-                    created_at: '2016-03-01'
-                });
-            })
-            .then(function () {
-                return knex('posts').insert({
-                    name: 'featured-sample',
-                    featured: true,
-                    created_at: '2016-03-02'
-                });
-            })
-            .then(function () {
-                return knex('posts').insert({
-                    name: 'sample-with-image',
-                    image: image,
-                    created_at: '2016-03-03'
-                });
-            })
-            .then(function () {
-                return knex('posts').insert({
-                    name: 'featured-sample-with-image',
-                    featured: true,
-                    image: image,
-                    created_at: '2016-03-04'
-                });
-            }).then(function () {
+            return knex('posts').insert({
+                name: 'sample',
+                created_at: '2016-03-01'
+            });
+        }).then(function () {
+            return knex('posts').insert({
+                name: 'featured-sample',
+                featured: true,
+                created_at: '2016-03-02'
+            });
+        }).then(function () {
+            return knex('posts').insert({
+                name: 'sample-with-image',
+                image: image,
+                created_at: '2016-03-03'
+            });
+        }).then(function () {
+            return knex('posts').insert({
+                name: 'featured-sample-with-image',
+                featured: true,
+                image: image,
+                created_at: '2016-03-04'
+            });
+        }).then(function () {
             done();
         });
     });
