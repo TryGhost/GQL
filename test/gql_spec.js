@@ -30,40 +30,47 @@ describe('GQL', function () {
                 table.string('username');
                 table.string('name');
                 table.timestamps();
-            })
+            }).then(function(){
+                return knex('users').insert({
+                    id: 1,
+                    username: 'test',
+                    name: 'Foo Bar'
+                });
+            });
         }).then(function() {
             return knex.schema.createTable('comments', function (table) {
                 table.increments();
                 table.integer('author_id');
+                table.integer('post_id');
                 table.string('comment');
                 table.timestamps();
-            })
+            });
         }).then(function() {
             return knex.schema.createTable('tags', function (table) {
                 table.increments();
                 table.string('name');
                 table.string('slug');
                 table.timestamps();
-            })
+            });
         }).then(function() {
             return knex.schema.createTable('posts_tags', function (table) {
                 table.integer('post_id');
                 table.integer('tag_id');
                 table.timestamps();
-            })
+            });
         }).then(function() {
             return knex.schema.createTable('products', function (table) {
                 table.increments();
                 table.string('name');
                 table.decimal('price');
                 table.timestamps();
-            })
+            });
         }).then(function() {
             return knex.schema.createTable('customers', function (table) {
                 table.increments();
                 table.string('name');
                 table.timestamps();
-            })
+            });
         }).then(function() {
             return knex.schema.createTable('orders', function (table) {
                 table.increments();
@@ -71,12 +78,48 @@ describe('GQL', function () {
                 table.integer('product_id');
                 table.integer('quantity');
                 table.timestamps();
-            })
+            });
         }).then(function () {
             return knex('posts').insert({
                 id: 1,
                 name: 'sample',
                 created_at: '2016-03-01'
+            }).then(function(){
+                return knex('comments').insert({
+                    id: 1,
+                    author_id: 1,
+                    post_id: 1,
+                    comment: 'Hello world'
+                }).then(function(){
+                    return knex('comments').insert({
+                        id: 2,
+                        author_id: 1,
+                        post_id: 1,
+                        comment: 'Hello again'
+                    })
+                }).then(function(){
+                    return knex('tags').insert({
+                        id: 1,
+                        name: 'Hot',
+                        slug: 'hot'
+                    }).then(function(){
+                        return knex('tags').insert({
+                            id: 2,
+                            name: 'Cold',
+                            slug: 'cold'
+                        });
+                    }).then(function(){
+                        return knex('posts_tags').insert({
+                            tag_id: 1,
+                            post_id: 1
+                        }).then(function(){
+                            return knex('posts_tags').insert({
+                                tag_id: 2,
+                                post_id: 1
+                            });
+                        });
+                    });
+                });
             });
         }).then(function () {
             return knex('posts').insert({
@@ -84,6 +127,11 @@ describe('GQL', function () {
                 name: 'featured-sample',
                 featured: true,
                 created_at: '2016-03-02'
+            }).then(function() {
+                return knex('posts_tags').insert({
+                    tag_id: 1,
+                    post_id: 2
+                })
             });
         }).then(function () {
             return knex('posts').insert({
