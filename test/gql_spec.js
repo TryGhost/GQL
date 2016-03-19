@@ -74,23 +74,27 @@ describe('GQL', function () {
             })
         }).then(function () {
             return knex('posts').insert({
+                id: 1,
                 name: 'sample',
                 created_at: '2016-03-01'
             });
         }).then(function () {
             return knex('posts').insert({
+                id: 2,
                 name: 'featured-sample',
                 featured: true,
                 created_at: '2016-03-02'
             });
         }).then(function () {
             return knex('posts').insert({
+                id: 3,
                 name: 'sample-with-image',
                 image: image,
                 created_at: '2016-03-03'
             });
         }).then(function () {
             return knex('posts').insert({
+                id: 4,
                 name: 'featured-sample-with-image',
                 featured: true,
                 image: image,
