@@ -16,7 +16,7 @@ gql = new Gql(knex);
 
 describe('GQL', function () {
     before(function (done) {
-        knex.schema.createTableIfNotExists('posts', function (table) {
+        knex.schema.createTable('posts', function (table) {
             table.increments();
             table.string('name');
             table.binary('image');
@@ -24,47 +24,47 @@ describe('GQL', function () {
             table.boolean('featured').defaultTo(false);
             table.timestamps();
         }).then(function() {
-            knex.schema.createTableIfNotExists('users', function (table) {
+            knex.schema.createTable('users', function (table) {
                 table.increments();
                 table.string('username');
                 table.string('name');
                 table.timestamps();
             })
         }).then(function() {
-            knex.schema.createTableIfNotExists('comments', function (table) {
+            knex.schema.createTable('comments', function (table) {
                 table.increments();
                 table.integer('author_id');
                 table.string('comment');
                 table.timestamps();
             })
         }).then(function() {
-            knex.schema.createTableIfNotExists('tags', function (table) {
+            knex.schema.createTable('tags', function (table) {
                 table.increments();
                 table.string('name');
                 table.string('slug');
                 table.timestamps();
             })
         }).then(function() {
-            knex.schema.createTableIfNotExists('posts_tags', function (table) {
+            knex.schema.createTable('posts_tags', function (table) {
                 table.integer('post_id');
                 table.integer('tag_id');
                 table.timestamps();
             })
         }).then(function() {
-            knex.schema.createTableIfNotExists('products', function (table) {
+            knex.schema.createTable('products', function (table) {
                 table.increments();
                 table.string('name');
                 table.decimal('price');
                 table.timestamps();
             })
         }).then(function() {
-            knex.schema.createTableIfNotExists('customers', function (table) {
+            knex.schema.createTable('customers', function (table) {
                 table.increments();
                 table.string('name');
                 table.timestamps();
             })
         }).then(function() {
-            knex.schema.createTableIfNotExists('orders', function (table) {
+            knex.schema.createTable('orders', function (table) {
                 table.increments();
                 table.integer('customer_id');
                 table.integer('product_id');
