@@ -11,8 +11,7 @@ knex = require('knex')({
     connection: {filename: ':memory:'}
 });
 
-Gql = require('../src/gql');
-gql = new Gql(knex);
+gql = require('../src/gql');
 
 describe('GQL', function () {
     before(function (done) {
@@ -159,33 +158,30 @@ describe('GQL', function () {
 
     it('should correctly escape bad sequences', function () {
         (function () {
-            gql.parse('id:\'1 and 1‘=\'1`\'').toSQL();
+            gql.parse('id:\'1 and 1‘=\'1`\'').applyTo(knex('posts')).toSQL();
         }).should.throw();
-        gql.findAll('posts').filter('posts.id:\'1 and a=\\\'1`\'').toSQL()
+        gql.parse('posts.id:\'1 and a=\\\'1`\'').applyTo(knex('posts')).toString()
             .should.eql('select * from "posts" where "posts"."id" = \'1 and a=\\\'1`\'');
     });
 
     describe('filter with a string', function () {
         it('should support a string argument', function (done) {
-            gql.findAll('posts').filter('name:sample').fetch().then(function (result) {
+            gql.parse('name:sample').applyTo(knex('posts')).select().then(function (result) {
                 result.length.should.eql(1);
                 Object.keys(result[0]).length.should.eql(7);
                 done();
             });
         });
 
-        it('should not accept an empty string filter', function () {
-            (function () {
-                gql.parse('').toSQL();
-            }).should.throw();
+        it('should interpret an an empty string as no conditions (empty array)', function () {
+            gql.parse('').conditions.should.eql([]);
         });
     });
 
     describe('basic matching', function () {
         it('should perform exact string matches', function (done) {
-            gql.findAll('posts')
-                .filter({name: 'sample'})
-                .fetch()
+            gql.parse({name: 'sample'}).applyTo(knex('posts'))
+                .select()
                 .then(function (result) {
                     result[0].name.should.eql('sample');
                     // console.log(JSON.stringify(result));
@@ -194,9 +190,8 @@ describe('GQL', function () {
         });
 
         it('should perform like matches on strings', function (done) {
-            gql.findAll('posts')
-                .filter([{name: {$like: '%ample'}}, {name: {$like: 'fe%'}}])
-                .fetch()
+            gql.parse([{name: {$like: '%ample'}}, {name: {$like: 'fe%'}}]).applyTo(knex('posts'))
+                .select()
                 .then(function (result) {
                     result.length.should.eql(1);
                     result[0].name.should.eql('featured-sample');
@@ -206,74 +201,74 @@ describe('GQL', function () {
         });
 
         it('should support exact not matches', function () {
-            gql.findAll('posts').filter({$not: {name: 'sample'}}).conditions
+            gql.parse({$not: {name: 'sample'}}).conditions
                 .should.eql({whereNot: ['name', 'sample']});
         });
 
         it('should support less than matches', function () {
-            gql.findAll('posts').filter({created_at: {$lt: '2016-03-02'}}).conditions
+            gql.parse({created_at: {$lt: '2016-03-02'}}).conditions
                 .should.eql({where: ['created_at', '<', '2016-03-02']});
         });
 
         it('should support not less than matches', function () {
-            gql.findAll('posts').filter({created_at: {$not: {$lt: '2016-03-02'}}}).conditions
+            gql.parse({created_at: {$not: {$lt: '2016-03-02'}}}).conditions
                 .should.eql({whereNot: ['created_at', '<', '2016-03-02']});
         });
 
         it('should support greater than matches', function () {
-            gql.findAll('posts').filter({created_at: {$gt: '2016-03-02'}}).conditions
+            gql.parse({created_at: {$gt: '2016-03-02'}}).conditions
                 .should.eql({where: ['created_at', '>', '2016-03-02']});
         });
 
         it('should support not greater than matches', function () {
-            gql.findAll('posts').filter({created_at: {$not: {$gt: '2016-03-02'}}}).conditions
+            gql.parse({created_at: {$not: {$gt: '2016-03-02'}}}).conditions
                 .should.eql({whereNot: ['created_at', '>', '2016-03-02']});
         });
 
         it('should support less than equal matches', function () {
-            gql.findAll('posts').filter({created_at: {$lte: '2016-03-02'}}).conditions
+            gql.parse({created_at: {$lte: '2016-03-02'}}).conditions
                 .should.eql({where: ['created_at', '<=', '2016-03-02']});
         });
 
         it('should support not less than equal matches', function () {
-            gql.findAll('posts').filter({created_at: {$not: {$lte: '2016-03-02'}}}).conditions
+            gql.parse({created_at: {$not: {$lte: '2016-03-02'}}}).conditions
                 .should.eql({whereNot: ['created_at', '<=', '2016-03-02']});
         });
 
         it('should support greater than equal matches', function () {
-            gql.findAll('posts').filter({created_at: {$gte: '2016-03-02'}}).conditions
+            gql.parse({created_at: {$gte: '2016-03-02'}}).conditions
                 .should.eql({where: ['created_at', '>=', '2016-03-02']});
         });
 
         it('should support not greater than equal matches', function () {
-            gql.findAll('posts').filter({created_at: {$not: {$gte: '2016-03-02'}}}).conditions
+            gql.parse({created_at: {$not: {$gte: '2016-03-02'}}}).conditions
                 .should.eql({whereNot: ['created_at', '>=', '2016-03-02']});
         });
 
         it('should support null matches', function () {
-            gql.findAll('posts').filter({created_at: null}).conditions
+            gql.parse({created_at: null}).conditions
                 .should.eql({whereNull: ['created_at']});
         });
 
         it('should support not null matches', function () {
-            gql.findAll('posts').filter({created_at: {$ne: null}}).conditions
+            gql.parse({created_at: {$ne: null}}).conditions
                 .should.eql({whereNotNull: ['created_at']});
         });
 
         it('should support not null matches', function () {
-            gql.findAll('posts').filter({created_at: {$ne: null}}).conditions
+            gql.parse({created_at: {$ne: null}}).conditions
                 .should.eql({whereNotNull: ['created_at']});
         });
     });
 
     describe('in clauses', function () {
         it('should support in matches', function () {
-            gql.findAll('posts').filter({created_at: ['2016-03-01', '2016-03-02']}).conditions
+            gql.parse({created_at: ['2016-03-01', '2016-03-02']}).conditions
                 .should.eql({whereIn: ['created_at', ['2016-03-01', '2016-03-02']]});
         });
 
         it('should support not in matches', function () {
-            gql.findAll('posts').filter({$not: {created_at: ['2016-03-01', '2016-03-02']}}).conditions
+            gql.parse({$not: {created_at: ['2016-03-01', '2016-03-02']}}).conditions
                 .should.eql({whereNotIn: ['created_at', ['2016-03-01', '2016-03-02']]});
         });
     });
@@ -281,19 +276,19 @@ describe('GQL', function () {
     describe('invalid filters', function () {
         it('should throw an error for a bad comparison operator', function () {
             (function () {
-                gql.findAll('posts').filter({$bad: {created_at: ['2016-03-01', '2016-03-02']}});
+                gql.parse({$bad: {created_at: ['2016-03-01', '2016-03-02']}});
             }).should.throw();
         });
 
         it('should throw an error for an $or clause that does not have objects for values.', function () {
             (function () {
-                gql.findAll('posts').filter({$or: ['sample']});
+                gql.parse({$or: ['sample']});
             }).should.not.throw();
         });
 
         it('should not throw an error for an $or clause that has a single object value', function () {
             (function () {
-                gql.findAll('posts').filter({$or: {name: 'sample'}});
+                gql.parse({$or: {name: 'sample'}});
             }).should.not.throw();
         });
     });
@@ -304,7 +299,7 @@ describe('GQL', function () {
                 .join('id', 'posts', 'author_id')
                 .filter('posts.id.$count:>0')
                 .debug()
-                .fetch()
+                .select()
                 .then(function(result){
                     // TODO verify result
                     done();
@@ -316,7 +311,7 @@ describe('GQL', function () {
                 .join('id', 'posts', 'author_id')
                 .filter('posts.id.$count.distinct:>0')
                 .debug()
-                .fetch()
+                .select()
                 .then(function(result){
                     // TODO verify result
                     done();
@@ -329,7 +324,7 @@ describe('GQL', function () {
                 .join('id', 'posts', 'author_id')
                 .filter('posts.id.$sum:>0')
                 .debug()
-                .fetch()
+                .select()
                 .then(function(result){
                     // TODO verify result
                     done();
@@ -342,7 +337,7 @@ describe('GQL', function () {
                 .join('id', 'posts', 'author_id')
                 .filter('posts.id.$max:>0')
                 .debug()
-                .fetch()
+                .select()
                 .then(function(result){
                     // TODO verify result
                     done();
@@ -355,7 +350,7 @@ describe('GQL', function () {
                 .join('id', 'posts', 'author_id')
                 .filter('posts.id.$max:>0')
                 .debug()
-                .fetch()
+                .select()
                 .then(function(result){
                     // TODO verify result
                     done();
@@ -365,7 +360,7 @@ describe('GQL', function () {
 
     describe('nested groups', function () {
         it('should support $and queries nested one level deep', function () {
-            var conditions = gql.findAll('posts').filter([
+            var conditions = gql.parse([
                     {$not: {created_at: ['2016-03-01', '2016-03-02']}},
                     {created_at: {$lt: '2016-03-04'}}
                 ]
@@ -377,9 +372,8 @@ describe('GQL', function () {
             ]).should.eql(true);
         });
 
-        it('should be able to execute queries containing groups of clauses', function () {
-            var conditions, filter, sql;
-            filter = gql.findAll('posts').filter({
+        it('should support $or queries nested one level deep', function () {
+            var conditions = gql.parse({
                 $or: [
                     [{created_at: {$lt: '2016-03-04'}},
                         {$not: {created_at: ['2016-03-01', '2016-03-02']}}],
@@ -412,14 +406,14 @@ describe('GQL', function () {
 
     describe('grouping by logical operators', function () {
         it('should support and queries', function () {
-            var conditions = gql.findAll('posts').filter([{name: 'sample'}, {featured: false}]).conditions;
+            var conditions = gql.parse([{name: 'sample'}, {featured: false}]).conditions;
             // console.log(JSON.stringify(conditions));
             _.isEqual(conditions, [{where: ['name', 'sample']}, {where: ['featured', false]}]).should.eql(true);
         });
 
         it('should support or queries', function () {
             var conditions, test;
-            conditions = gql.findAll('posts').filter([{$or: [{name: 'sample'}, {featured: false}]}]).conditions;
+            conditions = gql.parse([{$or: [{name: 'sample'}, {featured: false}]}]).conditions;
             test = {or: [{where: ['name', 'sample']}, {where: ['featured', false]}]};
             conditions.should.eql(test);
         });
@@ -431,9 +425,8 @@ describe('GQL', function () {
 
     describe('returned field selection', function () {
         it('should return all fields of all posts when called with no filter and no fetch fields', function (done) {
-            gql.findAll('posts')
-                .filter()
-                .fetch()
+            gql.parse().applyTo(knex('posts'))
+                .select()
                 .then(function (result) {
                     result.length.should.eql(4);
                     Object.keys(result[0]).length.should.eql(7);
@@ -443,9 +436,8 @@ describe('GQL', function () {
         });
 
         it('should return all fields of all posts when called with no filter and \'*\'', function (done) {
-            gql.findAll('posts')
-                .filter()
-                .fetch('*')
+            gql.parse().applyTo(knex('posts'))
+                .select('*')
                 .then(function (result) {
                     result.length.should.eql(4);
                     Object.keys(result[0]).length.should.eql(7);
@@ -455,9 +447,8 @@ describe('GQL', function () {
         });
 
         it('should return only id when called with fields \'id\' as a string', function (done) {
-            gql.findAll('posts')
-                .filter()
-                .fetch('id')
+            gql.parse().applyTo(knex('posts'))
+                .select('id')
                 .then(function (result) {
                     result.length.should.eql(4);
                     Object.keys(result[0]).length.should.eql(1);
@@ -467,24 +458,11 @@ describe('GQL', function () {
         });
 
         it('should return id and name when called with fields \'id, name\' as a comma-separated string', function (done) {
-            gql.findAll('posts')
-                .filter()
-                .fetch('id, name')
+            gql.parse().applyTo(knex('posts'))
+                .select('id', 'name')
                 .then(function (result) {
                     result.length.should.eql(4);
                     Object.keys(result[0]).length.should.eql(2);
-                    // console.log(JSON.stringify(result));
-                    done();
-                });
-        });
-
-        it('should return only id when called with fields [\'id\'] as an array', function (done) {
-            gql.findAll('posts')
-                .filter()
-                .fetch(['id'])
-                .then(function (result) {
-                    result.length.should.eql(4);
-                    Object.keys(result[0]).length.should.eql(1);
                     // console.log(JSON.stringify(result));
                     done();
                 });
@@ -493,10 +471,9 @@ describe('GQL', function () {
 
     describe('limit queries', function () {
         it('should return only 1 record after calling limit(1)', function (done) {
-            gql.findAll('posts')
-                .filter()
+            gql.parse().applyTo(knex('posts'))
                 .limit(1)
-                .fetch('id')
+                .select('id')
                 .then(function (result) {
                     result.length.should.eql(1);
                     Object.keys(result[0]).length.should.eql(1);
@@ -508,10 +485,9 @@ describe('GQL', function () {
 
     describe('offset queries', function () {
         it('should return only 2 records after calling offset(2)', function (done) {
-            gql.findAll('posts')
-                .filter()
+            gql.parse().applyTo(knex('posts'))
                 .offset(2)
-                .fetch('id')
+                .select('id')
                 .then(function (result) {
                     result.length.should.eql(2);
                     Object.keys(result[0]).length.should.eql(1);
@@ -523,10 +499,9 @@ describe('GQL', function () {
 
     describe('orderBy queries', function () {
         it('should return all posts in descending order after calling orderBy(\'name\', \'desc\')', function (done) {
-            gql.findAll('posts')
-                .filter({})
+            gql.parse().applyTo(knex('posts'))
                 .orderBy('name', 'desc')
-                .fetch('name')
+                .select('name')
                 .then(function (results) {
                     results.length.should.eql(4);
                     Object.keys(results[0]).length.should.eql(1);
@@ -542,10 +517,9 @@ describe('GQL', function () {
         });
 
         it('should return all posts in ascending order after calling orderBy(\'name\')', function (done) {
-            gql.findAll('posts')
-                .filter({})
+            gql.parse().applyTo(knex('posts'))
                 .orderBy('name')
-                .fetch('name')
+                .select('name')
                 .then(function (results) {
                     results.length.should.eql(4);
                     Object.keys(results[0]).length.should.eql(1);
@@ -563,10 +537,9 @@ describe('GQL', function () {
 
     describe('fetch().toSQL()', function () {
         it('should correctly convert statement to SQL string', function () {
-            gql.findAll('posts')
-                .filter({})
+            gql.parse().applyTo(knex('posts'))
                 .orderBy('name')
-                .fetch('name')
+                .select('name')
                 .toString()
                 .should.eql('select "name" from "posts" order by "name" asc');
         });
@@ -574,17 +547,16 @@ describe('GQL', function () {
 
     describe('filter with objects', function () {
         it('should accept and properly query given an array of filters', function () {
-            gql.findAll('posts')
-                .filter([{name: 'sample'}, {featured: true}])
+            gql.parse([{name: 'sample'}, {featured: true}]).applyTo(knex('posts'))
+                .select('name')
                 .orderBy('name')
-                .toSQL('name')
+                .toString()
                 .should.eql('select "name" from "posts" where "name" = \'sample\' and "featured" = true order by "name" asc');
         });
 
         it('should return all posts when calling findAll with an empty object filter', function (done) {
-            gql.findAll('posts')
-                .filter({})
-                .fetch()
+            gql.parse({}).applyTo(knex('posts'))
+                .select()
                 .then(function (result) {
                     result.length.should.eql(4);
                     // console.log(JSON.stringify(result));
@@ -596,8 +568,8 @@ describe('GQL', function () {
     describe('grouped clauses', function () {
         describe('should support or queries', function () {
             it('containing a nested and', function (done) {
-                var query = 'name:sample,(!name:sample+created_at:<=\'2016-03-03\')';
-                gql.parse(query).should.eql([
+                var query = gql.parse('name:sample,(!name:sample+created_at:<=\'2016-03-03\')');
+                query.filters.should.eql([
                     {name: 'sample'},
                     {
                         $or: [
@@ -607,10 +579,8 @@ describe('GQL', function () {
                         ]
                     }
                 ]);
-
-                gql.findAll('posts')
-                    .filter(query)
-                    .fetch()
+                query.applyTo(knex('posts'))
+                    .select()
                     .then(function (result) {
                         result.length.should.eql(3);
                         done();
@@ -618,8 +588,8 @@ describe('GQL', function () {
             });
 
             it('containing a nested or', function (done) {
-                var query = 'name:sample,(created_at:\'2016-03-03\',created_at:\'2016-03-04\')';
-                gql.parse(query).should.eql([
+                var query = gql.parse('name:sample,(created_at:\'2016-03-03\',created_at:\'2016-03-04\')');
+                query.filters.should.eql([
                     {name: 'sample'},
                     {
                         $or: [
@@ -629,10 +599,8 @@ describe('GQL', function () {
                         ]
                     }
                 ]);
-
-                gql.findAll('posts')
-                    .filter(query)
-                    .fetch()
+                query.applyTo(knex('posts'))
+                    .select()
                     .then(function (result) {
                         result.length.should.eql(3);
                         done();
@@ -640,15 +608,13 @@ describe('GQL', function () {
             });
 
             it('containing a nested clause containing a single statement', function (done) {
-                var query = 'name:sample,(created_at:<=\'2016-03-03\')';
-                gql.parse(query).should.eql([
+                var query = gql.parse('name:sample,(created_at:<=\'2016-03-03\')');
+                query.filters.should.eql([
                     {name: 'sample'},
                     {$or: {created_at: {$lte: '2016-03-03'}}} // no nested array because the outer array had only one element and was therefore reduced
                 ]);
-
-                gql.findAll('posts')
-                    .filter(query)
-                    .fetch()
+                query.applyTo(knex('posts'))
+                    .select()
                     .then(function (result) {
                         result.length.should.eql(3);
                         done();
@@ -658,8 +624,8 @@ describe('GQL', function () {
 
         describe('should support and queries', function () {
             it('containing a nested and', function (done) {
-                var query = 'name:sample+(!name:sample+created_at:<=\'2016-03-03\')';
-                gql.parse(query).should.eql([
+                var query = gql.parse('name:sample+(!name:sample+created_at:<=\'2016-03-03\')');
+                query.filters.should.eql([
                     {name: 'sample'},
                     [
                         // no nested array because the outer array had only one element and was therefore reduced
@@ -667,10 +633,8 @@ describe('GQL', function () {
                         {created_at: {$lte: '2016-03-03'}}
                     ]
                 ]);
-
-                gql.findAll('posts')
-                    .filter(query)
-                    .fetch()
+                query.applyTo(knex('posts'))
+                    .select()
                     .then(function (result) {
                         result.length.should.eql(0);
                         done();
@@ -678,16 +642,15 @@ describe('GQL', function () {
             });
 
             it('containing a nested clause containing a single element', function (done) {
-                var query = 'name:sample+(created_at:<=\'2016-03-03\')';
-                gql.parse(query).should.eql([
+                var query = gql.parse('name:sample+(created_at:<=\'2016-03-03\')');
+                query.filters.should.eql([
                     {name: 'sample'},
                     // no nested array because the outer array had only one element and was therefore reduced
                     {created_at: {$lte: '2016-03-03'}}
                 ]);
 
-                gql.findAll('posts')
-                    .filter(query)
-                    .fetch()
+                gql.parse().applyTo(knex('posts'), query)
+                    .select()
                     .then(function (result) {
                         result.length.should.eql(1);
                         done();
@@ -696,8 +659,8 @@ describe('GQL', function () {
         });
 
         it('should support nested and queries', function (done) {
-            var query = 'name:sample,(!name:sample+created_at:<=\'2016-03-03\'),(created_at:>\'2016-03-03\')';
-            gql.parse(query).should.eql([
+            var query = gql.parse('name:sample,(!name:sample+created_at:<=\'2016-03-03\'),(created_at:>\'2016-03-03\')');
+            query.filters.should.eql([
                 {name: 'sample'},
                 {$or: [
                     // no nested array because the outer array had only one element and was therefore reduced
@@ -706,10 +669,9 @@ describe('GQL', function () {
                 ]},
                 {$or: {created_at: {$gt: '2016-03-03'}}}
             ]);
-
-            gql.findAll('posts')
-                .filter(query)
-                .fetch()
+            query.applyTo(knex('posts'))
+                .select()
+                .toString()
                 .then(function (result) {
                     result.length.should.eql(4);
                     done();
@@ -717,16 +679,14 @@ describe('GQL', function () {
         });
 
         it('should support nested or queries', function (done) {
-            var query = 'name:sample,(!name:sample+created_at:<=\'2016-03-03\'),(!name:sample+(created_at:\'2016-03-03\',created_at:\'2016-03-04\'))';
-            gql.parse(query).should.eql([
+            var query = gql.parse('name:sample,(!name:sample+created_at:<=\'2016-03-03\'),(!name:sample+(created_at:\'2016-03-03\',created_at:\'2016-03-04\'))');
+            query.filters.should.eql([
                 {name: 'sample'},
                 {$or: [{$not: {name: 'sample'}}, {created_at: {$lte: '2016-03-03'}}]},
                 {$or: [{$not: {name: 'sample'}}, [{created_at: '2016-03-03'}, {$or: {created_at: '2016-03-04'}}]]}
             ]);
-
-            gql.findAll('posts')
-                .filter(query)
-                .fetch()
+            query.applyTo(knex('posts'))
+                .select()
                 .then(function (result) {
                     result.length.should.eql(4);
                     done();

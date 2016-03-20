@@ -1,7 +1,5 @@
 /* globals describe, it */
-var gql, Gql;
-Gql = require('../src/gql');
-gql = new Gql({});
+var gql = require('../src/lexer');
 
 describe('Lexer', function () {
     var lexicalError = /^Query Error: unrecognized text/;
