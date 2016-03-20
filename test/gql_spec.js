@@ -294,12 +294,11 @@ describe('GQL', function () {
         });
     });
 
-    describe.skip('aggregate queries', function () {
+    describe('aggregate queries', function () {
         it('should support .$count', function (done) {
-            gql.findAll('users')
+            gql.parse('posts.id.$count:>0')
+                .applyTo(knex('users'))
                 .join('id', 'posts', 'author_id')
-                .filter('posts.id.$count:>0')
-                .debug()
                 .select()
                 .then(function () {
                     // TODO verify result
@@ -308,10 +307,9 @@ describe('GQL', function () {
         });
 
         it('should support .$count.distinct', function (done) {
-            gql.findAll('users')
+            gql.parse('posts.id.$count.distinct:>0')
+                .applyTo(knex('users'))
                 .join('id', 'posts', 'author_id')
-                .filter('posts.id.$count.distinct:>0')
-                .debug()
                 .select()
                 .then(function () {
                     // TODO verify result
@@ -321,10 +319,9 @@ describe('GQL', function () {
 
         it('should support .$sum', function (done) {
             // want a better field here than posts.id to sum. something like an orders/products schema would be better
-            gql.findAll('users')
+            gql.parse('posts.id.$sum:>0')
+                .applyTo(knex('users'))
                 .join('id', 'posts', 'author_id')
-                .filter('posts.id.$sum:>0')
-                .debug()
                 .select()
                 .then(function () {
                     // TODO verify result
@@ -334,10 +331,9 @@ describe('GQL', function () {
 
         it('should support .$max', function (done) {
             // want a better field here than posts.id to sum. something like an orders/products schema would be better
-            gql.findAll('users')
+            gql.parse('posts.id.$max:>0')
+                .applyTo(knex('users'))
                 .join('id', 'posts', 'author_id')
-                .filter('posts.id.$max:>0')
-                .debug()
                 .select()
                 .then(function () {
                     // TODO verify result
@@ -347,10 +343,9 @@ describe('GQL', function () {
 
         it('should support .$min', function (done) {
             // want a better field here than posts.id to sum. something like an orders/products schema would be better
-            gql.findAll('users')
+            gql.parse('posts.id.$max:>0')
+                .applyTo(knex('users'))
                 .join('id', 'posts', 'author_id')
-                .filter('posts.id.$max:>0')
-                .debug()
                 .select()
                 .then(function () {
                     // TODO verify result
