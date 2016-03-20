@@ -4,8 +4,8 @@
 
 %options case-insensitive
 
-badcharsincnot               [^\s'"\+\,\(\)\>\<=\[\]!]
-badcharsnonot                [^\s'"\+\,\(\)\>\<=\[\]]
+badcharsincnot               [^\s'"\+\,\(\)\>\<=\[\]~!]
+badcharsnonot                [^\s'"\+\,\(\)\>\<=\[\]~]
 escapable                    ['"\+\,\(\)\>\<=\[\]]
 
 %%

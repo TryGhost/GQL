@@ -200,13 +200,25 @@ describe('GQL', function () {
                 });
         });
 
-        it('should perform like matches on strings', function (done) {
+        it('should perform like matches on json', function (done) {
             gql.parse([{name: {$like: '%ample'}}, {name: {$like: 'fe%'}}]).applyTo(knex('posts'))
                 .select()
                 .then(function (result) {
                     result.length.should.eql(1);
                     result[0].name.should.eql('featured-sample');
                     // console.log(JSON.stringify(result));
+                    done();
+                });
+        });
+
+        it('should perform like matches on strings', function (done) {
+            var query = gql.parse('name:~%ample+name:~fe%');
+
+            query.applyTo(knex('posts'))
+                .select()
+                .then(function (result) {
+                    result.length.should.eql(1);
+                    result[0].name.should.eql('featured-sample');
                     done();
                 });
         });
