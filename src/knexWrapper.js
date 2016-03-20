@@ -43,7 +43,16 @@ buildLogicalDollarCondition = function (conditions, key, value, negated, parentK
 buildDollarComparisonCondition = function (condition, key, value, negated, parentKey) {
     if(dollarConditionMap.hasOwnProperty(key)) {
         condition[negated ? 'whereNot' : 'where'] = [parentKey, dollarConditionMap[key], value];
-    } else if (key === '$ne') {
+    } else if (key.match(/^\$having\./i)) {
+        if(!!negated) {
+            throw new Error('$having cannot be negated. It\'s invalid SQL.');
+        }
+        var valkey = Object.keys(value)[0];
+        if(!dollarConditionMap.hasOwnProperty(valkey)) {
+            throw new Error('Unsupported aggregate comparison operator: \''+valkey+'\'')
+        }
+        condition.having = [key.substr(8), dollarConditionMap[valkey], value[valkey]];
+    } else if (key === '$ne') { // this might want to come out. don't think it's used.
         condition = buildCondition(parentKey, value, true);
     } else {
         throw new Error('' + key + ' is not a valid comparison operator');
@@ -64,28 +73,11 @@ buildSimpleComparisonCondition = function (condition, key, value, negated) {
     return condition;
 };
 
-buildAggregateCondition = function (condition, key, value) {
-    // Notice that there's no support for negated values.
-    // knex doesn't have a notHaving function and most
-    // aggregation conditions can be specified easily as the inverse operator
-    var convertedKey = key.replace(/\.\$/g, '_').replace(/\./g, '_');
-    // the convention here is to convert the key for use in the having.
-    // the select clause will have to adhere to this convention in order to work.
-    var valkey = Object.keys(value)[0];
-    if(!dollarConditionMap.hasOwnProperty(valkey)) {
-        throw new Error('Unsupported aggregate comparison operator: \''+valkey+'\'')
-    }
-    condition.having = [convertedKey, dollarConditionMap[valkey], value[valkey]];
-    return condition;
-};
-
 buildCondition = function (key, value, negated, parentKey) {
     if (key) {
         var condition = {};
         if (key.charAt(0) === '$') {
             condition = buildDollarComparisonCondition(condition, key, value, negated, parentKey);
-        } else if (-1 !== key.indexOf('.$')) {
-            condition = buildAggregateCondition(condition, key, value, negated, parentKey);
         } else {
             condition = buildSimpleComparisonCondition(condition, key, value, negated);
         }
@@ -145,7 +137,7 @@ applyCondition = function (knex, condition, useOr, _qb) {
                     // having's are handled differently because there is no or functionality for having
                     qb = qb.having.apply(qb, value);
                 } else {
-                    qb = qb[useOr ? orAnalogues[key] : key].apply(qb, value);
+                    qb = qb[key].apply(qb, value);
                 }
             }
         });

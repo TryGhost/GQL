@@ -14,8 +14,8 @@ escapable                    ['"\+\,\(\)\>\<=\[\]]
 'NULL'                                                      return 'NULL';
 'TRUE'                                                      return 'TRUE';
 'FALSE'                                                     return 'FALSE';
-[!][a-zA-Z_][a-zA-Z0-9_\.\$\-]*[:]                          return 'NOTPROP';
-[a-zA-Z_][a-zA-Z0-9_\.\$\-]*[:]                             return 'PROP';
+[!][a-zA-Z_\$][a-zA-Z0-9_\.\$\-]*[:]                        return 'NOTPROP';
+[a-zA-Z_\$][a-zA-Z0-9_\.\$\-]*[:]                           return 'PROP';
 [-]?[0-9]+("."[0-9]+)?\b                                    return 'NUMBER';
 '['                                                         return 'LBRACKET';
 ']'                                                         return 'RBRACKET';

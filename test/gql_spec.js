@@ -9,7 +9,7 @@ chai.use(require('chai-as-promised'));
 knex = require('knex')({
     client: 'sqlite3',
     connection: {filename: ':memory:'}
-     , debug: true
+    // , debug: true
 });
 
 gql = require('../src/gql');
@@ -297,6 +297,13 @@ describe('GQL', function () {
             }).should.not.throw();
         });
 
+        it('should throw an error for an $or clause that does not have objects for values.', function () {
+            (function () {
+                gql.parse({$or: 'sample'});
+            }).should.throw();
+        });
+
+
         it('should not throw an error for an $or clause that has a single object value', function () {
             (function () {
                 gql.parse({$or: {name: 'sample'}});
@@ -305,67 +312,44 @@ describe('GQL', function () {
     });
 
     describe('aggregate queries', function () {
-        it.only('should support .$count', function (done) {
-            gql.parse('posts.id.$count:>0')
-                .applyTo(knex('users'))
+        var usersAndPosts;
+        beforeEach(function () {
+            // the join and group by are not part of the query.
+            // the specify how the users and posts table relate.
+            // so we do that outside of the filters.
+            usersAndPosts = knex('users')
                 .join('posts', 'users.id', 'posts.author_id')
                 .groupBy('users.id')
-                .orderBy('id')
+        });
+
+        it('should support $having', function (done) {
+            // we only need to specify the filter here
+            gql.parse('$having.post_count:>0')
+                .applyTo(usersAndPosts)
+                // specify which fields to get
                 .select('users.*')
-                .count('posts.id as posts_id_count')
+                .count('posts.id as post_count')
+                // order just so we can verify correct counts
+                .orderBy('id')
                 .then(function (result) {
                     result.length.should.eql(2);
-                    result[0].posts_id_count.should.eql(1)
-                    result[1].posts_id_count.should.eql(3)
+                    result[0].post_count.should.eql(1);
+                    result[1].post_count.should.eql(3);
                     done();
                 });
         });
 
-        it('should support .$count.distinct', function (done) {
-            gql.parse('posts.id.$count:>0')
-                .applyTo(knex('users'))
-                .join('posts', 'author_id')
-                .select()
-                .then(function () {
-                    // TODO verify result
-                    done();
-                });
+        it('should fail an attempt to negate $having', function () {
+            (function () {
+                gql.parse('!$having.post_count:>0').applyTo(usersAndPosts)
+            }).should.throw();
         });
 
-        it('should support .$sum', function (done) {
-            // want a better field here than posts.id to sum. something like an orders/products schema would be better
-            gql.parse('posts.id.$sum:>0')
-                .applyTo(knex('users'))
-                .join('posts', 'author_id')
-                .select()
-                .then(function () {
-                    // TODO verify result
-                    done();
-                });
-        });
-
-        it('should support .$max', function (done) {
-            // want a better field here than posts.id to sum. something like an orders/products schema would be better
-            gql.parse('posts.id.$max:>0')
-                .applyTo(knex('users'))
-                .join('posts', 'author_id')
-                .select()
-                .then(function () {
-                    // TODO verify result
-                    done();
-                });
-        });
-
-        it('should support .$min', function (done) {
-            // want a better field here than posts.id to sum. something like an orders/products schema would be better
-            gql.parse('posts.id.$max:>0')
-                .applyTo(knex('users'))
-                .join('posts', 'author_id')
-                .select()
-                .then(function () {
-                    // TODO verify result
-                    done();
-                });
+        it('should fail an attempt to use an invalid operator with $having', function () {
+            (function () {
+                // only possible with json api. parser will throw this sort of thing out when parsing.
+                gql.parse({'$having.post_count' : {$uhoh: 0}}).applyTo(usersAndPosts)
+            }).should.throw();
         });
     });
 
