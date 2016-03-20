@@ -52,8 +52,6 @@ buildDollarComparisonCondition = function (condition, key, value, negated, paren
             throw new Error('Unsupported aggregate comparison operator: \''+valkey+'\'')
         }
         condition.having = [key.substr(8), dollarConditionMap[valkey], value[valkey]];
-    } else if (key === '$ne') { // this might want to come out. don't think it's used.
-        condition = buildCondition(parentKey, value, true);
     } else {
         throw new Error('' + key + ' is not a valid comparison operator');
     }

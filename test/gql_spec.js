@@ -228,6 +228,12 @@ describe('GQL', function () {
                 .should.eql({whereNot: ['name', 'sample']});
         });
 
+        it('should not support exact not equals matches using $ne', function () {
+            (function () {
+                gql.parse({name: {$ne: 'sample'}});
+            }).should.throw();
+        });
+
         it('should support less than matches', function () {
             gql.parse({created_at: {$lt: '2016-03-02'}}).conditions
                 .should.eql({where: ['created_at', '<', '2016-03-02']});
@@ -274,12 +280,7 @@ describe('GQL', function () {
         });
 
         it('should support not null matches', function () {
-            gql.parse({created_at: {$ne: null}}).conditions
-                .should.eql({whereNotNull: ['created_at']});
-        });
-
-        it('should support not null matches', function () {
-            gql.parse({created_at: {$ne: null}}).conditions
+            gql.parse({$not: {created_at: null}}).conditions
                 .should.eql({whereNotNull: ['created_at']});
         });
     });

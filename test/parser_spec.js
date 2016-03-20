@@ -179,12 +179,6 @@ describe('Parser', function () {
             );
         });
 
-        it('can parse NOT true', function () {
-            gql.parse('featured:!true').filters.should.eql(
-                {featured: {$ne: true}}
-            );
-        });
-
         it('can parse false', function () {
             gql.parse('featured:false').filters.should.eql(
                 {featured: false}
