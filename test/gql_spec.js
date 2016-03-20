@@ -316,7 +316,6 @@ describe('GQL', function () {
             }).should.throw();
         });
 
-
         it('should not throw an error for an $or clause that has a single object value', function () {
             (function () {
                 gql.parse({$or: {name: 'sample'}});
@@ -332,7 +331,7 @@ describe('GQL', function () {
             // so we do that outside of the filters.
             usersAndPosts = knex('users')
                 .join('posts', 'users.id', 'posts.author_id')
-                .groupBy('users.id')
+                .groupBy('users.id');
         });
 
         it('should support $having', function (done) {
@@ -354,14 +353,14 @@ describe('GQL', function () {
 
         it('should fail an attempt to negate $having', function () {
             (function () {
-                gql.parse('!$having.post_count:>0').applyTo(usersAndPosts)
+                gql.parse('!$having.post_count:>0').applyTo(usersAndPosts);
             }).should.throw();
         });
 
         it('should fail an attempt to use an invalid operator with $having', function () {
             (function () {
                 // only possible with json api. parser will throw this sort of thing out when parsing.
-                gql.parse({'$having.post_count' : {$uhoh: 0}}).applyTo(usersAndPosts)
+                gql.parse({'$having.post_count': {$uhoh: 0}}).applyTo(usersAndPosts);
             }).should.throw();
         });
     });

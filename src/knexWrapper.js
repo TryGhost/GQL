@@ -3,16 +3,15 @@ var _ = require('lodash'), knexWrapper,
     buildLogicalDollarCondition,
     buildDollarComparisonCondition,
     buildSimpleComparisonCondition,
-    buildAggregateCondition, orAnalogues,
-    applyCondition, applyConditions,
-    dollarConditionMap;
+    orAnalogues, dollarConditionMap,
+    applyCondition, applyConditions;
 
 dollarConditionMap = {
     $gt: '>',
-    $gte:'>=',
+    $gte: '>=',
     $lt: '<',
-    $lte:'<=',
-    $like:'like'
+    $lte: '<=',
+    $like: 'like'
 };
 
 buildLogicalDollarCondition = function (conditions, key, value, negated, parentKey) {
@@ -41,15 +40,15 @@ buildLogicalDollarCondition = function (conditions, key, value, negated, parentK
 };
 
 buildDollarComparisonCondition = function (condition, key, value, negated, parentKey) {
-    if(dollarConditionMap.hasOwnProperty(key)) {
+    if (dollarConditionMap.hasOwnProperty(key)) {
         condition[negated ? 'whereNot' : 'where'] = [parentKey, dollarConditionMap[key], value];
     } else if (key.match(/^\$having\./i)) {
-        if(!!negated) {
+        if (!!negated) {
             throw new Error('$having cannot be negated. It\'s invalid SQL.');
         }
         var valkey = Object.keys(value)[0];
-        if(!dollarConditionMap.hasOwnProperty(valkey)) {
-            throw new Error('Unsupported aggregate comparison operator: \''+valkey+'\'')
+        if (!dollarConditionMap.hasOwnProperty(valkey)) {
+            throw new Error('Unsupported aggregate comparison operator: \'' + valkey + '\'');
         }
         condition.having = [key.substr(8), dollarConditionMap[valkey], value[valkey]];
     } else {
@@ -131,7 +130,7 @@ applyCondition = function (knex, condition, useOr, _qb) {
             if (key === 'or') { // flip the and to an or
                 applyCondition(knex, value, true, qb);
             } else {
-                if(key == 'having') {
+                if (key === 'having') {
                     // having's are handled differently because there is no or functionality for having
                     qb = qb.having.apply(qb, value);
                 } else {
