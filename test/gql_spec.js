@@ -9,7 +9,7 @@ chai.use(require('chai-as-promised'));
 knex = require('knex')({
     client: 'sqlite3',
     connection: {filename: ':memory:'}
-    // , debug: true
+     , debug: true
 });
 
 gql = require('../src/gql');
@@ -33,8 +33,14 @@ describe('GQL', function () {
             }).then(function () {
                 return knex('users').insert({
                     id: 1,
-                    username: 'test',
-                    name: 'Foo Bar'
+                    username: 'foo',
+                    name: 'Foo Foo'
+                }).then(function () {
+                    return knex('users').insert({
+                        id: 2,
+                        username: 'bar',
+                        name: 'Bar Bar'
+                    });
                 });
             });
         }).then(function () {
@@ -82,6 +88,7 @@ describe('GQL', function () {
         }).then(function () {
             return knex('posts').insert({
                 id: 1,
+                author_id: 1,
                 name: 'sample',
                 created_at: '2016-03-01'
             }).then(function () {
@@ -124,6 +131,7 @@ describe('GQL', function () {
         }).then(function () {
             return knex('posts').insert({
                 id: 2,
+                author_id: 2,
                 name: 'featured-sample',
                 featured: true,
                 created_at: '2016-03-02'
@@ -136,6 +144,7 @@ describe('GQL', function () {
         }).then(function () {
             return knex('posts').insert({
                 id: 3,
+                author_id: 2,
                 name: 'sample-with-image',
                 image: image,
                 created_at: '2016-03-03'
@@ -143,6 +152,7 @@ describe('GQL', function () {
         }).then(function () {
             return knex('posts').insert({
                 id: 4,
+                author_id: 2,
                 name: 'featured-sample-with-image',
                 featured: true,
                 image: image,
@@ -295,21 +305,26 @@ describe('GQL', function () {
     });
 
     describe('aggregate queries', function () {
-        it('should support .$count', function (done) {
+        it.only('should support .$count', function (done) {
             gql.parse('posts.id.$count:>0')
                 .applyTo(knex('users'))
-                .join('id', 'posts', 'author_id')
-                .select()
-                .then(function () {
-                    // TODO verify result
+                .join('posts', 'users.id', 'posts.author_id')
+                .groupBy('users.id')
+                .orderBy('id')
+                .select('users.*')
+                .count('posts.id as posts_id_count')
+                .then(function (result) {
+                    result.length.should.eql(2);
+                    result[0].posts_id_count.should.eql(1)
+                    result[1].posts_id_count.should.eql(3)
                     done();
                 });
         });
 
         it('should support .$count.distinct', function (done) {
-            gql.parse('posts.id.$count.distinct:>0')
+            gql.parse('posts.id.$count:>0')
                 .applyTo(knex('users'))
-                .join('id', 'posts', 'author_id')
+                .join('posts', 'author_id')
                 .select()
                 .then(function () {
                     // TODO verify result
@@ -321,7 +336,7 @@ describe('GQL', function () {
             // want a better field here than posts.id to sum. something like an orders/products schema would be better
             gql.parse('posts.id.$sum:>0')
                 .applyTo(knex('users'))
-                .join('id', 'posts', 'author_id')
+                .join('posts', 'author_id')
                 .select()
                 .then(function () {
                     // TODO verify result
@@ -333,7 +348,7 @@ describe('GQL', function () {
             // want a better field here than posts.id to sum. something like an orders/products schema would be better
             gql.parse('posts.id.$max:>0')
                 .applyTo(knex('users'))
-                .join('id', 'posts', 'author_id')
+                .join('posts', 'author_id')
                 .select()
                 .then(function () {
                     // TODO verify result
@@ -345,7 +360,7 @@ describe('GQL', function () {
             // want a better field here than posts.id to sum. something like an orders/products schema would be better
             gql.parse('posts.id.$max:>0')
                 .applyTo(knex('users'))
-                .join('id', 'posts', 'author_id')
+                .join('posts', 'author_id')
                 .select()
                 .then(function () {
                     // TODO verify result

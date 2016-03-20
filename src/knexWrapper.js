@@ -4,7 +4,16 @@ var _ = require('lodash'), knexWrapper,
     buildDollarComparisonCondition,
     buildSimpleComparisonCondition,
     buildAggregateCondition, orAnalogues,
-    applyCondition, applyConditions;
+    applyCondition, applyConditions,
+    dollarConditionMap;
+
+dollarConditionMap = {
+    $gt: '>',
+    $gte:'>=',
+    $lt: '<',
+    $lte:'<=',
+    $like:'like'
+};
 
 buildLogicalDollarCondition = function (conditions, key, value, negated, parentKey) {
     // it's a logical grouping such as $and, $or or $not
@@ -32,17 +41,8 @@ buildLogicalDollarCondition = function (conditions, key, value, negated, parentK
 };
 
 buildDollarComparisonCondition = function (condition, key, value, negated, parentKey) {
-    // could be $gt, $gte, $lt, $lte, $ne
-    if (key === '$gt') {
-        condition[negated ? 'whereNot' : 'where'] = [parentKey, '>', value];
-    } else if (key === '$gte') {
-        condition[negated ? 'whereNot' : 'where'] = [parentKey, '>=', value];
-    } else if (key === '$lt') {
-        condition[negated ? 'whereNot' : 'where'] = [parentKey, '<', value];
-    } else if (key === '$lte') {
-        condition[negated ? 'whereNot' : 'where'] = [parentKey, '<=', value];
-    } else if (key === '$like') {
-        condition[negated ? 'whereNot' : 'where'] = [parentKey, 'like', value];
+    if(dollarConditionMap.hasOwnProperty(key)) {
+        condition[negated ? 'whereNot' : 'where'] = [parentKey, dollarConditionMap[key], value];
     } else if (key === '$ne') {
         condition = buildCondition(parentKey, value, true);
     } else {
@@ -64,15 +64,19 @@ buildSimpleComparisonCondition = function (condition, key, value, negated) {
     return condition;
 };
 
-buildAggregateCondition = function () {// condition, key, value, negated, parentKey) {
-    // if(key.match(/\.\$count\.distinct$/)) {
-    // } else if(key.match(/\.\$count$/)) {
-    // } else if(key.match(/\.\$sum$/)) {
-    // } else if(key.match(/\.\$max$/)) {
-    // } else if(key.match(/\.\$min$/)) {
-    // }
-    // it's an aggregate query such as 'posts.$count'
-    throw new Error('Aggregate queries are not yet supported');
+buildAggregateCondition = function (condition, key, value) {
+    // Notice that there's no support for negated values.
+    // knex doesn't have a notHaving function and most
+    // aggregation conditions can be specified easily as the inverse operator
+    var convertedKey = key.replace(/\.\$/g, '_').replace(/\./g, '_');
+    // the convention here is to convert the key for use in the having.
+    // the select clause will have to adhere to this convention in order to work.
+    var valkey = Object.keys(value)[0];
+    if(!dollarConditionMap.hasOwnProperty(valkey)) {
+        throw new Error('Unsupported aggregate comparison operator: \''+valkey+'\'')
+    }
+    condition.having = [convertedKey, dollarConditionMap[valkey], value[valkey]];
+    return condition;
 };
 
 buildCondition = function (key, value, negated, parentKey) {
@@ -137,7 +141,12 @@ applyCondition = function (knex, condition, useOr, _qb) {
             if (key === 'or') { // flip the and to an or
                 applyCondition(knex, value, true, qb);
             } else {
-                qb = qb[useOr ? orAnalogues[key] : key].apply(qb, value);
+                if(key == 'having') {
+                    // having's are handled differently because there is no or functionality for having
+                    qb = qb.having.apply(qb, value);
+                } else {
+                    qb = qb[useOr ? orAnalogues[key] : key].apply(qb, value);
+                }
             }
         });
     }
