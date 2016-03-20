@@ -1,4 +1,4 @@
-var _, chai, knex, gql, Gql;
+var _, chai, knex, gql;
 _ = require('lodash');
 
 chai = require('chai');
@@ -9,6 +9,7 @@ chai.use(require('chai-as-promised'));
 knex = require('knex')({
     client: 'sqlite3',
     connection: {filename: ':memory:'}
+    // , debug: true
 });
 
 gql = require('../src/gql');
@@ -23,20 +24,20 @@ describe('GQL', function () {
             table.integer('author_id');
             table.boolean('featured').defaultTo(false);
             table.timestamps();
-        }).then(function() {
+        }).then(function () {
             return knex.schema.createTable('users', function (table) {
                 table.increments();
                 table.string('username');
                 table.string('name');
                 table.timestamps();
-            }).then(function(){
+            }).then(function () {
                 return knex('users').insert({
                     id: 1,
                     username: 'test',
                     name: 'Foo Bar'
                 });
             });
-        }).then(function() {
+        }).then(function () {
             return knex.schema.createTable('comments', function (table) {
                 table.increments();
                 table.integer('author_id');
@@ -44,33 +45,33 @@ describe('GQL', function () {
                 table.string('comment');
                 table.timestamps();
             });
-        }).then(function() {
+        }).then(function () {
             return knex.schema.createTable('tags', function (table) {
                 table.increments();
                 table.string('name');
                 table.string('slug');
                 table.timestamps();
             });
-        }).then(function() {
+        }).then(function () {
             return knex.schema.createTable('posts_tags', function (table) {
                 table.integer('post_id');
                 table.integer('tag_id');
                 table.timestamps();
             });
-        }).then(function() {
+        }).then(function () {
             return knex.schema.createTable('products', function (table) {
                 table.increments();
                 table.string('name');
                 table.decimal('price');
                 table.timestamps();
             });
-        }).then(function() {
+        }).then(function () {
             return knex.schema.createTable('customers', function (table) {
                 table.increments();
                 table.string('name');
                 table.timestamps();
             });
-        }).then(function() {
+        }).then(function () {
             return knex.schema.createTable('orders', function (table) {
                 table.increments();
                 table.integer('customer_id');
@@ -83,35 +84,35 @@ describe('GQL', function () {
                 id: 1,
                 name: 'sample',
                 created_at: '2016-03-01'
-            }).then(function(){
+            }).then(function () {
                 return knex('comments').insert({
                     id: 1,
                     author_id: 1,
                     post_id: 1,
                     comment: 'Hello world'
-                }).then(function(){
+                }).then(function () {
                     return knex('comments').insert({
                         id: 2,
                         author_id: 1,
                         post_id: 1,
                         comment: 'Hello again'
-                    })
-                }).then(function(){
+                    });
+                }).then(function () {
                     return knex('tags').insert({
                         id: 1,
                         name: 'Hot',
                         slug: 'hot'
-                    }).then(function(){
+                    }).then(function () {
                         return knex('tags').insert({
                             id: 2,
                             name: 'Cold',
                             slug: 'cold'
                         });
-                    }).then(function(){
+                    }).then(function () {
                         return knex('posts_tags').insert({
                             tag_id: 1,
                             post_id: 1
-                        }).then(function(){
+                        }).then(function () {
                             return knex('posts_tags').insert({
                                 tag_id: 2,
                                 post_id: 1
@@ -126,11 +127,11 @@ describe('GQL', function () {
                 name: 'featured-sample',
                 featured: true,
                 created_at: '2016-03-02'
-            }).then(function() {
+            }).then(function () {
                 return knex('posts_tags').insert({
                     tag_id: 1,
                     post_id: 2
-                })
+                });
             });
         }).then(function () {
             return knex('posts').insert({
@@ -293,14 +294,14 @@ describe('GQL', function () {
         });
     });
 
-    describe('aggregate queries', function(){
+    describe.skip('aggregate queries', function () {
         it('should support .$count', function (done) {
             gql.findAll('users')
                 .join('id', 'posts', 'author_id')
                 .filter('posts.id.$count:>0')
                 .debug()
                 .select()
-                .then(function(result){
+                .then(function () {
                     // TODO verify result
                     done();
                 });
@@ -312,7 +313,7 @@ describe('GQL', function () {
                 .filter('posts.id.$count.distinct:>0')
                 .debug()
                 .select()
-                .then(function(result){
+                .then(function () {
                     // TODO verify result
                     done();
                 });
@@ -325,7 +326,7 @@ describe('GQL', function () {
                 .filter('posts.id.$sum:>0')
                 .debug()
                 .select()
-                .then(function(result){
+                .then(function () {
                     // TODO verify result
                     done();
                 });
@@ -338,7 +339,7 @@ describe('GQL', function () {
                 .filter('posts.id.$max:>0')
                 .debug()
                 .select()
-                .then(function(result){
+                .then(function () {
                     // TODO verify result
                     done();
                 });
@@ -351,7 +352,7 @@ describe('GQL', function () {
                 .filter('posts.id.$max:>0')
                 .debug()
                 .select()
-                .then(function(result){
+                .then(function () {
                     // TODO verify result
                     done();
                 });
@@ -649,7 +650,7 @@ describe('GQL', function () {
                     {created_at: {$lte: '2016-03-03'}}
                 ]);
 
-                gql.parse().applyTo(knex('posts'), query)
+                query.applyTo(knex('posts'), query)
                     .select()
                     .then(function (result) {
                         result.length.should.eql(1);
@@ -662,16 +663,17 @@ describe('GQL', function () {
             var query = gql.parse('name:sample,(!name:sample+created_at:<=\'2016-03-03\'),(created_at:>\'2016-03-03\')');
             query.filters.should.eql([
                 {name: 'sample'},
-                {$or: [
-                    // no nested array because the outer array had only one element and was therefore reduced
-                    {$not: {name: 'sample'}},
-                    {created_at: {$lte: '2016-03-03'}}
-                ]},
+                {
+                    $or: [
+                        // no nested array because the outer array had only one element and was therefore reduced
+                        {$not: {name: 'sample'}},
+                        {created_at: {$lte: '2016-03-03'}}
+                    ]
+                },
                 {$or: {created_at: {$gt: '2016-03-03'}}}
             ]);
             query.applyTo(knex('posts'))
                 .select()
-                .toString()
                 .then(function (result) {
                     result.length.should.eql(4);
                     done();

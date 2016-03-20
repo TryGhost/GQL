@@ -1,4 +1,4 @@
-var _ = require('lodash'),
+var _ = require('lodash'), knexWrapper,
     buildCondition, buildConditions,
     buildLogicalDollarCondition,
     buildDollarComparisonCondition,
@@ -64,13 +64,13 @@ buildSimpleComparisonCondition = function (condition, key, value, negated) {
     return condition;
 };
 
-buildAggregateCondition = function (condition, key, value, negated, parentKey) {
-    if(key.match(/\.\$count\.distinct$/)) {
-    } else if(key.match(/\.\$count$/)) {
-    } else if(key.match(/\.\$sum$/)) {
-    } else if(key.match(/\.\$max$/)) {
-    } else if(key.match(/\.\$min$/)) {
-    }
+buildAggregateCondition = function () {// condition, key, value, negated, parentKey) {
+    // if(key.match(/\.\$count\.distinct$/)) {
+    // } else if(key.match(/\.\$count$/)) {
+    // } else if(key.match(/\.\$sum$/)) {
+    // } else if(key.match(/\.\$max$/)) {
+    // } else if(key.match(/\.\$min$/)) {
+    // }
     // it's an aggregate query such as 'posts.$count'
     throw new Error('Aggregate queries are not yet supported');
 };
@@ -124,7 +124,7 @@ applyCondition = function (knex, condition, useOr, _qb) {
         qb = qb[useOr ? 'orWhere' : 'where'].apply(qb, [(function () {
             var f = function () {
                 for (var i = 0; i < condition.length; i = i + 1) {
-                    applyCondition(condition[i], false, this);
+                    applyCondition(knex, condition[i], false, this);
                 }
             };
             f.bind(qb);
@@ -135,7 +135,7 @@ applyCondition = function (knex, condition, useOr, _qb) {
         // Using forIn is a concise way to iterate over the object.
         _.forIn(condition, function (value, key) {
             if (key === 'or') { // flip the and to an or
-                applyCondition(value, true, qb);
+                applyCondition(knex, value, true, qb);
             } else {
                 qb = qb[useOr ? orAnalogues[key] : key].apply(qb, value);
             }
@@ -156,12 +156,12 @@ applyConditions = function (knex, conditions) {
     }
 };
 
-knexWrapper = function(filters) {
+knexWrapper = function (filters) {
     this.filters = filters;
     this.conditions = buildConditions(filters);
 };
 
-knexWrapper.prototype.applyTo = function(knex) {
+knexWrapper.prototype.applyTo = function (knex) {
     applyConditions(knex, this.conditions);
     return knex;
 };

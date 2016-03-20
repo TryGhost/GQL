@@ -1,4 +1,4 @@
-var parser = require('../dist/parser').parser;
+var parser = require('../dist/parser').parser, lex;
 
 lex = function (input) {
     parser.lexer.setInput(input);

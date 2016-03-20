@@ -1,7 +1,7 @@
 /* globals describe, it */
 /* jshint unused:false */
 var should = require('should'),
-    gql = require('../src/gql')
+    gql = require('../src/gql');
 
 describe('Parser', function () {
     var parserError = /^Query Error: unexpected character in filter at char/;

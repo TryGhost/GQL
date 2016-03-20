@@ -1,6 +1,6 @@
 var parser = require('../dist/parser').parser,
     _ = require('lodash'),
-    gql, knexWrapper = require('./knexWrapper');
+    gql, KnexWrapper = require('./knexWrapper');
 
 gql = {
     parse: function (filters) {
@@ -8,7 +8,7 @@ gql = {
             filters = filters ? parser.parse(filters) : {};
         }
 
-        return new knexWrapper(filters);
+        return new KnexWrapper(filters);
     }
 };
 
