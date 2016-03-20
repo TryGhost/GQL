@@ -43,7 +43,7 @@ buildDollarComparisonCondition = function (condition, key, value, negated, paren
     if (dollarConditionMap.hasOwnProperty(key)) {
         condition[negated ? 'whereNot' : 'where'] = [parentKey, dollarConditionMap[key], value];
     } else if (key.match(/^\$having\./i)) {
-        if (!!negated) {
+        if (negated) {
             throw new Error('$having cannot be negated. It\'s invalid SQL.');
         }
         var valkey = Object.keys(value)[0];
