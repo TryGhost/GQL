@@ -193,6 +193,18 @@ describe('GQL', function () {
                 });
         });
 
+        it('should perform like matches on strings', function (done) {
+            gql.findAll('posts')
+                .filter([{name: {$like: '%ample'}}, {name: {$like: 'fe%'}}])
+                .fetch()
+                .then(function (result) {
+                    result.length.should.eql(1);
+                    result[0].name.should.eql('featured-sample');
+                    // console.log(JSON.stringify(result));
+                    done();
+                });
+        });
+
         it('should support exact not matches', function () {
             gql.findAll('posts').filter({$not: {name: 'sample'}}).conditions
                 .should.eql({whereNot: ['name', 'sample']});
