@@ -65,7 +65,7 @@ buildSimpleComparisonCondition = function (condition, key, value, negated) {
     } else if (!_.isPlainObject(value)) {
         condition[negated ? 'whereNot' : 'where'] = [key, value];
     } else {
-        condition = buildConditions(value, false, key);
+        condition = buildConditions(value, negated, key);
     }
     return condition;
 };
