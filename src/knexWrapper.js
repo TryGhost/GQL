@@ -30,6 +30,9 @@ buildLogicalDollarCondition = function (conditions, key, value, negated, parentK
         } else {
             throw new Error('$or conditions only accept arrays or an object (which represents an array of length 1) as a value');
         }
+        if(_.isArray(_conditions) && _conditions.length === 1) {
+            _conditions = _conditions[0];
+        }
         conditions.push({or: _conditions});
     } else if (key === '$not') {
         conditions.push(buildConditions(value, true, parentKey));
@@ -84,14 +87,23 @@ buildCondition = function (key, value, negated, parentKey) {
 
 buildConditions = function (filter, negated, parentKey) {
     var conditions = [];
-    _.forIn(filter, function (value, key) {
-        if (key.charAt(0) === '$') {
-            buildLogicalDollarCondition(conditions, key, value, negated, parentKey);
-        } else {
-            // it's an attribute matcher such as { name : 'sample' }
-            conditions.push(buildCondition(key, value, negated));
-        }
-    });
+    if(_.isArray(filter)) { // it's a clause
+        _.each(filter, function(f) {
+            conditions.push(buildConditions(f, negated, parentKey));
+        });
+    } else if (_.isPlainObject(filter)) {
+        _.forIn(filter, function (value, key) {
+            if (key.charAt(0) === '$') {
+                if(_.isArray(value) && !key.match(/\$or/i)) {
+                    throw new Error('Arrays are not valid values for comparison conditions that aren\'t IN conditions');
+                }
+                buildLogicalDollarCondition(conditions, key, value, negated, parentKey);
+            } else {
+                // it's an attribute matcher such as { name : 'sample' }
+                conditions.push(buildCondition(key, value, negated));
+            }
+        });
+    }
     // This is necessary because with negation we can end up with arbitrarily nested arrays without this.
     if (conditions && conditions.length === 1) {
         conditions = conditions[0];
@@ -117,7 +129,15 @@ applyCondition = function (knex, condition, useOr, _qb) {
         qb = qb[useOr ? 'orWhere' : 'where'].apply(qb, [(function () {
             var f = function () {
                 for (var i = 0; i < condition.length; i = i + 1) {
-                    applyCondition(knex, condition[i], false, this);
+                    var c, o;
+                    if(condition[i].hasOwnProperty('or')) {
+                        o = true;
+                        c = condition[i].or;
+                    } else {
+                        o = false;
+                        c = condition[i];
+                    }
+                    applyCondition(knex, c, o, this);
                 }
             };
             f.bind(qb);
@@ -134,7 +154,7 @@ applyCondition = function (knex, condition, useOr, _qb) {
                     // having's are handled differently because there is no or functionality for having
                     qb = qb.having.apply(qb, value);
                 } else {
-                    qb = qb[key].apply(qb, value);
+                    qb = qb[useOr ? orAnalogues[key] : key].apply(qb, value);
                 }
             }
         });
