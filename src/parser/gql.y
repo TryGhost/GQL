@@ -96,7 +96,8 @@ andCondition
     ;
 
 filterExpr
-    : LPAREN expression RPAREN { $$ = {$group: $2}; }
+    : NOT LPAREN expression RPAREN { $$ = {$not: {$group: $3}}; }
+    | LPAREN expression RPAREN { $$ = {$group: $2}; }
     | notPropExpr valueExpr { $$ = setNot($1, $2); }
     | propExpr valueExpr { $1[Object.keys($1)[0]] = $2; $$ = $1; }
     ;

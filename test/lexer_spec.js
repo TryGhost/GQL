@@ -23,6 +23,9 @@ describe('Lexer', function () {
         it('can recognise (', function () {
             gql.lex('(').should.eql([{token: 'LPAREN', matched: '('}]);
         });
+        it('can recognise !(', function () {
+            gql.lex('!(').should.eql([{token: 'NOT', matched: '!'}, {token: 'LPAREN', matched: '('}]);
+        });
         it('can recognise )', function () {
             gql.lex(')').should.eql([{token: 'RPAREN', matched: ')'}]);
         });
