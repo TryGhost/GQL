@@ -30,7 +30,7 @@ buildLogicalDollarCondition = function (conditions, key, value, negated, parentK
         } else {
             throw new Error('$or conditions only accept arrays or an object (which represents an array of length 1) as a value');
         }
-        if(_.isArray(_conditions) && _conditions.length === 1) {
+        if (_.isArray(_conditions) && _conditions.length === 1) {
             _conditions = _conditions[0];
         }
         conditions.push({or: _conditions});
@@ -87,14 +87,14 @@ buildCondition = function (key, value, negated, parentKey) {
 
 buildConditions = function (filter, negated, parentKey) {
     var conditions = [];
-    if(_.isArray(filter)) { // it's a clause
-        _.each(filter, function(f) {
+    if (_.isArray(filter)) { // it's a clause
+        _.each(filter, function (f) {
             conditions.push(buildConditions(f, negated, parentKey));
         });
     } else if (_.isPlainObject(filter)) {
         _.forIn(filter, function (value, key) {
             if (key.charAt(0) === '$') {
-                if(_.isArray(value) && !key.match(/\$or/i)) {
+                if (_.isArray(value) && !key.match(/\$or/i)) {
                     throw new Error('Arrays are not valid values for comparison conditions that aren\'t IN conditions');
                 }
                 buildLogicalDollarCondition(conditions, key, value, negated, parentKey);
@@ -128,9 +128,9 @@ applyCondition = function (knex, condition, useOr, _qb) {
     if (_.isArray(condition)) { // it's a clause/group.
         qb = qb[useOr ? 'orWhere' : 'where'].apply(qb, [(function () {
             var f = function () {
-                for (var i = 0; i < condition.length; i = i + 1) {
-                    var c, o;
-                    if(condition[i].hasOwnProperty('or')) {
+                var c, i, o;
+                for (i = 0; i < condition.length; i = i + 1) {
+                    if (condition[i].hasOwnProperty('or')) {
                         o = true;
                         c = condition[i].or;
                     } else {

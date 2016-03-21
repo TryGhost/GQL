@@ -416,7 +416,7 @@ describe('GQL', function () {
                 ],
                 {or: {where: ['featured', false]}}
             ];
-            var conditions = gql.parse([
+            gql.parse([
                     [{created_at: {$lt: '2016-03-04'}},
                         {$not: {created_at: ['2016-03-01', '2016-03-02']}}],
                 {$or: {featured: false}}
