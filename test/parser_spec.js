@@ -202,6 +202,12 @@ describe('Parser', function () {
                 {$not: {count: 5}}
             );
         });
+
+        it('can parse a value with an exclamation point', function () {
+            var q = gql.parse('word:\'Hello world!\'');
+            q.filters.should.eql({word: 'Hello world!'});
+            q.should.eql(gql.parse({word: 'Hello world!'}));
+        });
     });
 
     describe('simple expressions', function () {
