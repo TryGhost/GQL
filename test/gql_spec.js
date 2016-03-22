@@ -437,7 +437,7 @@ describe('GQL', function () {
 
     describe('basic and and or', function () {
         it('should support and queries', function () {
-            var query = gql.parse("name:sample+featured:false");
+            var query = gql.parse('name:sample+featured:false');
             query.should.eql(gql.parse([{name: 'sample'}, {featured: false}]));
             query.conditions.should.eql([{where: ['name', 'sample']}, {where: ['featured', false]}]);
         });
