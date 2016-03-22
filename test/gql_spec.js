@@ -306,6 +306,21 @@ describe('GQL', function () {
             gql.parse('!created_at:null').conditions
                 .should.eql({whereNotNull: ['created_at']});
         });
+
+        it('should support Javascript Date values through the JSON API', function (done) {
+            // Dates are supported to the extent that knex supports them. So timezone issues, etc. would all be handled
+            // however Knex handles them. Dates are supported by GQL as a value type though.
+
+            // yes, this is intended to be 02-01, a date prior to all of the dates in our database
+            var query = gql.parse({created_at: {$gt: new Date('2016-02-01')}});
+            query.applyTo(knex('posts'))
+                .select()
+                .then(function (result) {
+                    result.length.should.eql(4);
+                    done();
+                });
+        });
+
     });
 
     describe('in clauses', function () {
