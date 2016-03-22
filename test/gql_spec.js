@@ -320,7 +320,6 @@ describe('GQL', function () {
                     done();
                 });
         });
-
     });
 
     describe('in clauses', function () {
@@ -430,7 +429,7 @@ describe('GQL', function () {
             p = gql.parse([
                     [{created_at: {$lt: '2016-03-04'}},
                         {$not: {created_at: ['2016-03-01', '2016-03-02']}}],
-                {$or: {featured: false}}
+                    {$or: {featured: false}}
                 ]
             );
 
@@ -470,11 +469,13 @@ describe('GQL', function () {
                 var query = gql.parse('name:sample,(!name:sample+created_at:<=\'2016-03-03\')');
                 query.filters.should.eql([
                     {name: 'sample'},
-                    {$or: [
-                        // no nested array because the outer array had only one element and was therefore reduced
-                        {$not: {name: 'sample'}},
-                        {created_at: {$lte: '2016-03-03'}}
-                    ]}
+                    {
+                        $or: [
+                            // no nested array because the outer array had only one element and was therefore reduced
+                            {$not: {name: 'sample'}},
+                            {created_at: {$lte: '2016-03-03'}}
+                        ]
+                    }
                 ]);
                 query.applyTo(knex('posts'))
                     .select()
@@ -488,11 +489,13 @@ describe('GQL', function () {
                 var query = gql.parse('name:sample,(created_at:\'2016-03-03\',created_at:\'2016-03-04\')');
                 query.filters.should.eql([
                     {name: 'sample'},
-                    {$or: [
-                        // no nested array because the outer array had only one element and was therefore reduced
-                        {created_at: '2016-03-03'},
-                        {$or: {created_at: '2016-03-04'}}
-                    ]}
+                    {
+                        $or: [
+                            // no nested array because the outer array had only one element and was therefore reduced
+                            {created_at: '2016-03-03'},
+                            {$or: {created_at: '2016-03-04'}}
+                        ]
+                    }
                 ]);
                 query.applyTo(knex('posts'))
                     .select()
