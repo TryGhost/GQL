@@ -4,7 +4,8 @@ var _ = require('lodash'), knexWrapper,
     buildDollarComparisonCondition,
     buildSimpleComparisonCondition,
     orAnalogues, dollarConditionMap,
-    applyCondition, applyConditions;
+    applyCondition, applyConditions,
+    buildRelations, objectifyRelations;
 
 dollarConditionMap = {
     $gt: '>',
@@ -174,9 +175,50 @@ applyConditions = function (knex, conditions) {
     }
 };
 
+buildRelations = function (conditions) {
+    var relations = [];
+    if (conditions) {
+        if (_.isPlainObject(conditions)) {
+            _.forIn(conditions, function (value, key) {
+                if (key.match(/^\$or/i) || key.match(/^\$not/i)) {
+                    relations.push(buildRelations(value))
+                } else if (key.match(/^\$/)) {
+                    // skip
+                } else {
+                    relations.push(key);
+                }
+            });
+        } else if (_.isArray(conditions)) {
+            _.each(conditions, function (condition) {
+                relations.push(buildRelations(condition));
+            });
+        }
+    }
+    return _.uniq(_.flattenDeep(relations));
+};
+
+objectifyRelations = function (relations) {
+    var o = {};
+    _.each(relations, function (r) {
+        r = r.split('.');
+        var rel = o, relParent = o, i = 0;
+
+        for(i = 0; i < r.length; i++) {
+            if(!rel.hasOwnProperty(r[i])) {
+                rel[r[i]] = {};
+            }
+            relParent = rel;
+            rel = rel[r[i]];
+        }
+        relParent[r[r.length-1]] = false;
+    });
+    return o;
+};
+
 knexWrapper = function (filters) {
     this.filters = filters;
     this.conditions = buildConditions(filters);
+    this.relations = objectifyRelations(buildRelations(this.filters));
 };
 
 knexWrapper.prototype.applyTo = function (knex) {
