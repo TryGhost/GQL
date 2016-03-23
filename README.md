@@ -6,7 +6,3 @@
 GQL stands for 'Ghost Query Language'.
 
 Take a look at [the wiki](https://www.github.com/laran/gql/wiki) for more information.
-
-**GQL is not yet ready for public consumption.**
-
-You can track the status of the initial release via [Milestone 0.6](https://github.com/laran/GQL/milestones/0.6).
