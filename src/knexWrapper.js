@@ -94,7 +94,7 @@ buildConditions = function (filter, negated, parentKey) {
     } else if (_.isPlainObject(filter)) {
         _.forIn(filter, function (value, key) {
             if (key.charAt(0) === '$') {
-                if (_.isArray(value) && !key.match(/\$or/i)) {
+                if (_.isArray(value) && !key.match(/\$or/i) && !key.match(/\$not/i)) {
                     throw new Error('Arrays are not valid values for comparison conditions that aren\'t IN conditions');
                 }
                 buildLogicalDollarCondition(conditions, key, value, negated, parentKey);
