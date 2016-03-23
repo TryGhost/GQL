@@ -593,16 +593,17 @@ describe('GQL', function () {
         });
     });
 
-    describe('relations', function() {
-        it('should extract simple relations', function() {
+    describe('relations', function () {
+        it('should extract simple relations', function () {
             gql.parse('title:Hello').relations.should.eql({title: false});
         });
 
         it('should extract complex relations', function () {
             gql.parse('title:Hello,!(famous:true+happy:[\'yes\',\'no\',\'maybe\'])+comments.id:5+tags.foo.bar:baz+tags.faz: balls')
                 .relations.should.eql({
-                    title: false, famous: false, happy: false,
-                    comments: {id: false}, tags: {foo: {bar: false}, faz: false}});
+                title: false, famous: false, happy: false,
+                comments: {id: false}, tags: {foo: {bar: false}, faz: false}
+            });
         });
     });
 });

@@ -181,10 +181,8 @@ buildRelations = function (conditions) {
         if (_.isPlainObject(conditions)) {
             _.forIn(conditions, function (value, key) {
                 if (key.match(/^\$or/i) || key.match(/^\$not/i)) {
-                    relations.push(buildRelations(value))
-                } else if (key.match(/^\$/)) {
-                    // skip
-                } else {
+                    relations.push(buildRelations(value));
+                } else if (!key.match(/^\$/)) {
                     relations.push(key);
                 }
             });
@@ -203,14 +201,14 @@ objectifyRelations = function (relations) {
         r = r.split('.');
         var rel = o, relParent = o, i = 0;
 
-        for(i = 0; i < r.length; i++) {
-            if(!rel.hasOwnProperty(r[i])) {
+        for (i = 0; i < r.length; i += 1) {
+            if (!rel.hasOwnProperty(r[i])) {
                 rel[r[i]] = {};
             }
             relParent = rel;
             rel = rel[r[i]];
         }
-        relParent[r[r.length-1]] = false;
+        relParent[r[r.length - 1]] = false;
     });
     return o;
 };
