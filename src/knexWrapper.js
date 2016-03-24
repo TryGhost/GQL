@@ -196,21 +196,14 @@ buildRelations = function (conditions) {
 };
 
 objectifyRelations = function (relations) {
-    var o = {};
+    var o = [], p;
     _.each(relations, function (r) {
-        r = r.split('.');
-        var rel = o, relParent = o, i = 0;
-
-        for (i = 0; i < r.length; i += 1) {
-            if (!rel.hasOwnProperty(r[i])) {
-                rel[r[i]] = {};
-            }
-            relParent = rel;
-            rel = rel[r[i]];
+        p = r.indexOf('.');
+        if(p > 0) { // ignore period at first character too
+            o.push(r.substring(0, p));
         }
-        relParent[r[r.length - 1]] = false;
     });
-    return o;
+    return _.uniq(o);
 };
 
 knexWrapper = function (filters) {
