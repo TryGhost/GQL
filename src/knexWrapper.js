@@ -199,7 +199,7 @@ objectifyRelations = function (relations) {
     var o = [], p;
     _.each(relations, function (r) {
         p = r.indexOf('.');
-        if(p > 0) { // ignore period at first character too
+        if (p > 0) { // ignore period at first character too
             o.push(r.substring(0, p));
         }
     });
