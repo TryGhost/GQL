@@ -209,7 +209,7 @@ objectifyRelations = function (relations) {
 knexWrapper = function (filters) {
     this.filters = filters;
     this.conditions = buildConditions(filters);
-    this.relations = objectifyRelations(buildRelations(this.filters));
+    this.relations = function() { return objectifyRelations(buildRelations(this.filters)) };
 };
 
 knexWrapper.prototype.applyTo = function (knex) {
