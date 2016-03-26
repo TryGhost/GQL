@@ -7,7 +7,7 @@
     "lint": "jshint src/*.js test/*.js && jscs src/*.js test/*.js",
     "test": "npm run lint && mocha",
     "build": "jison src/parser/gql.y src/parser/gql.l -o dist/parser.js",
-    "coverage": "istanbul cover -x src --dir=test/coverage --report=lcov ./node_modules/mocha/bin/_mocha -- test/*_spec.js",
+    "coverage": "istanbul cover -x dist/**/* --dir=test/coverage --report=lcov ./node_modules/mocha/bin/_mocha -- test/*_spec.js",
     "release": "npm-release patch"
   },
   "author": "Ghost Foundation",
