@@ -2,4 +2,4 @@
 
 [![Build Status](https://travis-ci.org/laran/gql.svg?branch=master)](https://travis-ci.org/laran/gql)
 
-Take a look at [the wiki](https://www.github.com/laran/gql/wiki).
+Docs are in [The Wiki](https://www.github.com/laran/gql/wiki).
