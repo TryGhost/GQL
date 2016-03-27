@@ -148,10 +148,6 @@ describe('Parser', function () {
                 {tag: ['getting-started', 'ghost', 'really-long-1']}
             );
 
-            gql.parse('tag:[getting-started, ghost, really-long-1]').filters.should.eql(
-                {tag: ['getting-started', 'ghost', 'really-long-1']}
-            );
-
             gql.parse('author:[\'Joe Bloggs\', \'John O\\\'Nolan\', \'Hello World\']').filters.should.eql(
                 {author: ['Joe Bloggs', 'John O\'Nolan', 'Hello World']}
             );
