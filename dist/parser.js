@@ -72,12 +72,12 @@
   }
 */
 var parser = (function(){
-var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,5],$V1=[1,6],$V2=[1,9],$V3=[1,10],$V4=[1,11],$V5=[1,6,11],$V6=[1,12],$V7=[1,6,8,11],$V8=[1,16],$V9=[1,24],$Va=[1,25],$Vb=[1,26],$Vc=[1,27],$Vd=[1,19],$Ve=[1,20],$Vf=[1,21],$Vg=[1,22],$Vh=[1,23],$Vi=[17,20,21,22,23,24,25,26,27,28],$Vj=[20,21,22,23];
+var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,5],$V1=[1,6],$V2=[1,9],$V3=[1,10],$V4=[1,11],$V5=[1,6,11],$V6=[1,12],$V7=[1,6,8,11],$V8=[1,16],$V9=[1,24],$Va=[1,25],$Vb=[1,26],$Vc=[1,19],$Vd=[1,20],$Ve=[1,21],$Vf=[1,22],$Vg=[1,23],$Vh=[17,20,21,22,23,24,25,26,27],$Vi=[20,21,22];
 var parser = {trace: function trace() { },
 yy: {},
-symbols_: {"error":2,"expressions":3,"expression":4,"andCondition":5,"OR":6,"filterExpr":7,"AND":8,"NOT":9,"LPAREN":10,"RPAREN":11,"notPropExpr":12,"valueExpr":13,"propExpr":14,"NOTPROP":15,"PROP":16,"IN":17,"OP":18,"VALUE":19,"NULL":20,"NUMBER":21,"STRING":22,"LITERAL":23,"GT":24,"LT":25,"GTE":26,"LTE":27,"LIKE":28,"$accept":0,"$end":1},
-terminals_: {2:"error",6:"OR",8:"AND",9:"NOT",10:"LPAREN",11:"RPAREN",15:"NOTPROP",16:"PROP",17:"IN",20:"NULL",21:"NUMBER",22:"STRING",23:"LITERAL",24:"GT",25:"LT",26:"GTE",27:"LTE",28:"LIKE"},
-productions_: [0,[3,1],[4,1],[4,3],[5,1],[5,3],[7,4],[7,3],[7,2],[7,2],[12,1],[14,1],[13,1],[13,2],[13,1],[19,1],[19,1],[19,1],[19,1],[18,1],[18,1],[18,1],[18,1],[18,1]],
+symbols_: {"error":2,"expressions":3,"expression":4,"andCondition":5,"OR":6,"filterExpr":7,"AND":8,"NOT":9,"LPAREN":10,"RPAREN":11,"notPropExpr":12,"valueExpr":13,"propExpr":14,"NOTPROP":15,"PROP":16,"IN":17,"OP":18,"VALUE":19,"NULL":20,"STRING":21,"LITERAL":22,"GT":23,"LT":24,"GTE":25,"LTE":26,"LIKE":27,"$accept":0,"$end":1},
+terminals_: {2:"error",6:"OR",8:"AND",9:"NOT",10:"LPAREN",11:"RPAREN",15:"NOTPROP",16:"PROP",17:"IN",20:"NULL",21:"STRING",22:"LITERAL",23:"GT",24:"LT",25:"GTE",26:"LTE",27:"LIKE"},
+productions_: [0,[3,1],[4,1],[4,3],[5,1],[5,3],[7,4],[7,3],[7,2],[7,2],[12,1],[14,1],[13,1],[13,2],[13,1],[19,1],[19,1],[19,1],[18,1],[18,1],[18,1],[18,1],[18,1]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */, options) {
 /* this == yyval */
 
@@ -123,32 +123,29 @@ case 15:
  this.$ = null 
 break;
 case 16:
- this.$ = parseInt(yytext); 
-break;
-case 17:
  $$[$0] = $$[$0].replace(/^'|'$/g, ''); this.$ = unescape($$[$0]); 
 break;
-case 18:
+case 17:
  this.$ = interpret($$[$0]); 
 break;
-case 19:
+case 18:
  this.$ = "$gt"; 
 break;
-case 20:
+case 19:
  this.$ = "$lt"; 
 break;
-case 21:
+case 20:
  this.$ = "$gte"; 
 break;
-case 22:
+case 21:
  this.$ = "$lte"; 
 break;
-case 23:
+case 22:
  this.$ = "$like"; 
 break;
 }
 },
-table: [{3:1,4:2,5:3,7:4,9:$V0,10:$V1,12:7,14:8,15:$V2,16:$V3},{1:[3]},{1:[2,1],6:$V4},o($V5,[2,2],{8:$V6}),o($V7,[2,4]),{10:[1,13]},{4:14,5:3,7:4,9:$V0,10:$V1,12:7,14:8,15:$V2,16:$V3},{13:15,17:$V8,18:17,19:18,20:$V9,21:$Va,22:$Vb,23:$Vc,24:$Vd,25:$Ve,26:$Vf,27:$Vg,28:$Vh},{13:28,17:$V8,18:17,19:18,20:$V9,21:$Va,22:$Vb,23:$Vc,24:$Vd,25:$Ve,26:$Vf,27:$Vg,28:$Vh},o($Vi,[2,10]),o($Vi,[2,11]),{5:29,7:4,9:$V0,10:$V1,12:7,14:8,15:$V2,16:$V3},{7:30,9:$V0,10:$V1,12:7,14:8,15:$V2,16:$V3},{4:31,5:3,7:4,9:$V0,10:$V1,12:7,14:8,15:$V2,16:$V3},{6:$V4,11:[1,32]},o($V7,[2,8]),o($V7,[2,12]),{19:33,20:$V9,21:$Va,22:$Vb,23:$Vc},o($V7,[2,14]),o($Vj,[2,19]),o($Vj,[2,20]),o($Vj,[2,21]),o($Vj,[2,22]),o($Vj,[2,23]),o($V7,[2,15]),o($V7,[2,16]),o($V7,[2,17]),o($V7,[2,18]),o($V7,[2,9]),o($V5,[2,3],{8:$V6}),o($V7,[2,5]),{6:$V4,11:[1,34]},o($V7,[2,7]),o($V7,[2,13]),o($V7,[2,6])],
+table: [{3:1,4:2,5:3,7:4,9:$V0,10:$V1,12:7,14:8,15:$V2,16:$V3},{1:[3]},{1:[2,1],6:$V4},o($V5,[2,2],{8:$V6}),o($V7,[2,4]),{10:[1,13]},{4:14,5:3,7:4,9:$V0,10:$V1,12:7,14:8,15:$V2,16:$V3},{13:15,17:$V8,18:17,19:18,20:$V9,21:$Va,22:$Vb,23:$Vc,24:$Vd,25:$Ve,26:$Vf,27:$Vg},{13:27,17:$V8,18:17,19:18,20:$V9,21:$Va,22:$Vb,23:$Vc,24:$Vd,25:$Ve,26:$Vf,27:$Vg},o($Vh,[2,10]),o($Vh,[2,11]),{5:28,7:4,9:$V0,10:$V1,12:7,14:8,15:$V2,16:$V3},{7:29,9:$V0,10:$V1,12:7,14:8,15:$V2,16:$V3},{4:30,5:3,7:4,9:$V0,10:$V1,12:7,14:8,15:$V2,16:$V3},{6:$V4,11:[1,31]},o($V7,[2,8]),o($V7,[2,12]),{19:32,20:$V9,21:$Va,22:$Vb},o($V7,[2,14]),o($Vi,[2,18]),o($Vi,[2,19]),o($Vi,[2,20]),o($Vi,[2,21]),o($Vi,[2,22]),o($V7,[2,15]),o($V7,[2,16]),o($V7,[2,17]),o($V7,[2,9]),o($V5,[2,3],{8:$V6}),o($V7,[2,5]),{6:$V4,11:[1,33]},o($V7,[2,7]),o($V7,[2,13]),o($V7,[2,6])],
 defaultActions: {},
 parseError: function parseError(str, hash) {
     if (hash.recoverable) {
@@ -740,23 +737,23 @@ case 6:return 6;
 break;
 case 7:return 8;
 break;
-case 8:return 26;
+case 8:return 25;
 break;
-case 9:return 27;
+case 9:return 26;
 break;
 case 10:return 9;
 break;
-case 11:return 24;
+case 11:return 23;
 break;
-case 12:return 25;
+case 12:return 24;
 break;
-case 13:return 28;
+case 13:return 27;
 break;
-case 14:return 22;
+case 14:return 21;
 break;
 case 15:return 17;
 break;
-case 16:return 23;
+case 16:return 22;
 break;
 }
 },

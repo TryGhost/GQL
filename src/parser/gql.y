@@ -139,7 +139,6 @@ valueExpr
 
 VALUE
     : NULL { $$ = null }
-    | NUMBER { $$ = parseInt(yytext); }
     | STRING  { $1 = $1.replace(/^'|'$/g, ''); $$ = unescape($1); }
     | LITERAL { $$ = interpret($1); }
     ;
