@@ -267,6 +267,23 @@ describe('Lexer', function () {
             ]);
         });
 
+        if('can recognise multiple LITERAL values', function () {
+            // same check, but without quotes
+            gql.lex('[magic,mystery]').should.eql([
+                {token: 'IN', matched: '[magic,mystery]'}
+            ]);
+            gql.lex('[1,5]').should.eql([
+                {token: 'IN', matched: '[1,5]'}
+            ]);
+            gql.lex('[2015-01-01,2016-01-01]').should.eql([
+                {token: 'IN', matched: '[2015-01-01,2016-01-01]'}
+            ]);
+            // same check, with whitespace
+            gql.lex('[ 2015-01-01, 2016-01-01 ]').should.eql([
+                {token: 'IN', matched: '[ 2015-01-01, 2016-01-01 ]'}
+            ]);
+        });
+
         it('can recognise STRING with special characters', function () {
             gql.lex('\'magic+\'').should.eql([{token: 'STRING', matched: '\'magic+\''}]);
             gql.lex('\'magic,\'').should.eql([{token: 'STRING', matched: '\'magic,\''}]);
