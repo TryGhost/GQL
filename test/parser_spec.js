@@ -306,8 +306,6 @@ describe('Parser', function () {
                 ]
             ];
 
-            // console.log(JSON.stringify(one));
-            // console.log(JSON.stringify(oneTest));
             one.filters.should.eql(oneTest);
 
             two = gql.parse('(tag:photo,!image:null,featured:true)+!author:joe');
@@ -319,8 +317,6 @@ describe('Parser', function () {
                 ],
                 {$not: {author: 'joe'}}
             ];
-            // console.log(JSON.stringify(two));
-            // console.log(JSON.stringify(twoTest));
             two.filters.should.eql(twoTest);
 
             three = gql.parse('!author:joe,(tag:photo,!image:null,featured:true)');
@@ -332,8 +328,6 @@ describe('Parser', function () {
                     {$or: {featured: true}}
                 ]}
             ];
-            // console.log(JSON.stringify(three));
-            // console.log(JSON.stringify(threeTest));
             three.filters.should.eql(threeTest);
 
             four = gql.parse('(tag:photo,!image:null,featured:false),!author:joe');
@@ -345,8 +339,6 @@ describe('Parser', function () {
                     ],
                 {$or: {$not: {author: 'joe'}}}
                 ];
-            // console.log(JSON.stringify(four));
-            // console.log(JSON.stringify(fourTest));
             four.filters.should.eql(fourTest);
 
             five = gql.parse('name:sample,(!name:sample+created_at:<=\'2016-03-03\'),(!name:sample+(created_at:\'2016-03-03\',created_at:\'2016-03-04\'))');

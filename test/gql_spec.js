@@ -195,7 +195,6 @@ describe('GQL', function () {
                 .select()
                 .then(function (result) {
                     result[0].name.should.eql('sample');
-                    // console.log(JSON.stringify(result));
                     done();
                 });
         });
@@ -207,7 +206,6 @@ describe('GQL', function () {
                     .then(function (result) {
                         result.length.should.eql(1);
                         result[0].name.should.eql('featured-sample');
-                        // console.log(JSON.stringify(result));
                         done();
                     });
             });
