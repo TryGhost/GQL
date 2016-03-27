@@ -267,7 +267,7 @@ describe('Lexer', function () {
             ]);
         });
 
-        if('can recognise multiple LITERAL values', function () {
+        it('can recognise multiple LITERAL values', function () {
             // same check, but without quotes
             gql.lex('[magic,mystery]').should.eql([
                 {token: 'IN', matched: '[magic,mystery]'}
