@@ -3,12 +3,12 @@ var parser = require('../dist/parser').parser,
     gql, KnexWrapper = require('./knexWrapper');
 
 gql = {
-    parse: function (filters) {
+    parse: function (filters, transformers) {
         if (_.isString(filters)) {
             filters = filters ? parser.parse(filters) : {};
         }
 
-        return new KnexWrapper(filters);
+        return new KnexWrapper(filters, transformers);
     }
 };
 

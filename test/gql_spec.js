@@ -591,7 +591,7 @@ describe('GQL', function () {
         });
     });
 
-    describe('relations', function () {
+    describe('Relations', function () {
         it('should extract simple relations', function () {
             gql.parse('title:Hello').relations().should.eql([]);
         });
@@ -599,6 +599,37 @@ describe('GQL', function () {
         it('should extract complex relations', function () {
             gql.parse('title:Hello,!(famous:true+happy:[\'yes\',\'no\',\'maybe\'])+comments.id:5+tags.foo.bar:baz+tags.faz: balls')
                 .relations().should.eql(['comments', 'tags']);
+        });
+    });
+
+    describe('Transformers', function () {
+        it('should convert dates and return constants', function() {
+            var query = gql.parse(
+                'name:sample,(!name:sample+created_at:<=\'2016-03-01\'),(created_at:>\'2016-03-01\'),featured:true',
+                {
+                    created_at: function (o) {
+                        // will convert created_at into a Date object
+                        return new Date(o);
+                    },
+                    featured: function () {
+                        // will always return false
+                        return false;
+                    }
+                }
+            );
+
+            var marchFirst = new Date('2016-03-01');
+            query.conditions.should.eql([
+                {"where": [ "name", "sample" ] },
+                {"or": [
+                        {"whereNot": ["name", "sample"]},
+                        {"where": ["created_at", "<=", marchFirst]}
+                    ]
+                },
+                {"or": {"where": ["created_at", ">", marchFirst]}},
+                {"or": {"where": ["featured", false]}
+                }
+            ]);
         });
     });
 });

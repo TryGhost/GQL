@@ -5,7 +5,8 @@ var _ = require('lodash'), knexWrapper,
     buildSimpleComparisonCondition,
     orAnalogues, dollarConditionMap,
     applyCondition, applyConditions,
-    buildRelations, objectifyRelations;
+    buildRelations, objectifyRelations,
+    transform;
 
 dollarConditionMap = {
     $gt: '>',
@@ -15,7 +16,7 @@ dollarConditionMap = {
     $like: 'like'
 };
 
-buildLogicalDollarCondition = function (conditions, key, value, negated, parentKey) {
+buildLogicalDollarCondition = function (conditions, key, value, negated, parentKey, transformers) {
     // it's a logical grouping such as $and, $or or $not
     if (key === '$or') {
         // or queries always come in as an array.
@@ -23,11 +24,11 @@ buildLogicalDollarCondition = function (conditions, key, value, negated, parentK
         var _conditions = [];
         if (_.isArray(value)) {
             _.forEach(value, function (_value) {
-                _conditions.push(buildConditions(_value));
+                _conditions.push(buildConditions(_value, false, null, transformers));
             });
         } else if (_.isPlainObject(value)) {
             // it was an or condition with a single value
-            _conditions.push(buildConditions(value));
+            _conditions.push(buildConditions(value, false, null, transformers));
         } else {
             throw new Error('$or conditions only accept arrays or an object (which represents an array of length 1) as a value');
         }
@@ -36,72 +37,82 @@ buildLogicalDollarCondition = function (conditions, key, value, negated, parentK
         }
         conditions.push({or: _conditions});
     } else if (key === '$not') {
-        conditions.push(buildConditions(value, true, parentKey));
+        conditions.push(buildConditions(value, true, parentKey, transformers));
     } else {
         // it's an comparison operator such as { $lt : 5 }
-        conditions.push(buildCondition(key, value, negated, parentKey));
+        conditions.push(buildCondition(key, value, negated, parentKey, transformers));
     }
 };
 
-buildDollarComparisonCondition = function (condition, key, value, negated, parentKey) {
+transform = function (value, key, transformers) {
+    if(transformers && transformers.hasOwnProperty(key)) {
+        return transformers[key].apply(null, [value]);
+    }
+    return value;
+};
+
+buildDollarComparisonCondition = function (condition, key, value, negated, parentKey, transformers) {
     if (dollarConditionMap.hasOwnProperty(key)) {
-        condition[negated ? 'whereNot' : 'where'] = [parentKey, dollarConditionMap[key], value];
+        condition[negated ? 'whereNot' : 'where'] = [parentKey, dollarConditionMap[key], transform(value, parentKey, transformers)];
     } else if (key.match(/^\$having\./i)) {
         if (negated) {
             throw new Error('$having cannot be negated. It\'s invalid SQL.');
         }
-        var valkey = Object.keys(value)[0];
+        var valkey, alias;
+        valkey = Object.keys(value)[0];
         if (!dollarConditionMap.hasOwnProperty(valkey)) {
             throw new Error('Unsupported aggregate comparison operator: \'' + valkey + '\'');
         }
-        condition.having = [key.substr(8), dollarConditionMap[valkey], value[valkey]];
+        alias = key.substr(8);
+        condition.having = [alias, dollarConditionMap[valkey], transform(value[valkey], alias)];
     } else {
         throw new Error('' + key + ' is not a valid comparison operator');
     }
     return condition;
 };
 
-buildSimpleComparisonCondition = function (condition, key, value, negated) {
+buildSimpleComparisonCondition = function (condition, key, value, negated, transformers) {
     if (_.isNull(value)) {
         condition[negated ? 'whereNotNull' : 'whereNull'] = [key];
     } else if (_.isArray(value)) {
-        condition[negated ? 'whereNotIn' : 'whereIn'] = [key, value];
+        condition[negated ? 'whereNotIn' : 'whereIn'] = [key, transform(value, key, transformers)];
     } else if (!_.isPlainObject(value)) {
-        condition[negated ? 'whereNot' : 'where'] = [key, value];
+        condition[negated ? 'whereNot' : 'where'] = [key, transform(value, key, transformers)];
     } else {
-        condition = buildConditions(value, negated, key);
+        condition = buildConditions(value, negated, key, transformers);
     }
     return condition;
 };
 
-buildCondition = function (key, value, negated, parentKey) {
+buildCondition = function (key, value, negated, parentKey, transformers) {
     if (key) {
         var condition = {};
         if (key.charAt(0) === '$') {
-            condition = buildDollarComparisonCondition(condition, key, value, negated, parentKey);
+            condition = buildDollarComparisonCondition(condition, key, value, negated, parentKey, transformers);
         } else {
-            condition = buildSimpleComparisonCondition(condition, key, value, negated);
+            condition = buildSimpleComparisonCondition(condition, key, value, negated, transformers);
         }
         return condition;
     }
 };
 
-buildConditions = function (filter, negated, parentKey) {
+buildConditions = function (filter, negated, parentKey, transformers) {
     var conditions = [];
     if (_.isArray(filter)) { // it's a clause
         _.each(filter, function (f) {
-            conditions.push(buildConditions(f, negated, parentKey));
+            conditions.push(buildConditions(f, negated, parentKey, transformers));
         });
     } else if (_.isPlainObject(filter)) {
-        _.forIn(filter, function (value, key) {
+        _.each(Object.keys(filter), function (key) {
+            var value = filter[key];
             if (key.charAt(0) === '$') {
                 if (_.isArray(value) && !key.match(/\$or/i) && !key.match(/\$not/i)) {
                     throw new Error('Arrays are not valid values for comparison conditions that aren\'t IN conditions');
                 }
-                buildLogicalDollarCondition(conditions, key, value, negated, parentKey);
+                buildLogicalDollarCondition(conditions, key, value, negated, parentKey, transformers);
             } else {
                 // it's an attribute matcher such as { name : 'sample' }
-                conditions.push(buildCondition(key, value, negated));
+                conditions.push(buildCondition(key, value, negated, null, transformers));
             }
         });
     }
@@ -206,9 +217,9 @@ objectifyRelations = function (relations) {
     return _.uniq(o);
 };
 
-knexWrapper = function (filters) {
+knexWrapper = function (filters, transformers) {
     this.filters = filters;
-    this.conditions = buildConditions(filters);
+    this.conditions = buildConditions(filters, false, null, transformers);
     this.relations = function () { return objectifyRelations(buildRelations(this.filters)); };
 };
 
