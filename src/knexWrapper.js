@@ -45,7 +45,7 @@ buildLogicalDollarCondition = function (conditions, key, value, negated, parentK
 };
 
 transform = function (value, key, transformers) {
-    if(transformers && transformers.hasOwnProperty(key)) {
+    if (transformers && transformers.hasOwnProperty(key)) {
         return transformers[key].apply(null, [value]);
     }
     return value;
@@ -220,7 +220,9 @@ objectifyRelations = function (relations) {
 knexWrapper = function (filters, transformers) {
     this.filters = filters;
     this.conditions = buildConditions(filters, false, null, transformers);
-    this.relations = function () { return objectifyRelations(buildRelations(this.filters)); };
+    this.relations = function () {
+        return objectifyRelations(buildRelations(this.filters));
+    };
 };
 
 knexWrapper.prototype.applyTo = function (knex) {

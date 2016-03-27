@@ -603,8 +603,9 @@ describe('GQL', function () {
     });
 
     describe('Transformers', function () {
-        it('should convert dates and return constants', function() {
-            var query = gql.parse(
+        it('should convert dates and return constants', function () {
+            var query, marchFirst;
+            query = gql.parse(
                 'name:sample,(!name:sample+created_at:<=\'2016-03-01\'),(created_at:>\'2016-03-01\'),featured:true',
                 {
                     created_at: function (o) {
@@ -618,16 +619,18 @@ describe('GQL', function () {
                 }
             );
 
-            var marchFirst = new Date('2016-03-01');
+            marchFirst = new Date('2016-03-01');
             query.conditions.should.eql([
-                {"where": [ "name", "sample" ] },
-                {"or": [
-                        {"whereNot": ["name", "sample"]},
-                        {"where": ["created_at", "<=", marchFirst]}
+                {where: ['name', 'sample']},
+                {
+                    or: [
+                        {whereNot: ['name', 'sample']},
+                        {where: ['created_at', '<=', marchFirst]}
                     ]
                 },
-                {"or": {"where": ["created_at", ">", marchFirst]}},
-                {"or": {"where": ["featured", false]}
+                {or: {where: ['created_at', '>', marchFirst]}},
+                {
+                    or: {where: ['featured', false]}
                 }
             ]);
         });
