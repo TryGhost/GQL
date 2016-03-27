@@ -1,7 +1,8 @@
 /* globals describe, it */
 /* jshint unused:false */
 var should = require('should'),
-    gql = require('../src/gql');
+    gql = require('../src/gql'),
+    lexer = require('../src/lexer');
 
 describe('Parser', function () {
     var parserError = /^Query Error: unexpected character in filter at char/;
@@ -33,6 +34,9 @@ describe('Parser', function () {
             gql.parse('!author:\'Joe Bloggs\'').filters.should.eql(
                 {$not: {author: 'Joe Bloggs'}}
             );
+            gql.parse('!author:Joe Bloggs').filters.should.eql(
+                {$not: {author: 'Joe Bloggs'}}
+            );
         });
 
         it('can parse greater than', function () {
@@ -45,6 +49,9 @@ describe('Parser', function () {
             );
 
             gql.parse('author:>\'Joe Bloggs\'').filters.should.eql(
+                {author: {$gt: 'Joe Bloggs'}}
+            );
+            gql.parse('author:>Joe Bloggs').filters.should.eql(
                 {author: {$gt: 'Joe Bloggs'}}
             );
         });
@@ -61,6 +68,9 @@ describe('Parser', function () {
             gql.parse('author:<\'Joe Bloggs\'').filters.should.eql(
                 {author: {$lt: 'Joe Bloggs'}}
             );
+            gql.parse('author:<Joe Bloggs').filters.should.eql(
+                {author: {$lt: 'Joe Bloggs'}}
+            );
         });
 
         it('can parse greater than or equals', function () {
@@ -75,6 +85,9 @@ describe('Parser', function () {
             gql.parse('author:>=\'Joe Bloggs\'').filters.should.eql(
                 {author: {$gte: 'Joe Bloggs'}}
             );
+            gql.parse('author:>=Joe Bloggs').filters.should.eql(
+                {author: {$gte: 'Joe Bloggs'}}
+            );
         });
 
         it('can parse less than or equals', function () {
@@ -87,6 +100,9 @@ describe('Parser', function () {
             );
 
             gql.parse('author:<=\'Joe Bloggs\'').filters.should.eql(
+                {author: {$lte: 'Joe Bloggs'}}
+            );
+            gql.parse('author:<=Joe Bloggs').filters.should.eql(
                 {author: {$lte: 'Joe Bloggs'}}
             );
         });
@@ -117,6 +133,10 @@ describe('Parser', function () {
             gql.parse('!author:[\'Joe Bloggs\']').filters.should.eql(
                 {$not: {author: 'Joe Bloggs'}}
             );
+
+            gql.parse('!author:[Joe Bloggs]').filters.should.eql(
+                {$not: {author: 'Joe Bloggs'}}
+            );
         });
 
         it('can parse IN with multiple values', function () {
@@ -135,6 +155,28 @@ describe('Parser', function () {
             gql.parse('author:[\'Joe Bloggs\', \'John O\\\'Nolan\', \'Hello World\']').filters.should.eql(
                 {author: ['Joe Bloggs', 'John O\'Nolan', 'Hello World']}
             );
+
+            gql.parse('author:[Joe Bloggs, John O\'Nolan, Hello World]').filters.should.eql(
+                {author: ['Joe Bloggs', 'John O\'Nolan', 'Hello World']}
+            );
+
+            gql.parse('author:[Joe Bloggs\\, John O\'Nolan, Hello World]').filters.should.eql(
+                {author: ['Joe Bloggs, John O\'Nolan', 'Hello World']}
+            );
+
+            gql.parse('author:[Joe Bloggs\\] John O\'Nolan, Hello World]').filters.should.eql(
+                {author: ['Joe Bloggs] John O\'Nolan', 'Hello World']}
+            );
+
+            (function () {
+                // premature, unescaped ']'
+                gql.parse('author:[Joe Bloggs] John O\'Nolan, Hello World]');
+            }).should.throw(parserError);
+
+            (function () {
+                // misplaced end of IN values
+                gql.parse('author:[Joe Bloggs], John O\'Nolan, Hello World]');
+            }).should.throw(parserError);
         });
 
         it('can parse NOT IN with single value', function () {
@@ -147,6 +189,10 @@ describe('Parser', function () {
             );
 
             gql.parse('!author:[\'Joe Bloggs\', \'John O\\\'Nolan\', \'Hello World\']').filters.should.eql(
+                {$not: {author: ['Joe Bloggs', 'John O\'Nolan', 'Hello World']}}
+            );
+
+            gql.parse('!author:[Joe Bloggs, John O\'Nolan, Hello World]').filters.should.eql(
                 {$not: {author: ['Joe Bloggs', 'John O\'Nolan', 'Hello World']}}
             );
         });
@@ -219,17 +265,21 @@ describe('Parser', function () {
             gql.parse('slug:getting-started').filters.should.eql(
                 {slug: 'getting-started'}
             );
+
+            gql.parse('slug:\'getting-started\'').filters.should.eql(
+                {slug: 'getting-started'}
+            );
         });
     });
 
     describe('complex examples', function () {
         it('many expressions', function () {
             var one, oneTest, two, twoTest;
-            one = gql.parse('tag:photo+featured:true,tag.id:>5');
+            one = gql.parse('tag:photo+featured:true,tags.id:>5');
             oneTest = [
                 {tag: 'photo'},
                 {featured: true},
-                {$or: {'tag.id': {$gt: 5}}}
+                {$or: {'tags.id': {$gt: 5}}}
             ];
             one.filters.should.eql(oneTest);
 
@@ -243,7 +293,7 @@ describe('Parser', function () {
         });
 
         it('grouped expressions', function () {
-            var one, oneTest, two, twoTest, three, threeTest, four, fourTest, five, fiveTest;
+            var one, oneTest, two, twoTest, three, threeTest, four, fourTest, five, fiveTest, fiveOne;
             one = gql.parse('!author:joe+(tag:photo,!image:null,featured:true)');
             oneTest = [
                 {$not: {author: 'joe'}},
@@ -313,6 +363,10 @@ describe('Parser', function () {
                 ]}
             ];
             five.filters.should.eql(fiveTest);
+
+            // same logical structure as five, but no quotes around dates
+            fiveOne = gql.parse('name:sample,(!name:sample+created_at:<=2016-03-03),(!name:sample+(created_at:2016-03-03,created_at:2016-03-04))');
+            fiveOne.filters.should.eql(fiveTest);
         });
 
         it('in expressions', function () {
@@ -369,23 +423,31 @@ describe('Parser', function () {
 
         it('CANNOT parse incomplete group', function () {
             (function () {
+                // no closing paren
                 gql.parse('id:5,(count:3');
             }).should.throw(parserError);
             (function () {
+                // no opening paren
                 gql.parse('count:3)');
             }).should.throw(parserError);
             (function () {
+                // no logical operator between conditions
                 gql.parse('id:5(count:3)');
             }).should.throw(parserError);
         });
 
         it('CANNOT parse invalid IN expression', function () {
             (function () {
+                // This is interpreted as {id: 'test+ing'}
+                // + isn't valid inside the brackets until outside the end bracket
+                // the IN with only one element is reduced from an array to a single element
                 gql.parse('id:[test+ing]');
-            }).should.throw(parserError);
+            }).should.not.throw(parserError);
             (function () {
+                // because there's not closing right bracket, id is interpreted as a literal
+                // {id: '[test'}
                 gql.parse('id:[test');
-            }).should.throw(parserError);
+            }).should.not.throw(parserError);
             (function () {
                 gql.parse('id:test,ing]');
             }).should.throw(parserError);

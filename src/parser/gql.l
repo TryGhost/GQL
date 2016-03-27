@@ -4,23 +4,16 @@
 
 %options case-insensitive
 
-badcharsincnot               [^\s'"\+\,\(\)\>\<=\[\]~!]
-badcharsnonot                [^\s'"\+\,\(\)\>\<=\[\]~]
-escapable                    ['"\+\,\(\)\>\<=\[\]]
+comparison               [\>\<=~]
+logical                  [\,\+\)]
+notlogical               [^\,\+\)]
 
 %%
 
 \s+                                                         /* skip whitespace */
 'NULL'                                                      return 'NULL';
-'TRUE'                                                      return 'TRUE';
-'FALSE'                                                     return 'FALSE';
-[!][a-zA-Z_\$][a-zA-Z0-9_\.\$\-]*[:]                        return 'NOTPROP';
-[a-zA-Z_\$][a-zA-Z0-9_\.\$\-]*[:]                           return 'PROP';
-[-]?[0-9]+("."[0-9]+)?\b                                    return 'NUMBER';
-'['                                                         return 'LBRACKET';
-']'                                                         return 'RBRACKET';
-{badcharsincnot}(\\{escapable}|{badcharsnonot})+            return 'LITERAL';
-['](\\['"]|[^'"])+?[']                                      return 'STRING';
+[!][a-zA-Z_\$][a-zA-Z0-9_\.\$]*[:]                          return 'NOTPROP';
+[a-zA-Z_\$][a-zA-Z0-9_\.\$]*[:]                             return 'PROP';
 '('                                                         return 'LPAREN';
 ')'                                                         return 'RPAREN';
 ','                                                         return 'OR';
@@ -31,6 +24,9 @@ escapable                    ['"\+\,\(\)\>\<=\[\]]
 '>'                                                         return 'GT';
 '<'                                                         return 'LT';
 '~'                                                         return 'LIKE';
+['](\\[']|[^'])+?[']                                        return 'STRING';
+[\[](\\\]|[^\]])*[\]]                                       return 'IN';
+{comparison}?(\\{logical}|{notlogical})+                    return 'LITERAL';
 
 %%
 

@@ -77,6 +77,27 @@
     return g;
  };
 
+ interpret = function (value) {
+   if(isArray(value)) {
+     for(var i = 0; i < value.length; i++) {
+       value[i] = interpret(value[i]);
+     }
+   } else if(value.match(/^true$/i)) {
+     return true;
+   } else if(value.match(/^false$/i)) {
+     return false;
+   } else if(value.match(/^\s*[-]?[0-9]+("."[0-9]+)?\s*$/)) {
+     return parseInt(value.trim());
+   } else {
+     return unescape(value.replace(/^'|'$/g, '')).trim();
+   }
+   return value;
+ }
+
+ unescapeInElement = function (o) {
+   return o.trim().replace(/\\,/g, ',').replace(/\\\]/g, ']');
+ }
+
 %}
 
 %% /* language grammar */
@@ -111,28 +132,20 @@ propExpr
     ;
 
 valueExpr
-    : LBRACKET inExpr RBRACKET { $$=$2; }
+    : IN { $1 = $1.substr(1, $1.length-2); $1 = $1.match(/(\\,|[^,])+/g).map(unescapeInElement); $$ = interpret($1.length === 1 ? $1[0] : $1); }
     | OP VALUE { $$={}; $$[$1]= $2; }
-    | VALUE { $$ = $1; }
-    ;
-
-inExpr
-    : inExpr OR VALUE { if(isArray($1)) { $1.push($3); } else { var a = []; a.push($1); a.push($3); $1 = a }; $$ = $1 ; }
     | VALUE { $$ = $1; }
     ;
 
 VALUE
     : NULL { $$ = null }
-    | TRUE { $$ = true }
-    | FALSE { $$ = false }
     | NUMBER { $$ = parseInt(yytext); }
-    | LITERAL { $$ = $1; }
     | STRING  { $1 = $1.replace(/^'|'$/g, ''); $$ = unescape($1); }
+    | LITERAL { $$ = interpret($1); }
     ;
 
 OP
-    : NOT { $$ = "$ne"; }
-    | GT { $$ = "$gt"; }
+    : GT { $$ = "$gt"; }
     | LT { $$ = "$lt"; }
     | GTE { $$ = "$gte"; }
     | LTE { $$ = "$lte"; }

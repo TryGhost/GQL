@@ -6,7 +6,10 @@ describe('Lexer', function () {
 
     describe('Symbols', function () {
         it('can recognise !', function () {
-            gql.lex('!').should.eql([{token: 'NOT', matched: '!'}]);
+            gql.lex('!asd').should.eql([{token: 'NOT', matched: '!'},{token: 'LITERAL', matched: 'asd'}]);
+        });
+        it('can recognise !p:', function () {
+            gql.lex('!p:').should.eql([{token: 'NOTPROP', matched: '!p:'}]);
         });
         it('can recognise +', function () {
             gql.lex('+').should.eql([{token: 'AND', matched: '+'}]);
@@ -14,11 +17,14 @@ describe('Lexer', function () {
         it('can recognise ,', function () {
             gql.lex(',').should.eql([{token: 'OR', matched: ','}]);
         });
-        it('can recognise [', function () {
-            gql.lex('[').should.eql([{token: 'LBRACKET', matched: '['}]);
+        it('can recognise [ out of context as a literal', function () {
+            gql.lex('[').should.eql([{token: 'LITERAL', matched: '['}]);
         });
-        it('can recognise ]', function () {
-            gql.lex(']').should.eql([{token: 'RBRACKET', matched: ']'}]);
+        it('can recognise ] out of context as a literal', function () {
+            gql.lex(']').should.eql([{token: 'LITERAL', matched: ']'}]);
+        });
+        it('can recognise (', function () {
+            gql.lex('(').should.eql([{token: 'LPAREN', matched: '('}]);
         });
         it('can recognise (', function () {
             gql.lex('(').should.eql([{token: 'LPAREN', matched: '('}]);
@@ -41,31 +47,11 @@ describe('Lexer', function () {
         it('can recognise <=', function () {
             gql.lex('<=').should.eql([{token: 'LTE', matched: '<='}]);
         });
-        it('cannot recognise :', function () {
-            (function () {gql.lex(':');}).should.throw(lexicalError);
-        });
-        it('cannot recognise =', function () {
-            (function () {gql.lex('=');}).should.throw(lexicalError);
-        });
-        it('cannot recognise "', function () {
-            (function () {gql.lex('"');}).should.throw(lexicalError);
-        });
-        it('cannot recognise \'', function () {
-            (function () {gql.lex('\'');}).should.throw(lexicalError);
-        });
     });
 
     describe('VALUES', function () {
         it('can recognise null', function () {
             gql.lex('null').should.eql([{token: 'NULL', matched: 'null'}]);
-        });
-
-        it('can recognise true', function () {
-            gql.lex('true').should.eql([{token: 'TRUE', matched: 'true'}]);
-        });
-
-        it('can recognise false', function () {
-            gql.lex('false').should.eql([{token: 'FALSE', matched: 'false'}]);
         });
 
         it('can recognise a LITERAL', function () {
@@ -76,15 +62,15 @@ describe('Lexer', function () {
             gql.lex('\'six\'').should.eql([{token: 'STRING', matched: '\'six\''}]);
         });
 
-        it('can recognise a NUMBER', function () {
-            gql.lex('6').should.eql([{token: 'NUMBER', matched: '6'}]);
+        it('can recognise a LITERAL that\'s a number', function () {
+            gql.lex('6').should.eql([{token: 'LITERAL', matched: '6'}]);
         });
 
         it('does not confuse values in LITERALs', function () {
             gql.lex('strueth').should.eql([{token: 'LITERAL', matched: 'strueth'}]);
             gql.lex('trueth').should.eql([{token: 'LITERAL', matched: 'trueth'}]);
             gql.lex('true_thing').should.eql([{token: 'LITERAL', matched: 'true_thing'}]);
-            // gql.lex('true-thing').should.eql([{token: 'LITERAL', matched: 'true-thing'}]);
+            gql.lex('true-thing').should.eql([{token: 'LITERAL', matched: 'true-thing'}]);
         });
 
         it('does not confuse values in STRINGs', function () {
@@ -101,8 +87,7 @@ describe('Lexer', function () {
                 {token: 'LITERAL', matched: 'myvalue'}
             ]);
             gql.lex('my value').should.eql([
-                {token: 'LITERAL', matched: 'my'},
-                {token: 'LITERAL', matched: 'value'}
+                {token: 'LITERAL', matched: 'my value'}
             ]);
             gql.lex('my-value').should.eql([
                 {token: 'LITERAL', matched: 'my-value'}
@@ -113,7 +98,9 @@ describe('Lexer', function () {
             gql.lex('my&valu\\\'e!').should.eql([
                 {token: 'LITERAL', matched: 'my&valu\\\'e!'}
             ]);
-            (function () {gql.lex('my&valu\'e!');}).should.throw(lexicalError);
+            gql.lex('my&valu\'e!').should.eql([
+                {token: 'LITERAL', matched: 'my&valu\'e!'}
+            ]);
         });
 
         it('should separate NOT at beginning of literal', function () {
@@ -121,20 +108,6 @@ describe('Lexer', function () {
                 {token: 'NOT', matched: '!'},
                 {token: 'LITERAL', matched: 'photo!graph'}
             ]);
-        });
-
-        it('should NOT permit special chars inside a literal', function () {
-            (function () { gql.lex('t+st');}).should.throw(lexicalError);
-            (function () { gql.lex('t,st');}).should.throw(lexicalError);
-            (function () { gql.lex('t(st');}).should.throw(lexicalError);
-            (function () { gql.lex('t)st');}).should.throw(lexicalError);
-            (function () { gql.lex('t>st');}).should.throw(lexicalError);
-            (function () { gql.lex('t<st');}).should.throw(lexicalError);
-            (function () { gql.lex('t=st');}).should.throw(lexicalError);
-            (function () { gql.lex('t[st');}).should.throw(lexicalError);
-            (function () { gql.lex('t]st');}).should.throw(lexicalError);
-            (function () { gql.lex('t\'st');}).should.throw(lexicalError);
-            (function () { gql.lex('t"st');}).should.throw(lexicalError);
         });
 
         it('should not match special chars at the start of a literal', function () {
@@ -163,12 +136,16 @@ describe('Lexer', function () {
                 {token: 'LITERAL', matched: 'test'}
             ]);
             gql.lex('[test').should.eql([
-                {token: 'LBRACKET', matched: '['},
-                {token: 'LITERAL', matched: 'test'}
+                {token: 'LITERAL', matched: '[test'}
+            ]);
+            gql.lex('test]').should.eql([
+                {token: 'LITERAL', matched: 'test]'}
+            ]);
+            gql.lex('[test]').should.eql([
+                {token: 'IN', matched: '[test]'}
             ]);
             gql.lex(']test').should.eql([
-                {token: 'RBRACKET', matched: ']'},
-                {token: 'LITERAL', matched: 'test'}
+                {token: 'LITERAL', matched: ']test'}
             ]);
             gql.lex('>=test').should.eql([
                 {token: 'GTE', matched: '>='},
@@ -179,9 +156,9 @@ describe('Lexer', function () {
                 {token: 'LITERAL', matched: 'test'}
             ]);
 
-            (function () { gql.lex('=test');}).should.throw(lexicalError);
-            (function () { gql.lex('"test');}).should.throw(lexicalError);
-            (function () { gql.lex('\'test');}).should.throw(lexicalError);
+            (function () { gql.lex('=test');}).should.not.throw(lexicalError);
+            (function () { gql.lex('"test');}).should.not.throw(lexicalError);
+            (function () { gql.lex('\'test');}).should.not.throw(lexicalError);
         });
 
         it('should not match special chars at the end of a literal', function () {
@@ -194,40 +171,36 @@ describe('Lexer', function () {
                 {token: 'OR', matched: ','}
             ]);
             gql.lex('test(').should.eql([
-                {token: 'LITERAL', matched: 'test'},
-                {token: 'LPAREN', matched: '('}
+                {token: 'LITERAL', matched: 'test('}
             ]);
             gql.lex('test)').should.eql([
                 {token: 'LITERAL', matched: 'test'},
                 {token: 'RPAREN', matched: ')'}
             ]);
+            gql.lex('test\\)').should.eql([
+                {token: 'LITERAL', matched: 'test\\)'}
+            ]);
             gql.lex('test>').should.eql([
-                {token: 'LITERAL', matched: 'test'},
-                {token: 'GT', matched: '>'}
+                {token: 'LITERAL', matched: 'test>'}
             ]);
             gql.lex('test<').should.eql([
-                {token: 'LITERAL', matched: 'test'},
-                {token: 'LT', matched: '<'}
+                {token: 'LITERAL', matched: 'test<'}
             ]);
             gql.lex('test[').should.eql([
-                {token: 'LITERAL', matched: 'test'},
-                {token: 'LBRACKET', matched: '['}
+                {token: 'LITERAL', matched: 'test['}
             ]);
             gql.lex('test]').should.eql([
-                {token: 'LITERAL', matched: 'test'},
-                {token: 'RBRACKET', matched: ']'}
+                {token: 'LITERAL', matched: 'test]'}
             ]);
             gql.lex('test>=').should.eql([
-                {token: 'LITERAL', matched: 'test'},
-                {token: 'GTE', matched: '>='}
+                {token: 'LITERAL', matched: 'test>='}
             ]);
             gql.lex('test<=').should.eql([
-                {token: 'LITERAL', matched: 'test'},
-                {token: 'LTE', matched: '<='}
+                {token: 'LITERAL', matched: 'test<='}
             ]);
-            (function () { gql.lex('test=');}).should.throw(lexicalError);
-            (function () { gql.lex('test"');}).should.throw(lexicalError);
-            (function () { gql.lex('test\'');}).should.throw(lexicalError);
+            (function () { gql.lex('test=');}).should.not.throw(lexicalError);
+            (function () { gql.lex('test"');}).should.not.throw(lexicalError);
+            (function () { gql.lex('test\'');}).should.not.throw(lexicalError);
         });
 
         it('should permit escaped special chars inside a literal', function () {
@@ -290,11 +263,7 @@ describe('Lexer', function () {
                 {token: 'STRING', matched: '\'mystery\''}
             ]);
             gql.lex('[\'magic\',\'mystery\']').should.eql([
-                {token: 'LBRACKET', matched: '['},
-                {token: 'STRING', matched: '\'magic\''},
-                {token: 'OR', matched: ','},
-                {token: 'STRING', matched: '\'mystery\''},
-                {token: 'RBRACKET', matched: ']'}
+                {token: 'IN', matched: '[\'magic\',\'mystery\']'}
             ]);
         });
 
@@ -319,8 +288,8 @@ describe('Lexer', function () {
         });
 
         it('should NOT permit quotes inside a STRING', function () {
-            (function () { gql.lex('\'t\'st\'');}).should.throw(lexicalError);
-            (function () { gql.lex('\'t"st\'');}).should.throw(lexicalError);
+            (function () { gql.lex('\'t\'st\'');}).should.not.throw(lexicalError);
+            (function () { gql.lex('\'t"st\'');}).should.not.throw(lexicalError);
         });
 
         it('should permit escaped quotes inside a String', function () {
@@ -358,9 +327,7 @@ describe('Lexer', function () {
 
             gql.lex('tags:[-getting-started]').should.eql([
                 {token: 'PROP', matched: 'tags:'},
-                {token: 'LBRACKET', matched: '['},
-                {token: 'LITERAL', matched: '-getting-started'},
-                {token: 'RBRACKET', matched: ']'}
+                {token: 'IN', matched: '[-getting-started]'}
             ]);
         });
 
@@ -372,51 +339,42 @@ describe('Lexer', function () {
 
             gql.lex('tags:[getting-started]').should.eql([
                 {token: 'PROP', matched: 'tags:'},
-                {token: 'LBRACKET', matched: '['},
-                {token: 'LITERAL', matched: 'getting-started'},
-                {token: 'RBRACKET', matched: ']'}
+                {token: 'IN', matched: '[getting-started]'}
             ]);
 
             gql.lex('tags:[-getting-started]').should.eql([
                 {token: 'PROP', matched: 'tags:'},
-                {token: 'LBRACKET', matched: '['},
-                {token: 'LITERAL', matched: '-getting-started'},
-                {token: 'RBRACKET', matched: ']'}
+                {token: 'IN', matched: '[-getting-started]'}
             ]);
 
-            (function () { gql.lex('tags=-[getting-started]');}).should.throw(lexicalError);
+            gql.lex('tags:-[getting-started]').should.eql([
+                {token: 'PROP', matched: 'tags:'},
+                {token: 'LITERAL', matched: '-[getting-started]'}
+            ]);
 
             gql.lex('id:-1+tags:[getting-started]').should.eql([
                 {token: 'PROP', matched: 'id:'},
-                {token: 'NUMBER', matched: '-1'},
+                {token: 'LITERAL', matched: '-1'},
                 {token: 'AND', matched: '+'},
                 {token: 'PROP', matched: 'tags:'},
-                {token: 'LBRACKET', matched: '['},
-                {token: 'LITERAL', matched: 'getting-started'},
-                {token: 'RBRACKET', matched: ']'}
+                {token: 'IN', matched: '[getting-started]'}
             ]);
         });
     });
 
     describe('complex examples', function () {
         it('many expressions', function () {
-            gql.lex('tag:photo+featured:true,tag.$count:>=5').should.eql([
+            gql.lex('tag:photo+featured:true,$having.tag_count:>=5').should.eql([
                 {token: 'PROP', matched: 'tag:'},
                 {token: 'LITERAL', matched: 'photo'},
                 {token: 'AND', matched: '+'},
                 {token: 'PROP', matched: 'featured:'},
-                {token: 'TRUE', matched: 'true'},
+                {token: 'LITERAL', matched: 'true'},
                 {token: 'OR', matched: ','},
-                {token: 'PROP', matched: 'tag.$count:'},
+                {token: 'PROP', matched: '$having.tag_count:'},
                 {token: 'GTE', matched: '>='},
-                {token: 'NUMBER', matched: '5'}
+                {token: 'LITERAL', matched: '5'}
             ]);
-
-            // gql.lex("tag:photo+image:-null,tag.count:>5").should.eql();
-        });
-
-        it('grouped expressions', function () {
-            // gql.lex("author:-joe+(tag:photo,image:-null,featured:true)").should.eql();
         });
 
         it('in expressions', function () {
@@ -425,16 +383,8 @@ describe('Lexer', function () {
                 {token: 'LITERAL', matched: '-joe'},
                 {token: 'AND', matched: '+'},
                 {token: 'PROP', matched: 'tag:'},
-                {token: 'LBRACKET', matched: '['},
-                {token: 'LITERAL', matched: 'photo'},
-                {token: 'OR', matched: ','},
-                {token: 'LITERAL', matched: 'video'},
-                {token: 'RBRACKET', matched: ']'}
+                {token: 'IN', matched: '[photo,video]'}
             ]);
-
-            // gql.lex("author:-joe+tag:-[photo,video]").should.eql();
-
-            // gql.lex("author:-joe+tag:[photo,video]+post.count:>5+post.count:<100").should.eql();
         });
     });
 });
