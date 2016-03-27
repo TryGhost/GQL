@@ -144,6 +144,12 @@ describe('Parser', function () {
                 {count: [5, 8, 12]}
             );
 
+            // we don't necessarily want multi-typed elements in an IN.
+            // but this shows that the values are interpreted
+            gql.parse('count:[5, -3, -purple, true, applesauce]').filters.should.eql(
+                {count: [5, -3, '-purple', true, 'applesauce']}
+            );
+
             gql.parse('tag:[getting-started, ghost, really-long-1]').filters.should.eql(
                 {tag: ['getting-started', 'ghost', 'really-long-1']}
             );
