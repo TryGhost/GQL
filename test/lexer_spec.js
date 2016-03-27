@@ -275,7 +275,7 @@ describe('Lexer', function () {
             gql.lex('\'magic<\'').should.eql([{token: 'STRING', matched: '\'magic<\''}]);
         });
 
-        it('should permit special chars inside a STRING, not including quotes', function () {
+        it('should permit special chars inside a STRING and properly interpret quotes', function () {
             gql.lex('\'t+st\'').should.eql([{token: 'STRING', matched: '\'t+st\''}]);
             gql.lex('\'t,st\'').should.eql([{token: 'STRING', matched: '\'t,st\''}]);
             gql.lex('\'t(st\'').should.eql([{token: 'STRING', matched: '\'t(st\''}]);
@@ -285,11 +285,13 @@ describe('Lexer', function () {
             gql.lex('\'t=st\'').should.eql([{token: 'STRING', matched: '\'t=st\''}]);
             gql.lex('\'t[st\'').should.eql([{token: 'STRING', matched: '\'t[st\''}]);
             gql.lex('\'t]st\'').should.eql([{token: 'STRING', matched: '\'t]st\''}]);
-        });
-
-        it('should NOT permit quotes inside a STRING', function () {
-            (function () { gql.lex('\'t\'st\'');}).should.not.throw(lexicalError);
-            (function () { gql.lex('\'t"st\'');}).should.not.throw(lexicalError);
+            gql.lex('\'t\'st\'').should.eql([
+                {token: 'STRING', matched: '\'t\''},
+                {token: 'LITERAL', matched: 'st\''}
+            ]);
+            gql.lex('\'t"st\'').should.eql([
+                {token: 'STRING', matched: '\'t"st\''}
+            ]);
         });
 
         it('should permit escaped quotes inside a String', function () {
@@ -299,17 +301,24 @@ describe('Lexer', function () {
     });
 
     describe('single & double QUOTE marks', function () {
-        it('CAN match an escaped double quote in a LITERAL', function () {
+        it('CAN match an escaped and unescaped double quotes in a LITERAL', function () {
             gql.lex('thing\\"amabob').should.eql([{token: 'LITERAL', matched: 'thing\\"amabob'}]);
+            gql.lex('thing"amabob').should.eql([{token: 'LITERAL', matched: 'thing"amabob'}]);
         });
         it('CAN match an escaped single quote in a LITERAL', function () {
             gql.lex('thing\\\'amabob').should.eql([{token: 'LITERAL', matched: 'thing\\\'amabob'}]);
+            gql.lex('thing\'amabob').should.eql([{token: 'LITERAL', matched: 'thing\'amabob'}]);
         });
-        it('CAN match an escaped double quote in a STRING', function () {
+        it('CAN match an escaped or unescaped double quote in a STRING', function () {
             gql.lex('\'thing\\"amabob\'').should.eql([{token: 'STRING', matched: '\'thing\\"amabob\''}]);
+            gql.lex('\'thing"amabob\'').should.eql([{token: 'STRING', matched: '\'thing"amabob\''}]);
         });
         it('CAN match an escaped single quote in a STRING', function () {
             gql.lex('\'thing\\\'amabob\'').should.eql([{token: 'STRING', matched: '\'thing\\\'amabob\''}]);
+            gql.lex('\'thing\'amabob\'').should.eql([
+                {token: 'STRING', matched: '\'thing\''},
+                {token: 'LITERAL', matched: 'amabob\''}
+            ]);
         });
     });
 
