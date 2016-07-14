@@ -16,7 +16,7 @@ escapable                    ['"\+\,\(\)\>\<=\[\]]
 'TRUE'                                                      return 'TRUE';
 'FALSE'                                                     return 'FALSE';
 [a-zA-Z_][a-zA-Z0-9_\.]*[:]                                 return 'PROP';
-[0-9]+("."[0-9]+)?\b                                        return 'NUMBER';
+[0-9]+(\.[0-9]+)?\b(?![\-])                                 return 'NUMBER';
 '['                                                         return 'LBRACKET';
 ']'                                                         return 'RBRACKET';
 {badcharsincnot}(\\{escapable}|{badcharsnonot})+            return 'LITERAL';

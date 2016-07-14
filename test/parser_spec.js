@@ -25,6 +25,12 @@ describe('Parser', function () {
                     {prop: 'author', op: '=', value: 'Joe Bloggs'}
                 ]
             });
+
+            gql.parse('author:123-test').should.eql({
+                statements: [
+                    {prop: 'author', op: '=', value: '123-test'}
+                ]
+            });
         });
 
         it('can parse not equals', function () {
