@@ -28,11 +28,11 @@
   "devDependencies": {
     "eslint": "4.8.0",
     "istanbul": "0.4.5",
-    "jison": "0.4.16",
+    "jison": "0.4.18",
     "knex": "0.8.6",
     "mocha": "3.5.3",
     "npm-release": "1.0.0",
-    "should": "^13.1.0",
+    "should": "13.1.0",
     "sinon": "4.0.1"
   }
 }
