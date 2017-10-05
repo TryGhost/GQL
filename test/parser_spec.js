@@ -1,6 +1,4 @@
-/* globals describe, it */
-/* jshint unused:false */
-var should = require('should'),
+var should = require('should'),  // eslint-disable-line no-unused-vars
     gql = require('../lib/gql');
 
 describe('Parser', function () {

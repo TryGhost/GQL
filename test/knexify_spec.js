@@ -1,4 +1,3 @@
-/* globals describe, beforeEach, afterEach, it */
 var sinon  = require('sinon'),
     knex = require('knex')({}),
     knexify = require('../lib/knexify');

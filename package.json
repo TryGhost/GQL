@@ -4,7 +4,7 @@
   "description": "Filter query language for Ghost",
   "main": "index.js",
   "scripts": {
-    "lint": "jshint lib/*.js test/*.js && jscs lib/*.js test/*.js",
+    "lint": "eslint lib test/*_spec.js",
     "test": "npm run build && npm run lint && mocha",
     "build": "jison src/gql.y src/gql.l -o dist/parser.js",
     "coverage": "istanbul cover -x src --dir=test/coverage --report=lcov _mocha -- test/*_spec.js",
@@ -26,10 +26,9 @@
     "lodash": "^4.17.4"
   },
   "devDependencies": {
+    "eslint": "4.8.0",
     "istanbul": "0.4.5",
     "jison": "0.4.16",
-    "jscs": "2.8.0",
-    "jshint": "2.8.0",
     "knex": "0.8.6",
     "mocha": "3.5.3",
     "npm-release": "1.0.0",
