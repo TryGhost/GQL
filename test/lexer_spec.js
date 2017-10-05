@@ -1,4 +1,3 @@
-/* globals describe, it */
 var gql = require('../lib/gql');
 
 describe('Lexer', function () {
