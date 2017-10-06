@@ -1,9 +1,11 @@
 var sinon  = require('sinon'),
     knex = require('knex')({}),
-    knexify = require('../lib/knexify');
+    knexify = require('../lib/knexify'),
+
+    sandbox = sinon.sandbox.create();
 
 describe('Knexify', function () {
-    var postKnex, sandbox = sinon.sandbox.create();
+    var postKnex, testKnex;
 
     beforeEach(function () {
         postKnex = knex('posts');
@@ -14,10 +16,20 @@ describe('Knexify', function () {
         sandbox.spy(postKnex, 'whereNotNull');
         sandbox.spy(postKnex, 'orWhereNull');
         sandbox.spy(postKnex, 'orWhereNotNull');
+
+        testKnex = knex('test');
     });
 
     afterEach(function () {
         sandbox.restore();
+    });
+
+    it('should error for unknown context', function () {
+        knexify(testKnex, {
+            statements: []
+        });
+
+        testKnex.toSQL.should.throwError();
     });
 
     it('should correctly build an empty query', function () {
