@@ -30,7 +30,7 @@
     "istanbul": "0.4.5",
     "jison": "0.4.18",
     "knex": "0.8.6",
-    "mocha": "3.5.3",
+    "mocha": "4.0.1",
     "npm-release": "1.0.0",
     "should": "13.1.0",
     "sinon": "4.0.1"
