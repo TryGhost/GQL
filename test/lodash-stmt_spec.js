@@ -446,6 +446,112 @@ describe('Lodash Stmt Functions', function () {
         });
     });
 
+    describe('replaceStatements', function () {
+        var replaceStatements = lodashStmt.replaceStatements,
+            testFunction = function testFunction() {
+                return {prop: 'magic', op: '=', value: true};
+            },
+            testFunctionGroup = function testFunctionGroup(stmt) {
+                stmt.prop = 'magic';
+                return {
+                    group: [
+                        stmt,
+                        {prop: 'foo', op: '=', value: 'bar'}
+                    ]
+                };
+            };
+
+        it('should replace inside a simple flat array', function () {
+            var statements = [
+                {prop: 'page', op: '=', value: false},
+                {prop: 'status', op: '=', value: 'published', func: 'and'}
+            ];
+
+            replaceStatements(statements, {prop: 'page'}, testFunction).should.eql([
+                {prop: 'magic', op: '=', value: true},
+                {prop: 'status', op: '=', value: 'published', func: 'and'}
+            ]);
+        });
+
+        it('should replace with group inside a simple flat array', function () {
+            var statements = [
+                {prop: 'page', op: '=', value: false},
+                {prop: 'status', op: '=', value: 'published', func: 'and'}
+            ];
+
+            replaceStatements(statements, {prop: 'page'}, testFunctionGroup).should.eql([
+                {
+                    group: [
+                        {prop: 'magic', op: '=', value: false},
+                        {prop: 'foo', op: '=', value: 'bar'}
+                    ]
+                },
+                {prop: 'status', op: '=', value: 'published', func: 'and'}
+            ]);
+        });
+
+        it('should replace with regex', function () {
+            var statements = [
+                {prop: 'tags.slug', op: 'IN', value: false},
+                {prop: 'status', op: '=', value: 'published', func: 'and'}
+            ];
+
+            replaceStatements(statements, {prop: /^tags/, op: 'IN'}, testFunction).should.eql([
+                {prop: 'magic', op: '=', value: true},
+                {prop: 'status', op: '=', value: 'published', func: 'and'}
+            ]);
+        });
+
+        it('should replace a statement from a group', function () {
+            var statements = [
+                {op: '!=', value: 'joe', prop: 'author'},
+                {
+                    group: [
+                        {op: '=', value: 'photo', prop: 'tag'},
+                        {op: '=', value: 'video', prop: 'tag', func: 'or'}
+                    ], func: 'and'
+                }
+            ];
+
+            replaceStatements(statements, {value: 'video'}, testFunction).should.eql([
+                {op: '!=', value: 'joe', prop: 'author'},
+                {
+                    group: [
+                        {op: '=', value: 'photo', prop: 'tag'},
+                        {op: '=', value: true, prop: 'magic'}
+                    ], func: 'and'
+                }
+            ]);
+        });
+
+        it('should replace a statement from a group with a group', function () {
+            var statements = [
+                {op: '!=', value: 'joe', prop: 'author'},
+                {
+                    group: [
+                        {op: '=', value: 'photo', prop: 'tag'},
+                        {op: '=', value: 'video', prop: 'tag', func: 'or'}
+                    ], func: 'and'
+                }
+            ];
+
+            replaceStatements(statements, {value: 'video'}, testFunctionGroup).should.eql([
+                {op: '!=', value: 'joe', prop: 'author'},
+                {
+                    group: [
+                        {op: '=', value: 'photo', prop: 'tag'},
+                        {
+                            group: [
+                                {prop: 'magic', op: '=', value: 'video', func: 'or'},
+                                {prop: 'foo', op: '=', value: 'bar'}
+                            ]
+                        }
+                    ], func: 'and'
+                }
+            ]);
+        });
+    });
+
     describe('mergeStatements', function () {
         var mergeStatements = lodashStmt.mergeStatements;
 
