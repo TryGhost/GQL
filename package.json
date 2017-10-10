@@ -1,6 +1,6 @@
 {
   "name": "ghost-gql",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Filter query language for Ghost",
   "main": "index.js",
   "scripts": {
