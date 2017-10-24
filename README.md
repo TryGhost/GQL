@@ -122,7 +122,7 @@ Also it's possible to implement conversion from the JSON format to SQL either vi
 
 The conversion from GQL -> JSON is performed via a [JISON](http://zaach.github.io/jison/) parser. [JISON](http://zaach.github.io/jison/) is an amazing tool that allows you to easily specify the rules for a language in a JavaScript like syntax, and it creates the parser for you.
 
-In the `/src/` folder is a .l and a .y file used by JISON to generate the parser. `gql.l` is the lexer or tokenizer that defines all of the symbols that GQL can understand. `gql.y` is the grammar, it defines the rules about in what order the symbols must appear. If you make changes to `gql.l` or `gql.y`, you'll need to run `grunt build` in order to generate a new version of the parser in `/dist/`.
+In the `/src/` folder is a .l and a .y file used by JISON to generate the parser. `gql.l` is the lexer or tokenizer that defines all of the symbols that GQL can understand. `gql.y` is the grammar, it defines the rules about in what order the symbols must appear. If you make changes to `gql.l` or `gql.y`, you'll need to run `npm run build` in order to generate a new version of the parser in `/dist/`.
 
 # Copyright & License
 
