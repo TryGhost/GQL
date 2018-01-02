@@ -126,4 +126,4 @@ In the `/src/` folder is a .l and a .y file used by JISON to generate the parser
 
 # Copyright & License
 
-Copyright (c) 2015-2017 Ghost Foundation - Released under the [MIT license](LICENSE).
+Copyright (c) 2015-2018 Ghost Foundation - Released under the [MIT license](LICENSE). Ghost and the Ghost Logo are trademarks of Ghost Foundation Ltd. Please see our [trademark policy](https://ghost.org/trademark/) for info on acceptable usage.
