@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "jison src/gql.y src/gql.l -o dist/parser.js",
-    "lint": "eslint lib test/*_spec.js",
+    "lint": "eslint . --ext .js --cache --ignore-pattern dist/**",
     "test": "yarn build && yarn lint && NODE_ENV=testing mocha -- $(find test -name '*_spec.js')",
     "coverage": "NODE_ENV=testing istanbul cover --dir test/coverage _mocha -- $(find test -name '*._spec.js')",
     "ship": "np"
@@ -26,7 +26,8 @@
     "lodash": "^4.17.4"
   },
   "devDependencies": {
-    "eslint": "4.8.0",
+    "eslint": "^4.19.0",
+    "eslint-plugin-ghost": "0.0.23",
     "istanbul": "0.4.5",
     "jison": "0.4.18",
     "knex": "0.8.6",
