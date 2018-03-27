@@ -26,7 +26,7 @@
     "lodash": "^4.17.4"
   },
   "devDependencies": {
-    "eslint": "4.8.0",
+    "eslint": "4.19.1",
     "istanbul": "0.4.5",
     "jison": "0.4.18",
     "knex": "0.8.6",
