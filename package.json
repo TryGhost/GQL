@@ -4,10 +4,10 @@
   "description": "Filter query language for Ghost",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint lib test/*_spec.js",
-    "test": "npm run build && npm run lint && mocha",
     "build": "jison src/gql.y src/gql.l -o dist/parser.js",
-    "coverage": "istanbul cover -x src --dir=test/coverage --report=lcov _mocha -- test/*_spec.js",
+    "lint": "eslint lib test/*_spec.js",
+    "test": "yarn build && yarn lint && NODE_ENV=testing mocha -- $(find test -name '*_spec.js')",
+    "coverage": "NODE_ENV=testing istanbul cover --dir test/coverage _mocha -- $(find test -name '*._spec.js')",
     "release": "npm-release patch"
   },
   "author": "Ghost Foundation",
