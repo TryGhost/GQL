@@ -13,7 +13,9 @@ describe('GQL', function () {
     });
 
     it('should correctly escape bad sequences', function () {
-        (function () {toSQL('id:\'1 and 1‘=\'1`\'', 'posts');}).should.throw();
+        (function () {
+            toSQL('id:\'1 and 1‘=\'1`\'', 'posts');
+        }).should.throw();
         toSQL('id:\'1 and 1‘=\\\'1`\'', 'posts').should.eql('select * from "posts" where "posts"."id" = \'1 and 1‘=\\\'1`\'');
     });
 });

@@ -38,16 +38,24 @@ describe('Lexer', function () {
             gql.lex('<=').should.eql([{token: 'LTE', matched: '<='}]);
         });
         it('cannot recognise :', function () {
-            (function () {gql.lex(':');}).should.throw(lexicalError);
+            (function () {
+                gql.lex(':');
+            }).should.throw(lexicalError);
         });
         it('cannot recognise =', function () {
-            (function () {gql.lex('=');}).should.throw(lexicalError);
+            (function () {
+                gql.lex('=');
+            }).should.throw(lexicalError);
         });
         it('cannot recognise "', function () {
-            (function () {gql.lex('"');}).should.throw(lexicalError);
+            (function () {
+                gql.lex('"');
+            }).should.throw(lexicalError);
         });
         it('cannot recognise \'', function () {
-            (function () {gql.lex('\'');}).should.throw(lexicalError);
+            (function () {
+                gql.lex('\'');
+            }).should.throw(lexicalError);
         });
     });
 
@@ -109,7 +117,9 @@ describe('Lexer', function () {
             gql.lex('my&valu\\\'e!').should.eql([
                 {token: 'LITERAL', matched: 'my&valu\\\'e!'}
             ]);
-            (function () {gql.lex('my&valu\'e!');}).should.throw(lexicalError);
+            (function () {
+                gql.lex('my&valu\'e!');
+            }).should.throw(lexicalError);
         });
 
         it('should separate NOT at beginning of literal', function () {
@@ -125,17 +135,39 @@ describe('Lexer', function () {
         });
 
         it('should NOT permit special chars inside a literal', function () {
-            (function () { gql.lex('t+st');}).should.throw(lexicalError);
-            (function () { gql.lex('t,st');}).should.throw(lexicalError);
-            (function () { gql.lex('t(st');}).should.throw(lexicalError);
-            (function () { gql.lex('t)st');}).should.throw(lexicalError);
-            (function () { gql.lex('t>st');}).should.throw(lexicalError);
-            (function () { gql.lex('t<st');}).should.throw(lexicalError);
-            (function () { gql.lex('t=st');}).should.throw(lexicalError);
-            (function () { gql.lex('t[st');}).should.throw(lexicalError);
-            (function () { gql.lex('t]st');}).should.throw(lexicalError);
-            (function () { gql.lex('t\'st');}).should.throw(lexicalError);
-            (function () { gql.lex('t"st');}).should.throw(lexicalError);
+            (function () {
+                gql.lex('t+st');
+            }).should.throw(lexicalError);
+            (function () {
+                gql.lex('t,st');
+            }).should.throw(lexicalError);
+            (function () {
+                gql.lex('t(st');
+            }).should.throw(lexicalError);
+            (function () {
+                gql.lex('t)st');
+            }).should.throw(lexicalError);
+            (function () {
+                gql.lex('t>st');
+            }).should.throw(lexicalError);
+            (function () {
+                gql.lex('t<st');
+            }).should.throw(lexicalError);
+            (function () {
+                gql.lex('t=st');
+            }).should.throw(lexicalError);
+            (function () {
+                gql.lex('t[st');
+            }).should.throw(lexicalError);
+            (function () {
+                gql.lex('t]st');
+            }).should.throw(lexicalError);
+            (function () {
+                gql.lex('t\'st');
+            }).should.throw(lexicalError);
+            (function () {
+                gql.lex('t"st');
+            }).should.throw(lexicalError);
         });
 
         it('should not match special chars at the start of a literal', function () {
@@ -180,9 +212,15 @@ describe('Lexer', function () {
                 {token: 'LITERAL', matched: 'test'}
             ]);
 
-            (function () { gql.lex('=test');}).should.throw(lexicalError);
-            (function () { gql.lex('"test');}).should.throw(lexicalError);
-            (function () { gql.lex('\'test');}).should.throw(lexicalError);
+            (function () {
+                gql.lex('=test');
+            }).should.throw(lexicalError);
+            (function () {
+                gql.lex('"test');
+            }).should.throw(lexicalError);
+            (function () {
+                gql.lex('\'test');
+            }).should.throw(lexicalError);
         });
 
         it('should not match special chars at the end of a literal', function () {
@@ -226,9 +264,15 @@ describe('Lexer', function () {
                 {token: 'LITERAL', matched: 'test'},
                 {token: 'LTE', matched: '<='}
             ]);
-            (function () { gql.lex('test=');}).should.throw(lexicalError);
-            (function () { gql.lex('test"');}).should.throw(lexicalError);
-            (function () { gql.lex('test\'');}).should.throw(lexicalError);
+            (function () {
+                gql.lex('test=');
+            }).should.throw(lexicalError);
+            (function () {
+                gql.lex('test"');
+            }).should.throw(lexicalError);
+            (function () {
+                gql.lex('test\'');
+            }).should.throw(lexicalError);
         });
 
         it('should permit escaped special chars inside a literal', function () {
@@ -329,8 +373,12 @@ describe('Lexer', function () {
         });
 
         it('should NOT permit quotes inside a STRING', function () {
-            (function () { gql.lex('\'t\'st\'');}).should.throw(lexicalError);
-            (function () { gql.lex('\'t"st\'');}).should.throw(lexicalError);
+            (function () {
+                gql.lex('\'t\'st\'');
+            }).should.throw(lexicalError);
+            (function () {
+                gql.lex('\'t"st\'');
+            }).should.throw(lexicalError);
         });
 
         it('should permit escaped quotes inside a String', function () {
@@ -341,16 +389,24 @@ describe('Lexer', function () {
 
     describe('single & double QUOTE marks', function () {
         it('CANNOT match an UNescaped double quote in a LITERAL', function () {
-            (function () {gql.lex('thing"amabob');}).should.throw(lexicalError);
+            (function () {
+                gql.lex('thing"amabob');
+            }).should.throw(lexicalError);
         });
         it('CANNOT match an UNescaped single quote in a LITERAL', function () {
-            (function () {gql.lex('thing\'amabob');}).should.throw(lexicalError);
+            (function () {
+                gql.lex('thing\'amabob');
+            }).should.throw(lexicalError);
         });
         it('CANNOT match an UNescaped double quote in a STRING', function () {
-            (function () {gql.lex('\'thing"amabob\'');}).should.throw(lexicalError);
+            (function () {
+                gql.lex('\'thing"amabob\'');
+            }).should.throw(lexicalError);
         });
         it('CANNOT match an UNescaped single quote in a STRING', function () {
-            (function () {gql.lex('\'thing\'amabob\'');}).should.throw(lexicalError);
+            (function () {
+                gql.lex('\'thing\'amabob\'');
+            }).should.throw(lexicalError);
         });
         it('CAN match an escaped double quote in a LITERAL', function () {
             gql.lex('thing\\"amabob').should.eql([{token: 'LITERAL', matched: 'thing\\"amabob'}]);
