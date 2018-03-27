@@ -8,7 +8,7 @@
     "lint": "eslint lib test/*_spec.js",
     "test": "yarn build && yarn lint && NODE_ENV=testing mocha -- $(find test -name '*_spec.js')",
     "coverage": "NODE_ENV=testing istanbul cover --dir test/coverage _mocha -- $(find test -name '*._spec.js')",
-    "release": "npm-release patch"
+    "ship": "np"
   },
   "author": "Ghost Foundation",
   "homepage": "http://ghost.org",
@@ -31,7 +31,7 @@
     "jison": "0.4.18",
     "knex": "0.8.6",
     "mocha": "4.0.1",
-    "npm-release": "1.0.0",
+    "np": "2.19.0",
     "should": "13.1.0",
     "sinon": "4.0.1"
   }
