@@ -21,6 +21,9 @@
     "type": "git",
     "url": "git://github.com/TryGhost/Ghost-GQL.git"
   },
+  "engine": {
+    "node": ">=6"
+  },
   "license": "MIT",
   "dependencies": {
     "lodash": "^4.17.4"
