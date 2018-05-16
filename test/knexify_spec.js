@@ -286,11 +286,11 @@ describe('Knexify', function () {
                 bindings: ['joe', 'photo', 'video'],
                 method: 'select',
                 options: {},
-                sql: 'select * from "posts" where "author"."slug" != ? and ("tags"."slug" = ? or "tags"."slug" = ?)'
+                sql: 'select * from "posts" where "author"."slug" != ? and ("posts"."id" in (select "post_id" from "posts_tags" inner join "tags" on "posts_tags"."tag_id" = "tags"."id" where "tags"."slug" = ?) or "posts"."id" in (select "post_id" from "posts_tags" inner join "tags" on "posts_tags"."tag_id" = "tags"."id" where "tags"."slug" = ?))'
             });
 
             postKnex.toQuery().should.eql(
-                'select * from "posts" where "author"."slug" != \'joe\' and ("tags"."slug" = \'photo\' or "tags"."slug" = \'video\')'
+                'select * from "posts" where "author"."slug" != \'joe\' and ("posts"."id" in (select "post_id" from "posts_tags" inner join "tags" on "posts_tags"."tag_id" = "tags"."id" where "tags"."slug" = \'photo\') or "posts"."id" in (select "post_id" from "posts_tags" inner join "tags" on "posts_tags"."tag_id" = "tags"."id" where "tags"."slug" = \'video\'))'
             );
 
             postKnex.where.calledOnce.should.eql(true);
@@ -327,6 +327,78 @@ describe('Knexify', function () {
 
             postKnex.toQuery().should.eql(
                 'select * from "posts" where "author"."slug" != \'joe\' and ("posts"."featured" = \'true\' or "posts"."image" is not null)'
+            );
+
+            postKnex.where.calledOnce.should.eql(true);
+            postKnex.andWhere.calledOnce.should.eql(true);
+
+            // can't stub out the sub-query-builder functions
+            postKnex.orWhere.calledOnce.should.eql(false);
+            postKnex.whereNull.calledOnce.should.eql(false);
+            postKnex.whereNotNull.calledOnce.should.eql(false);
+            postKnex.orWhereNull.calledOnce.should.eql(false);
+            postKnex.orWhereNotNull.calledOnce.should.eql(false);
+        });
+    });
+    describe('special queries with tags', function () {
+        it('should correctly build a group query with and', function () {
+            knexify(postKnex, {
+                statements: [
+                    {op: '!=', value: 'joe', prop: 'author'},
+                    {
+                        group: [
+                            {op: '=', value: 'photo', prop: 'tag'},
+                            {op: '=', value: 'video', prop: 'tag', func: 'and'}
+                        ], func: 'and'
+                    }
+                ]
+            });
+
+            // Check the output from both toSQL and toQuery - this emulates calling the query twice for pagination
+            postKnex.toSQL().should.eql({
+                bindings: ['joe', 'photo', 'video'],
+                method: 'select',
+                options: {},
+                sql: 'select * from "posts" where "author"."slug" != ? and ("posts"."id" in (select "post_id" from "posts_tags" inner join "tags" on "posts_tags"."tag_id" = "tags"."id" where "tags"."slug" = ?) and "posts"."id" in (select "post_id" from "posts_tags" inner join "tags" on "posts_tags"."tag_id" = "tags"."id" where "tags"."slug" = ?))'
+            });
+
+            postKnex.toQuery().should.eql(
+                'select * from "posts" where "author"."slug" != \'joe\' and ("posts"."id" in (select "post_id" from "posts_tags" inner join "tags" on "posts_tags"."tag_id" = "tags"."id" where "tags"."slug" = \'photo\') and "posts"."id" in (select "post_id" from "posts_tags" inner join "tags" on "posts_tags"."tag_id" = "tags"."id" where "tags"."slug" = \'video\'))'
+            );
+
+            postKnex.where.calledOnce.should.eql(true);
+            postKnex.andWhere.calledOnce.should.eql(true);
+
+            // can't stub out the sub-query-builder functions
+            postKnex.orWhere.calledOnce.should.eql(false);
+            postKnex.whereNull.calledOnce.should.eql(false);
+            postKnex.whereNotNull.calledOnce.should.eql(false);
+            postKnex.orWhereNull.calledOnce.should.eql(false);
+            postKnex.orWhereNotNull.calledOnce.should.eql(false);
+        });
+        it('should correctly build a group query with not equals', function () {
+            knexify(postKnex, {
+                statements: [
+                    {op: '!=', value: 'joe', prop: 'author'},
+                    {
+                        group: [
+                            {op: '=', value: 'photo', prop: 'tag'},
+                            {op: '!=', value: 'video', prop: 'tag', func: 'and'}
+                        ], func: 'and'
+                    }
+                ]
+            });
+
+            // Check the output from both toSQL and toQuery - this emulates calling the query twice for pagination
+            postKnex.toSQL().should.eql({
+                bindings: ['joe', 'photo', 'video'],
+                method: 'select',
+                options: {},
+                sql: 'select * from "posts" where "author"."slug" != ? and ("posts"."id" in (select "post_id" from "posts_tags" inner join "tags" on "posts_tags"."tag_id" = "tags"."id" where "tags"."slug" = ?) and "posts"."id" not in (select "post_id" from "posts_tags" inner join "tags" on "posts_tags"."tag_id" = "tags"."id" where "tags"."slug" = ?))'
+            });
+
+            postKnex.toQuery().should.eql(
+                'select * from "posts" where "author"."slug" != \'joe\' and ("posts"."id" in (select "post_id" from "posts_tags" inner join "tags" on "posts_tags"."tag_id" = "tags"."id" where "tags"."slug" = \'photo\') and "posts"."id" not in (select "post_id" from "posts_tags" inner join "tags" on "posts_tags"."tag_id" = "tags"."id" where "tags"."slug" = \'video\'))'
             );
 
             postKnex.where.calledOnce.should.eql(true);
