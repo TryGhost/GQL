@@ -26,8 +26,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "lodash": "^4.17.4",
-    "sqlite": "^2.9.2"
+    "lodash": "^4.17.4"
   },
   "devDependencies": {
     "eslint": "4.19.1",
