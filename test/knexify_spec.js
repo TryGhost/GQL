@@ -358,15 +358,14 @@ describe('Knexify', function () {
 
             // Check the output from both toSQL and toQuery - this emulates calling the query twice for pagination
             postKnex.toSQL().should.eql({
-                bindings: ['joe', 'select `post_id` from `posts_tags` inner join `tags` on `posts_tags`.`tag_id` = `tags`.`id` where `tags`.`slug` = `photo`',
-                    'select `post_id` from `posts_tags` inner join `tags` on `posts_tags`.`tag_id` = `tags`.`id` where `tags`.`slug` = `video`'],
+                bindings: ['joe'],
                 method: 'select',
                 options: {},
-                sql: 'select * from "posts" where "author"."slug" != ? and ("posts"."id" in (?) and "posts"."id" in (?))'
+                sql: 'select * from "posts" where "author"."slug" != ? and (posts.id in (select post_id from posts_tags inner join tags on posts_tags.tag_id = tags.id where tags.slug = \'photo\') and posts.id in (select post_id from posts_tags inner join tags on posts_tags.tag_id = tags.id where tags.slug = \'video\'))'
             });
 
             postKnex.toQuery().should.eql(
-                'select * from "posts" where "author"."slug" != \'joe\' and ("posts"."id" in (\'select `post_id` from `posts_tags` inner join `tags` on `posts_tags`.`tag_id` = `tags`.`id` where `tags`.`slug` = `photo`\') and "posts"."id" in (\'select `post_id` from `posts_tags` inner join `tags` on `posts_tags`.`tag_id` = `tags`.`id` where `tags`.`slug` = `video`\'))'
+                'select * from "posts" where "author"."slug" != \'joe\' and (posts.id in (select post_id from posts_tags inner join tags on posts_tags.tag_id = tags.id where tags.slug = \'photo\') and posts.id in (select post_id from posts_tags inner join tags on posts_tags.tag_id = tags.id where tags.slug = \'video\'))'
             );
 
             postKnex.where.calledOnce.should.eql(true);
@@ -394,15 +393,14 @@ describe('Knexify', function () {
 
             // Check the output from both toSQL and toQuery - this emulates calling the query twice for pagination
             postKnex.toSQL().should.eql({
-                bindings: ['joe', 'select `post_id` from `posts_tags` inner join `tags` on `posts_tags`.`tag_id` = `tags`.`id` where `tags`.`slug` = `photo`',
-                    'select `post_id` from `posts_tags` inner join `tags` on `posts_tags`.`tag_id` = `tags`.`id` where `tags`.`slug` = `video`'],
+                bindings: ['joe'],
                 method: 'select',
                 options: {},
-                sql: 'select * from "posts" where "author"."slug" != ? and ("posts"."id" in (?) and "posts"."id" not in (?))'
+                sql: 'select * from "posts" where "author"."slug" != ? and (posts.id in (select post_id from posts_tags inner join tags on posts_tags.tag_id = tags.id where tags.slug = \'photo\') and posts.id not in (select post_id from posts_tags inner join tags on posts_tags.tag_id = tags.id where tags.slug = \'video\'))'
             });
 
             postKnex.toQuery().should.eql(
-                'select * from "posts" where "author"."slug" != \'joe\' and ("posts"."id" in (\'select `post_id` from `posts_tags` inner join `tags` on `posts_tags`.`tag_id` = `tags`.`id` where `tags`.`slug` = `photo`\') and "posts"."id" not in (\'select `post_id` from `posts_tags` inner join `tags` on `posts_tags`.`tag_id` = `tags`.`id` where `tags`.`slug` = `video`\'))'
+                'select * from "posts" where "author"."slug" != \'joe\' and (posts.id in (select post_id from posts_tags inner join tags on posts_tags.tag_id = tags.id where tags.slug = \'photo\') and posts.id not in (select post_id from posts_tags inner join tags on posts_tags.tag_id = tags.id where tags.slug = \'video\'))'
             );
 
             postKnex.where.calledOnce.should.eql(true);
