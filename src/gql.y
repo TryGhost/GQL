@@ -14,6 +14,10 @@
      throw new Error(lines.join("\n"));
  };
 
+ isArray = function(o) {
+     return Array.isArray(o);
+ };
+
 %}
 
 %% /* language grammar */
@@ -24,16 +28,16 @@ expressions
 
 expression
     : andCondition { $$ = $1; }
-    | expression OR andCondition { $$ = {$or: [$1, $3]}; }
+    | expression OR andCondition { $1 = $1.$or ? $1 : {$or: [$1]}; $1.$or.push($3); $$ = $1; }
     ;
 
 andCondition
     : filterExpr { $$ = $1 }
-    | andCondition AND filterExpr { $$ = {$and: [$1, $3]} }
+    | andCondition AND filterExpr { $1 = $1.$and ? $1 : {$and: [$1]}; $1.$and.push($3); $$ = $1; }
     ;
 
 filterExpr
-    : LPAREN expression RPAREN { $$ = { group: $2 }; }
+    : LPAREN expression RPAREN { $$ = $2; }
     | propExpr valueExpr { $$ = {[$1]: $2}; }
     ;
 
@@ -44,7 +48,7 @@ propExpr
 valueExpr
     : NOT LBRACKET inExpr RBRACKET { $$ = {$nin: $3}; }
     | LBRACKET inExpr RBRACKET { $$ = {$in: $2}; }
-    | OP VALUE { $$={}; $$[$1]= $2; }
+    | OP VALUE { $$ = {}; $$[$1] = $2; }
     | VALUE { $$ = $1; }
     ;
 

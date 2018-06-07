@@ -152,7 +152,7 @@ describe.only('Parser', function () {
     });
 
     describe('complex examples', function () {
-        it('many expressions', function () {
+        it('Many expressions', function () {
             gql.parse('tag:photo+featured:true,tag.count:>5').should.eql({
                 $or: [
                     {$and: [{tag: 'photo'}, {featured: true}]},
@@ -168,87 +168,146 @@ describe.only('Parser', function () {
             });
         });
 
-        it.skip('grouped expressions', function () {
-            gql.parse('author:-joe+(tag:photo,image:-null,featured:true)').should.eql({
-                statements: [
-                    {op: '!=', value: 'joe', prop: 'author'},
-                    {
-                        group: [
-                            {op: '=', value: 'photo', prop: 'tag'},
-                            {op: 'IS NOT', value: null, prop: 'image', func: 'or'},
-                            {op: '=', value: true, prop: 'featured', func: 'or'}
-                        ], func: 'and'
-                    }
-                ]
-            });
+        it('RIGHT grouped expressions', function () {
+            gql.parse('author:-joe+tag:photo,image:-null,featured:true').should.eql(
+                {
+                    $or: [
+                        {
+                            $and: [
+                                {author: {$ne: 'joe'}},
+                                {tag: 'photo'}
+                            ]
+                        },
+                        {image: {$ne: null}},
+                        {featured: true}
+                    ]
+                }
+            );
 
-            gql.parse('(tag:photo,image:-null,featured:true)+author:-joe').should.eql({
-                statements: [
-                    {
-                        group: [
-                            {op: '=', value: 'photo', prop: 'tag'},
-                            {op: 'IS NOT', value: null, prop: 'image', func: 'or'},
-                            {op: '=', value: true, prop: 'featured', func: 'or'}
-                        ]
-                    },
-                    {op: '!=', value: 'joe', prop: 'author', func: 'and'}
-                ]
-            });
+            gql.parse('author:-joe+(tag:photo,image:-null,featured:true)').should.eql(
+                {
+                    $and: [
+                        {author: {$ne: 'joe'}},
+                        {
+                            $or: [
+                                {tag: 'photo'},
+                                {image: {$ne: null}},
+                                {featured: true}
+                            ]
+                        }
+                    ]
+                }
+            );
 
-            gql.parse('author:-joe,(tag:photo,image:-null,featured:true)').should.eql({
-                statements: [
-                    {op: '!=', value: 'joe', prop: 'author'},
-                    {
-                        group: [
-                            {op: '=', value: 'photo', prop: 'tag'},
-                            {op: 'IS NOT', value: null, prop: 'image', func: 'or'},
-                            {op: '=', value: true, prop: 'featured', func: 'or'}
-                        ], func: 'or'
-                    }
-                ]
-            });
+            gql.parse('(tag:photo,image:-null,featured:true)+author:-joe').should.eql(
+                {
+                    $and: [
+                        {
+                            $or: [
+                                {tag: 'photo'},
+                                {image: {$ne: null}},
+                                {featured: true}
+                            ]
+                        },
+                        {author: {$ne: 'joe'}}
+                    ]
+                }
+            );
 
-            gql.parse('(tag:photo,image:-null,featured:false),author:-joe').should.eql({
-                statements: [
-                    {
-                        group: [
-                            {op: '=', value: 'photo', prop: 'tag'},
-                            {op: 'IS NOT', value: null, prop: 'image', func: 'or'},
-                            {op: '=', value: false, prop: 'featured', func: 'or'}
-                        ]
-                    },
-                    {op: '!=', value: 'joe', prop: 'author', func: 'or'}
-                ]
-            });
+            gql.parse('author:-joe,(tag:photo,image:-null,featured:true)').should.eql(
+                {
+                    $or: [
+                        {author: {$ne: 'joe'}},
+                        {
+                            $or: [
+                                {tag: 'photo'},
+                                {image: {$ne: null}},
+                                {featured: true}
+                            ]
+                        }
+                    ]
+                }
+            );
+
+            gql.parse(
+                'name:sample,(name:-sample+created_at:<=\'2016-03-03\'),(name:-sample+(created_at:\'2016-03-03\',created_at:\'2016-03-04\'))'
+            ).should.eql(
+                {$or: [
+                    {name: 'sample'},
+                    {$and: [
+                        {name: {$ne: 'sample'}},
+                        {created_at: {$lte: '2016-03-03'}}
+                    ]},
+                    {$and: [
+                        {name: {$ne: 'sample'}},
+                        {$or: [
+                            {created_at: '2016-03-03'},
+                            {created_at: '2016-03-04'}
+                        ]}
+                    ]}
+                ]}
+            );
         });
 
-        it.skip('in expressions', function () {
-            gql.parse('author:-joe+tag:[photo,video]').should.eql({
-                statements: [
-                    {op: '!=', value: 'joe', prop: 'author'},
-                    {op: 'IN', value: ['photo', 'video'], prop: 'tag', func: 'and'}
-                ]
-            });
+        it.skip('LEFT grouped expressions', function () {
+            gql.parse('(tag:photo,image:-null,featured:false),author:-joe').should.eql(
+                {$or: [
+                    {$or: [
+                        {tag: 'photo'},
+                        {image: {$ne: null}},
+                        {featured: true}
+                    ]},
+                    {author: {$ne: 'joe'}}
+                ]}
+            );
 
-            gql.parse('author:-joe+tag:-[photo,video,audio]').should.eql({
-                statements: [
-                    {op: '!=', value: 'joe', prop: 'author'},
-                    {op: 'NOT IN', value: ['photo', 'video', 'audio'], prop: 'tag', func: 'and'}
-                ]
-            });
+            gql.parse(
+                '(name:-sample,(created_at:\'2016-03-03\',created_at:\'2016-03-04\')),(name:-sample+created_at:<=\'2016-03-03\'),name:sample'
+            ).should.eql(
+                {$or: [
+                    {$and: [
+                        {name: {$ne: 'sample'}},
+                        {$or: [
+                            {created_at: '2016-03-03'},
+                            {created_at: '2016-03-04'}
+                        ]}
+                    ]},
+                    {$and: [
+                        {name: {$ne: 'sample'}},
+                        {created_at: {$lte: '2016-03-03'}}
+                    ]},
+                    {name: 'sample'}
+                ]}
+            );
+        });
 
-            gql.parse('author:-joe+tag:[photo,video,magic,\'audio\']+post.count:>5+post.count:<100').should.eql({
-                statements: [
-                    {op: '!=', value: 'joe', prop: 'author'},
-                    {op: 'IN', value: ['photo', 'video', 'magic', 'audio'], prop: 'tag', func: 'and'},
-                    {op: '>', value: 5, prop: 'post.count', func: 'and'},
-                    {op: '<', value: 100, prop: 'post.count', func: 'and'}
-                ]
-            });
+        it('in expressions', function () {
+            gql.parse('author:-joe+tag:[photo,video]').should.eql(
+                {$and: [
+                    {author: {$ne: 'joe'}},
+                    {tag: {$in: ['photo', 'video']}}
+                ]}
+            );
+
+            gql.parse('author:-joe+tag:-[photo,video,audio]').should.eql(
+                {$and: [
+                    {author: {$ne: 'joe'}},
+                    {tag: {$nin: ['photo', 'video', 'audio']}}
+                ]}
+            );
+
+            gql.parse('author:-joe+tag:[photo,video,magic,\'audio\']+post.count:>5+post.count:<100').should.eql(
+                {$and: [
+                    {author: {$ne: 'joe'}},
+                    {tag: {$in: ['photo', 'video', 'magic', 'audio']}},
+                    {'post.count': {$gt: 5}},
+                    {'post.count': {$lt: 100}}
+                ]}
+            );
         });
     });
 
-    describe.skip('whitespace rules', function () {
+    describe('whitespace rules', function () {
         it('will ignore whitespace in expressions', function () {
             gql.parse('count: -5').should.eql(gql.parse('count:-5'));
             gql.parse('author: -joe + tag: [photo, video]').should.eql(gql.parse('author:-joe+tag:[photo,video]'));
@@ -259,7 +318,7 @@ describe.only('Parser', function () {
         });
     });
 
-    describe.skip('invalid expressions', function () {
+    describe('invalid expressions', function () {
         it('CANNOT parse characters outside of a STRING value', function () {
             (function () {
                 gql.parse('tag:\'My Tag\'-');
