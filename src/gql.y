@@ -19,7 +19,7 @@
 %% /* language grammar */
 
 expressions
-    : expression { return {statements: $1}; }
+    : expression { return $1; }
     ;
 
 expression
@@ -28,13 +28,13 @@ expression
     ;
 
 andCondition
-    : filterExpr { $$ = [$1] }
+    : filterExpr { $$ = $1 }
     | andCondition AND filterExpr { $$ = $1; $3.func = 'and'; $1.push($3); }
     ;
 
 filterExpr
     : LPAREN expression RPAREN { $$ = { group: $2 }; }
-    | propExpr valueExpr { $2.prop = $1; $$ = $2; }
+    | propExpr valueExpr { $$ = {[$1]: $2}; }
     ;
 
 propExpr
@@ -42,10 +42,10 @@ propExpr
     ;
 
 valueExpr
-    : NOT LBRACKET inExpr RBRACKET { $$ = {op: 'NOT IN', value: $3}; }
-    | LBRACKET inExpr RBRACKET { $$ = {op: 'IN', value: $2}; }
-    | OP VALUE { $$ = {op: yy.resolveOp($1, $2), value: $2}; }
-    | VALUE { $$ = {op: yy.resolveOp('=', $1), value: $1}; }
+    : NOT LBRACKET inExpr RBRACKET { $$ = {$nin: $3}; }
+    | LBRACKET inExpr RBRACKET { $$ = {$in: $2}; }
+    | OP VALUE { $$={}; $$[$1]= $2; }
+    | VALUE { $$ = $1; }
     ;
 
 inExpr
@@ -63,9 +63,9 @@ VALUE
     ;
 
 OP
-    : NOT { $$ = "!="; }
-    | GT { $$ = ">"; }
-    | LT { $$ = "<"; }
-    | GTE { $$ = ">="; }
-    | LTE { $$ = "<="; }
+    : NOT { $$ = "$ne"; }
+    | GT { $$ = "$gt"; }
+    | LT { $$ = "$lt"; }
+    | GTE { $$ = "$gte"; }
+    | LTE { $$ = "$lte"; }
     ;

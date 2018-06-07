@@ -84,16 +84,16 @@ performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* actio
 var $0 = $$.length - 1;
 switch (yystate) {
 case 1:
- return {statements: $$[$0]}; 
+ return $$[$0]; 
 break;
-case 2:
+case 2: case 12:
  this.$ = $$[$0]; 
 break;
 case 3:
  this.$ = $$[$0-2]; $$[$0][0].func = 'or'; $$[$0-2].push($$[$0][0]); 
 break;
 case 4:
- this.$ = [$$[$0]] 
+ this.$ = $$[$0] 
 break;
 case 5:
  this.$ = $$[$0-2]; $$[$0].func = 'and'; $$[$0-2].push($$[$0]); 
@@ -102,22 +102,19 @@ case 6:
  this.$ = { group: $$[$0-1] }; 
 break;
 case 7:
- $$[$0].prop = $$[$0-1]; this.$ = $$[$0]; 
+ this.$ = {[$$[$0-1]]: $$[$0]}; 
 break;
 case 8:
  $$[$0] = $$[$0].replace(/:$/, ''); this.$ = $$[$0]; 
 break;
 case 9:
- this.$ = {op: 'NOT IN', value: $$[$0-1]}; 
+ this.$ = {$nin: $$[$0-1]}; 
 break;
 case 10:
- this.$ = {op: 'IN', value: $$[$0-1]}; 
+ this.$ = {$in: $$[$0-1]}; 
 break;
 case 11:
- this.$ = {op: yy.resolveOp($$[$0-1], $$[$0]), value: $$[$0]}; 
-break;
-case 12:
- this.$ = {op: yy.resolveOp('=', $$[$0]), value: $$[$0]}; 
+ this.$={}; this.$[$$[$0-1]]= $$[$0]; 
 break;
 case 13:
  this.$.push($$[$0]); 
@@ -144,19 +141,19 @@ case 20:
  $$[$0] = $$[$0].replace(/^'|'$/g, ''); this.$ = yy.unescape($$[$0]); 
 break;
 case 21:
- this.$ = "!="; 
+ this.$ = "$ne"; 
 break;
 case 22:
- this.$ = ">"; 
+ this.$ = "$gt"; 
 break;
 case 23:
- this.$ = "<"; 
+ this.$ = "$lt"; 
 break;
 case 24:
- this.$ = ">="; 
+ this.$ = "$gte"; 
 break;
 case 25:
- this.$ = "<="; 
+ this.$ = "$lte"; 
 break;
 }
 },
