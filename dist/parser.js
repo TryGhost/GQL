@@ -90,13 +90,13 @@ case 2: case 12:
  this.$ = $$[$0]; 
 break;
 case 3:
- this.$ = $$[$0-2]; $$[$0][0].func = 'or'; $$[$0-2].push($$[$0][0]); 
+ this.$ = {$or: [$$[$0-2], $$[$0]]}; 
 break;
 case 4:
  this.$ = $$[$0] 
 break;
 case 5:
- this.$ = $$[$0-2]; $$[$0].func = 'and'; $$[$0-2].push($$[$0]); 
+ this.$ = {$and: [$$[$0-2], $$[$0]]} 
 break;
 case 6:
  this.$ = { group: $$[$0-1] }; 

@@ -4,6 +4,14 @@ var should = require('should'), // eslint-disable-line no-unused-vars
 describe.only('Parser', function () {
     var parserError = /^Query Error: unexpected character in filter at char/;
 
+    describe('Simple Expressions', function () {
+        it('should parse simple id & value combos', function () {
+            gql.parse('id:3').should.eql({id: 3});
+
+            gql.parse('slug:getting-started').should.eql({slug: 'getting-started'});
+        });
+    });
+
     describe('Comparison Query Operators', function () {
         it('can parse standard equals', function () {
             gql.parse('count:5').should.eql({count: 5});
@@ -126,42 +134,41 @@ describe.only('Parser', function () {
         });
     });
 
-    describe.skip('simple expressions', function () {
-        it('should parse simple id & value combos', function () {
-            gql.parse('id:3').should.eql({
-                statements: [
-                    {prop: 'id', op: '=', value: 3}
-                ]
-            });
+    describe('Logical Query Operators', function () {
+        // @TODO support implicit and?
+        it('$and', function () {
+            gql.parse('page:false+status:published')
+                .should.eql({$and: [{page: false}, {status: 'published'}]});
+        });
 
-            gql.parse('slug:getting-started').should.eql({
-                statements: [
-                    {prop: 'slug', op: '=', value: 'getting-started'}
-                ]
-            });
+        // @TODO or with same property is in?
+        it('$or', function () {
+            gql.parse('page:true,featured:true')
+                .should.eql({$or: [{page: true}, {featured: true}]});
+
+            gql.parse('page:true,page:false')
+                .should.eql({$or: [{page: true}, {page: false}]});
         });
     });
 
-    describe.skip('complex examples', function () {
+    describe('complex examples', function () {
         it('many expressions', function () {
             gql.parse('tag:photo+featured:true,tag.count:>5').should.eql({
-                statements: [
-                    {op: '=', value: 'photo', prop: 'tag'},
-                    {op: '=', value: true, prop: 'featured', func: 'and'},
-                    {op: '>', value: 5, prop: 'tag.count', func: 'or'}
+                $or: [
+                    {$and: [{tag: 'photo'}, {featured: true}]},
+                    {'tag.count': {$gt: 5}}
                 ]
             });
 
             gql.parse('tag:photo+image:-null,tag.count:>5').should.eql({
-                statements: [
-                    {op: '=', value: 'photo', prop: 'tag'},
-                    {op: 'IS NOT', value: null, prop: 'image', func: 'and'},
-                    {op: '>', value: 5, prop: 'tag.count', func: 'or'}
+                $or: [
+                    {$and: [{tag: 'photo'}, {image: {$ne: null}}]},
+                    {'tag.count': {$gt: 5}}
                 ]
             });
         });
 
-        it('grouped expressions', function () {
+        it.skip('grouped expressions', function () {
             gql.parse('author:-joe+(tag:photo,image:-null,featured:true)').should.eql({
                 statements: [
                     {op: '!=', value: 'joe', prop: 'author'},
@@ -215,7 +222,7 @@ describe.only('Parser', function () {
             });
         });
 
-        it('in expressions', function () {
+        it.skip('in expressions', function () {
             gql.parse('author:-joe+tag:[photo,video]').should.eql({
                 statements: [
                     {op: '!=', value: 'joe', prop: 'author'},

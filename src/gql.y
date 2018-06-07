@@ -24,12 +24,12 @@ expressions
 
 expression
     : andCondition { $$ = $1; }
-    | expression OR andCondition { $$ = $1; $3[0].func = 'or'; $1.push($3[0]); }
+    | expression OR andCondition { $$ = {$or: [$1, $3]}; }
     ;
 
 andCondition
     : filterExpr { $$ = $1 }
-    | andCondition AND filterExpr { $$ = $1; $3.func = 'and'; $1.push($3); }
+    | andCondition AND filterExpr { $$ = {$and: [$1, $3]} }
     ;
 
 filterExpr
