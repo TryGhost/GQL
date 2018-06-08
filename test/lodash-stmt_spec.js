@@ -141,7 +141,7 @@ describe('Lodash Stmt Functions', function () {
         it('should iterate through group statements with a group function', function () {
             var single = sandbox.spy(),
                 group = sandbox.spy(function (statement) {
-                    testFunc(statement.group);  // eslint-disable-line no-use-before-define
+                    testFunc(statement.group); // eslint-disable-line no-use-before-define
                 }),
                 testFunc = function (stuff) {
                     eachStatement(stuff, single, group);

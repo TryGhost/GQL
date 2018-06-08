@@ -1,4 +1,4 @@
-var sinon  = require('sinon'),
+var sinon = require('sinon'),
     knex = require('knex')({}),
     knexify = require('../lib/knexify'),
 

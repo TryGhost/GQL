@@ -1,4 +1,4 @@
-var should = require('should'),  // eslint-disable-line no-unused-vars
+var should = require('should'), // eslint-disable-line no-unused-vars
     gql = require('../lib/gql');
 
 describe('Parser', function () {
@@ -406,29 +406,51 @@ describe('Parser', function () {
 
     describe('invalid expressions', function () {
         it('CANNOT parse characters outside of a STRING value', function () {
-            (function () { gql.parse('tag:\'My Tag\'-');}).should.throw(parserError);
+            (function () {
+                gql.parse('tag:\'My Tag\'-');
+            }).should.throw(parserError);
         });
 
         it('CANNOT parse property - operator - value in wrong order', function () {
-            (function () { gql.parse('\'My Tag\':tag');}).should.throw(parserError);
-            (function () { gql.parse('5>:tag');}).should.throw(parserError);
+            (function () {
+                gql.parse('\'My Tag\':tag');
+            }).should.throw(parserError);
+            (function () {
+                gql.parse('5>:tag');
+            }).should.throw(parserError);
         });
 
         it('CANNOT parse combination without filter expression', function () {
-            (function () { gql.parse('count:3+');}).should.throw(parserError);
-            (function () { gql.parse(',count:3');}).should.throw(parserError);
+            (function () {
+                gql.parse('count:3+');
+            }).should.throw(parserError);
+            (function () {
+                gql.parse(',count:3');
+            }).should.throw(parserError);
         });
 
         it('CANNOT parse incomplete group', function () {
-            (function () { gql.parse('id:5,(count:3');}).should.throw(parserError);
-            (function () { gql.parse('count:3)');}).should.throw(parserError);
-            (function () { gql.parse('id:5(count:3)');}).should.throw(parserError);
+            (function () {
+                gql.parse('id:5,(count:3');
+            }).should.throw(parserError);
+            (function () {
+                gql.parse('count:3)');
+            }).should.throw(parserError);
+            (function () {
+                gql.parse('id:5(count:3)');
+            }).should.throw(parserError);
         });
 
         it('CANNOT parse invalid IN expression', function () {
-            (function () { gql.parse('id:[test+ing]');}).should.throw(parserError);
-            (function () { gql.parse('id:[test');}).should.throw(parserError);
-            (function () { gql.parse('id:test,ing]');}).should.throw(parserError);
+            (function () {
+                gql.parse('id:[test+ing]');
+            }).should.throw(parserError);
+            (function () {
+                gql.parse('id:[test');
+            }).should.throw(parserError);
+            (function () {
+                gql.parse('id:test,ing]');
+            }).should.throw(parserError);
         });
     });
 });
