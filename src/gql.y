@@ -7,15 +7,10 @@
   * This chunk is included in the parser code, before the lexer definition section and after the parser has been defined.
   */
 
- // console.log("parser object definition: ", this);
  parser.parseError = function(errStr, object) {
      var lines = errStr.split("\n");
      lines[0] = "Query Error: unexpected character in filter at char " + (object.loc.first_column + 1);
      throw new Error(lines.join("\n"));
- };
-
- isArray = function(o) {
-     return Array.isArray(o);
  };
 
 %}
@@ -23,21 +18,30 @@
 %% /* language grammar */
 
 expressions
-    : expression { return $1; }
+    : expression { yy.debug('expression', $1); return $1; }
     ;
 
 expression
-    : andCondition { $$ = $1; }
-    | expression OR andCondition { $1 = $1.$or ? $1 : {$or: [$1]}; $1.$or.push($3); $$ = $1; }
+    : andCondition { yy.debug('andCondition', $1); $$ = $1; }
+    | expression OR andCondition {
+        yy.debug('expression OR andCondition', $1, $3);
+        $1 = $1.$or ? $1 : {$or: [yy.deGroup($1)]};
+        $1.$or.push(yy.deGroup($3)); $$ = $1;
+    }
     ;
 
 andCondition
-    : filterExpr { $$ = $1 }
-    | andCondition AND filterExpr { $1 = $1.$and ? $1 : {$and: [$1]}; $1.$and.push($3); $$ = $1; }
+    : filterExpr { yy.debug('filterExpr', $1); $$ = $1 }
+    | andCondition AND filterExpr {
+        yy.debug('andCondition AND filterExpr', $1, $3);
+        $1 = $1.$and ? $1 : {$and: [yy.deGroup($1)]};
+        $1.$and.push(yy.deGroup($3));
+        $$ = $1;
+    }
     ;
 
 filterExpr
-    : LPAREN expression RPAREN { $$ = $2; }
+    : LPAREN expression RPAREN { yy.debug('LPAREN expression RPAREN', $2); $$ = {yg: $2}; }
     | propExpr valueExpr { $$ = {[$1]: $2}; }
     ;
 

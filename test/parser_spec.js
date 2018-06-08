@@ -168,117 +168,130 @@ describe.only('Parser', function () {
             });
         });
 
-        it('RIGHT grouped expressions', function () {
-            gql.parse('author:-joe+tag:photo,image:-null,featured:true').should.eql(
-                {
-                    $or: [
-                        {
-                            $and: [
+        describe('Logical Groups', function () {
+            describe('$or', function () {
+                it('ungrouped version', function () {
+                    gql.parse('author:-joe,tag:photo,image:-null,featured:true').should.eql(
+                        {$or: [
+                            {author: {$ne: 'joe'}},
+                            {tag: 'photo'},
+                            {image: {$ne: null}},
+                            {featured: true}
+                        ]}
+                    );
+                });
+
+                it('RIGHT grouped version', function () {
+                    gql.parse('author:-joe,(tag:photo,image:-null,featured:true)').should.eql(
+                        {$or: [
+                            {author: {$ne: 'joe'}},
+                            {$or: [
+                                {tag: 'photo'},
+                                {image: {$ne: null}},
+                                {featured: true}
+                            ]}
+                        ]}
+                    );
+                });
+
+                it('LEFT grouped version', function () {
+                    gql.parse('(tag:photo,image:-null,featured:true),author:-joe').should.eql(
+                        {$or: [
+                            {$or: [
+                                {tag: 'photo'},
+                                {image: {$ne: null}},
+                                {featured: true}
+                            ]},
+                            {author: {$ne: 'joe'}}
+                        ]}
+                    );
+                });
+            });
+
+            describe('$and', function () {
+                it('ungrouped version', function () {
+                    gql.parse('author:-joe+tag:photo,image:-null,featured:true').should.eql(
+                        {$or: [
+                            {$and: [
                                 {author: {$ne: 'joe'}},
                                 {tag: 'photo'}
-                            ]
-                        },
-                        {image: {$ne: null}},
-                        {featured: true}
-                    ]
-                }
-            );
-
-            gql.parse('author:-joe+(tag:photo,image:-null,featured:true)').should.eql(
-                {
-                    $and: [
-                        {author: {$ne: 'joe'}},
-                        {
-                            $or: [
-                                {tag: 'photo'},
-                                {image: {$ne: null}},
-                                {featured: true}
-                            ]
-                        }
-                    ]
-                }
-            );
-
-            gql.parse('(tag:photo,image:-null,featured:true)+author:-joe').should.eql(
-                {
-                    $and: [
-                        {
-                            $or: [
-                                {tag: 'photo'},
-                                {image: {$ne: null}},
-                                {featured: true}
-                            ]
-                        },
-                        {author: {$ne: 'joe'}}
-                    ]
-                }
-            );
-
-            gql.parse('author:-joe,(tag:photo,image:-null,featured:true)').should.eql(
-                {
-                    $or: [
-                        {author: {$ne: 'joe'}},
-                        {
-                            $or: [
-                                {tag: 'photo'},
-                                {image: {$ne: null}},
-                                {featured: true}
-                            ]
-                        }
-                    ]
-                }
-            );
-
-            gql.parse(
-                'name:sample,(name:-sample+created_at:<=\'2016-03-03\'),(name:-sample+(created_at:\'2016-03-03\',created_at:\'2016-03-04\'))'
-            ).should.eql(
-                {$or: [
-                    {name: 'sample'},
-                    {$and: [
-                        {name: {$ne: 'sample'}},
-                        {created_at: {$lte: '2016-03-03'}}
-                    ]},
-                    {$and: [
-                        {name: {$ne: 'sample'}},
-                        {$or: [
-                            {created_at: '2016-03-03'},
-                            {created_at: '2016-03-04'}
+                            ]},
+                            {image: {$ne: null}},
+                            {featured: true}
                         ]}
-                    ]}
-                ]}
-            );
-        });
+                    );
+                });
 
-        it.skip('LEFT grouped expressions', function () {
-            gql.parse('(tag:photo,image:-null,featured:false),author:-joe').should.eql(
-                {$or: [
-                    {$or: [
-                        {tag: 'photo'},
-                        {image: {$ne: null}},
-                        {featured: true}
-                    ]},
-                    {author: {$ne: 'joe'}}
-                ]}
-            );
-
-            gql.parse(
-                '(name:-sample,(created_at:\'2016-03-03\',created_at:\'2016-03-04\')),(name:-sample+created_at:<=\'2016-03-03\'),name:sample'
-            ).should.eql(
-                {$or: [
-                    {$and: [
-                        {name: {$ne: 'sample'}},
-                        {$or: [
-                            {created_at: '2016-03-03'},
-                            {created_at: '2016-03-04'}
+                it('RIGHT grouped version', function () {
+                    gql.parse('author:-joe+(tag:photo,image:-null,featured:true)').should.eql(
+                        {$and: [
+                            {author: {$ne: 'joe'}},
+                            {$or: [
+                                {tag: 'photo'},
+                                {image: {$ne: null}},
+                                {featured: true}
+                            ]}
                         ]}
-                    ]},
-                    {$and: [
-                        {name: {$ne: 'sample'}},
-                        {created_at: {$lte: '2016-03-03'}}
-                    ]},
-                    {name: 'sample'}
-                ]}
-            );
+                    );
+                });
+
+                it('LEFT grouped version', function () {
+                    gql.parse('(tag:photo,image:-null,featured:true)+author:-joe').should.eql(
+                        {$and: [
+                            {$or: [
+                                {tag: 'photo'},
+                                {image: {$ne: null}},
+                                {featured: true}
+                            ]},
+                            {author: {$ne: 'joe'}}
+                        ]}
+                    );
+                });
+            });
+
+            describe('combo', function () {
+                it('RIGHT grouped version', function () {
+                    gql.parse(
+                        'name:sample,(name:-sample+created_at:<=\'2016-03-03\'),(name:-sample+(created_at:\'2016-03-03\',created_at:\'2016-03-04\'))'
+                    ).should.eql(
+                        {$or: [
+                            {name: 'sample'},
+                            {$and: [
+                                {name: {$ne: 'sample'}},
+                                {created_at: {$lte: '2016-03-03'}}
+                            ]},
+                            {$and: [
+                                {name: {$ne: 'sample'}},
+                                {$or: [
+                                    {created_at: '2016-03-03'},
+                                    {created_at: '2016-03-04'}
+                                ]}
+                            ]}
+                        ]}
+                    );
+                });
+
+                it('LEFT grouped version', function () {
+                    gql.parse(
+                        '(name:-sample,(created_at:\'2016-03-03\',created_at:\'2016-03-04\')),(name:-sample+created_at:<=\'2016-03-03\'),name:sample'
+                    ).should.eql(
+                        {$or: [
+                            {$or: [
+                                {name: {$ne: 'sample'}},
+                                {$or: [
+                                    {created_at: '2016-03-03'},
+                                    {created_at: '2016-03-04'}
+                                ]}
+                            ]},
+                            {$and: [
+                                {name: {$ne: 'sample'}},
+                                {created_at: {$lte: '2016-03-03'}}
+                            ]},
+                            {name: 'sample'}
+                        ]}
+                    );
+                });
+            });
         });
 
         it('in expressions', function () {
