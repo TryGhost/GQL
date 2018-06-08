@@ -775,6 +775,10 @@ mimic-fn@^1.0.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/mimic-fn/-/mimic-fn-1.2.0.tgz#820c86a39334640e99516928bd03fca88057d022"
 
+mingo@2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/mingo/-/mingo-2.2.2.tgz#be69d486ae6e0ac54b979dc5f4412db21851f693"
+
 "minimatch@2 || 3", minimatch@^3.0.2, minimatch@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-3.0.4.tgz#5166e286457f03306064be5497e8dbb0c3d32083"
