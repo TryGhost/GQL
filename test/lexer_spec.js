@@ -1,3 +1,4 @@
+var should = require('should'); // eslint-disable-line no-unused-vars
 var gql = require('../lib/gql');
 
 describe('Lexer', function () {

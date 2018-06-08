@@ -1,7 +1,7 @@
-var should = require('should'), // eslint-disable-line no-unused-vars
-    gql = require('../lib/gql');
+var should = require('should'); // eslint-disable-line no-unused-vars
+var gql = require('../lib/gql');
 
-describe.only('Parser', function () {
+describe('Parser', function () {
     var parserError = /^Query Error: unexpected character in filter at char/;
 
     describe('Simple Expressions', function () {
