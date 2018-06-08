@@ -1,7 +1,10 @@
 const should = require('should'); // eslint-disable-line no-unused-vars
 const gql = require('../lib/gql');
 const mingo = require('mingo');
+// A simpler format of JSON useful for testing most behaviours
 const simpleJSON = require('./fixtures/simple');
+// A more advanced format, useful for testing joins, aggregates and other advanced behaviours
+const advancedJSON = require('./fixtures/advanced');
 
 /**
  * The purpose of this file is to prove that GQL
@@ -251,6 +254,50 @@ describe('Integration with Mingo', function () {
                 query.test(simpleJSON.posts[2]).should.eql(true);
                 query.test(simpleJSON.posts[3]).should.eql(true);
                 query.test(simpleJSON.posts[4]).should.eql(false);
+            });
+        });
+    });
+
+    describe('Joins', function () {
+        describe('IN with array of objects', function () {
+            it('can match array in (single value)', function () {
+                const query = makeQuery('tags.slug:[video]');
+
+                query.test(advancedJSON.posts[0]).should.eql(false);
+                query.test(advancedJSON.posts[1]).should.eql(true);
+                query.test(advancedJSON.posts[2]).should.eql(true);
+                query.test(advancedJSON.posts[3]).should.eql(false);
+                query.test(advancedJSON.posts[4]).should.eql(false);
+            });
+
+            it('can match array in (multiple values)', function () {
+                const query = makeQuery('tags.slug:[video, audio]');
+
+                query.test(advancedJSON.posts[0]).should.eql(false);
+                query.test(advancedJSON.posts[1]).should.eql(true);
+                query.test(advancedJSON.posts[2]).should.eql(true);
+                query.test(advancedJSON.posts[3]).should.eql(true);
+                query.test(advancedJSON.posts[4]).should.eql(false);
+            });
+
+            it('can match array NOT in (single value)', function () {
+                const query = makeQuery('tags.slug:-[video]');
+
+                query.test(advancedJSON.posts[0]).should.eql(true);
+                query.test(advancedJSON.posts[1]).should.eql(false);
+                query.test(advancedJSON.posts[2]).should.eql(false);
+                query.test(advancedJSON.posts[3]).should.eql(true);
+                query.test(advancedJSON.posts[4]).should.eql(true);
+            });
+
+            it('can match array NOT in (multiple values)', function () {
+                const query = makeQuery('tags.slug:-[video, audio]');
+
+                query.test(advancedJSON.posts[0]).should.eql(true);
+                query.test(advancedJSON.posts[1]).should.eql(false);
+                query.test(advancedJSON.posts[2]).should.eql(false);
+                query.test(advancedJSON.posts[3]).should.eql(false);
+                query.test(advancedJSON.posts[4]).should.eql(true);
             });
         });
     });
