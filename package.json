@@ -6,7 +6,8 @@
   "scripts": {
     "build": "jison src/gql.y src/gql.l -o dist/parser.js",
     "lint": "eslint lib test/*_spec.js",
-    "test": "yarn build && yarn lint && NODE_ENV=testing mocha -- $(find test -name '*_spec.js')",
+    "test": "yarn build && NODE_ENV=testing mocha -- $(find test -name '*_spec.js')",
+    "posttest": "yarn lint",
     "coverage": "NODE_ENV=testing istanbul cover --dir test/coverage _mocha -- $(find test -name '*._spec.js')",
     "preship": "yarn test",
     "ship": "STATUS=$(git status --porcelain); echo $STATUS; if [ -z \"$STATUS\" ]; then yarn publish && git push --follow-tags; fi"

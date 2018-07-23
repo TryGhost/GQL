@@ -124,6 +124,16 @@ The conversion from GQL -> JSON is performed via a [JISON](http://zaach.github.i
 
 In the `/src/` folder is a .l and a .y file used by JISON to generate the parser. `gql.l` is the lexer or tokenizer that defines all of the symbols that GQL can understand. `gql.y` is the grammar, it defines the rules about in what order the symbols must appear. If you make changes to `gql.l` or `gql.y`, you'll need to run `npm run build` in order to generate a new version of the parser in `/dist/`.
 
+## Development
+
+### Testing
+- `yarn test`
+- `yarn coverage`
+- `yarn lint`
+
+### Publish
+- `yarn ship`
+
 # Copyright & License
 
 Copyright (c) 2015-2018 Ghost Foundation - Released under the [MIT license](LICENSE). Ghost and the Ghost Logo are trademarks of Ghost Foundation Ltd. Please see our [trademark policy](https://ghost.org/trademark/) for info on acceptable usage.
