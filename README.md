@@ -1,3 +1,13 @@
+# Deprecated
+
+**GQL is deprecated. It was replaced by [NQL](https://github.com/NexesJS/NQL).**
+
+Issues should be raised [here](https://github.com/NexesJS/NQL/issues) now.
+
+*GQL is still used in [Ghost](https://github.com/TryGhost/Ghost) <= 2.7.1. We won't archive this repository yet in case we have to
+apply security fixes.*
+
+
 # GQL
 
 GQL stands for 'Ghost Query Language'
