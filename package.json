@@ -34,7 +34,7 @@
     "eslint-plugin-ghost": "0.0.23",
     "istanbul": "0.4.5",
     "jison": "0.4.18",
-    "knex": "0.8.6",
+    "knex": "0.19.5",
     "mocha": "4.0.1",
     "should": "13.1.0",
     "sinon": "4.0.1"
